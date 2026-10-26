@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useOffline } from '../context/OfflineContext';
+import { macosColors, macosTypography, sfFont } from '../config/macosTheme';
 
 export const FieldInspectionScreen: React.FC = () => {
   const { isOnline, toggleNetwork, queuedReports, submitReport, syncOutbox, selectedBarangay } = useOffline();
@@ -8,6 +9,7 @@ export const FieldInspectionScreen: React.FC = () => {
   const [desc, setDesc] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
+  const [longitude, latitude] = selectedBarangay.center;
 
   const handleSubmit = async () => {
     if (!desc.trim()) {
@@ -20,8 +22,8 @@ export const FieldInspectionScreen: React.FC = () => {
       barangayName: selectedBarangay.name,
       reportType,
       description: desc,
-      latitude: 13.6218,
-      longitude: 123.1948
+      latitude: selectedBarangay.center[1],
+      longitude: selectedBarangay.center[0]
     });
     setDesc('');
     setIsSubmitting(false);
@@ -38,67 +40,114 @@ export const FieldInspectionScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header & Network Toggle */}
-      <View style={styles.header}>
-        <View style={styles.badgeRow}>
-          <Text style={styles.badge}>FIELD INSPECTION & GEOTAG LOG</Text>
-          <TouchableOpacity style={styles.netToggle} onPress={toggleNetwork}>
-            <View style={[styles.netDot, { backgroundColor: isOnline ? '#10b981' : '#ef4444' }]} />
-            <Text style={styles.netText}>{isOnline ? 'ONLINE' : 'SIMULATE OFFLINE'}</Text>
-          </TouchableOpacity>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      {/* Header Card */}
+      <View style={styles.whiteCard}>
+        <View style={styles.headerTop}>
+          <View style={styles.badgeRow}>
+            <View style={styles.badgePill}>
+              <Text style={styles.badgePillText}>FIELD AUDIT & GEOTAG</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.netToggle}
+              onPress={toggleNetwork}
+              activeOpacity={0.7}
+            >
+              <View
+                style={[
+                  styles.netDot,
+                  { backgroundColor: isOnline ? macosColors.appleGreen : macosColors.appleRed },
+                ]}
+              />
+              <Text style={styles.netText}>{isOnline ? 'Online Sync' : 'Simulated Offline'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <Text style={styles.title}>Offline Outbox & Field Log</Text>
-        <Text style={styles.subtitle}>Target: {selectedBarangay.name} • GPS Lat 13.6218, Lon 123.1948</Text>
+
+        <Text style={styles.title}>Field Inspector Console</Text>
+        <Text style={styles.subtitle}>
+          Active Barangay: {selectedBarangay.name} • Centroid {latitude.toFixed(4)}°N, {longitude.toFixed(4)}°E
+        </Text>
       </View>
 
-      {/* New Report Form */}
-      <View style={styles.formCard}>
-        <Text style={styles.formTitle}>Submit New Field Proof / Report</Text>
-        
-        <Text style={styles.label}>Inspection Category</Text>
-        <View style={styles.typeRow}>
-          {['Rapid Damage (RDANA)', 'Project Milestone', 'Sanitation Check'].map((t) => (
-            <TouchableOpacity
-              key={t}
-              style={[styles.typeBtn, reportType === t && styles.typeBtnActive]}
-              onPress={() => setReportType(t)}
-            >
-              <Text style={[styles.typeBtnText, reportType === t && styles.typeBtnTextActive]}>{t}</Text>
-            </TouchableOpacity>
-          ))}
+      {/* Report Composer Card */}
+      <View style={styles.whiteCard}>
+        <View style={styles.composerHeader}>
+          <Text style={styles.composerIcon}>📋</Text>
+          <Text style={styles.composerTitle}>Log Field Inspection & Proof</Text>
         </View>
 
-        <Text style={styles.label}>Field Findings & Notes</Text>
+        <Text style={styles.inputLabel}>INSPECTION CATEGORY</Text>
+        <View style={styles.typeRow}>
+          {['Rapid Damage (RDANA)', 'Project Milestone', 'Sanitation Audit'].map((t) => {
+            const isSelected = reportType === t;
+            return (
+              <TouchableOpacity
+                key={t}
+                style={[styles.typeBtn, isSelected && styles.typeBtnActive]}
+                onPress={() => setReportType(t)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.typeBtnText, isSelected && styles.typeBtnTextActive]}>
+                  {t}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <Text style={styles.inputLabel}>OBSERVATION FINDINGS & EVIDENCE</Text>
         <TextInput
-          style={styles.input}
-          placeholder="e.g. Inspected 45 households along riverbank. 12 roof damages recorded..."
-          placeholderTextColor="#64748b"
+          style={styles.textInput}
+          placeholder="e.g. Inspected 45 households along flood zone. 12 roof damages verified..."
+          placeholderTextColor={macosColors.textTertiary}
           multiline
-          numberOfLines={3}
+          numberOfLines={4}
           value={desc}
           onChangeText={setDesc}
         />
 
-        <View style={styles.metaWatermark}>
-          <Text style={styles.watermarkText}>📷 Geotag Watermark: NAGA-BRGY{selectedBarangay.id}-13.6218N-123.1948E</Text>
-          <Text style={styles.watermarkText}>⏱ Timestamp: {new Date().toLocaleTimeString()} PHT</Text>
+        {/* Metadata Inspector Card */}
+        <View style={styles.metaBox}>
+          <View style={styles.metaRow}>
+            <Text style={styles.metaKey}>GPS Coordinates</Text>
+            <Text style={styles.metaVal}>
+              NAGA-BRGY{selectedBarangay.id} ({latitude.toFixed(4)}N, {longitude.toFixed(4)}E)
+            </Text>
+          </View>
+          <View style={styles.metaRow}>
+            <Text style={styles.metaKey}>Timestamp</Text>
+            <Text style={styles.metaVal}>
+              {new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' })} PHT
+            </Text>
+          </View>
+          <View style={styles.metaRow}>
+            <Text style={styles.metaKey}>Storage Engine</Text>
+            <Text style={[styles.metaVal, { color: macosColors.appleGreen }]}>
+              Encrypted Local SQLite Outbox
+            </Text>
+          </View>
         </View>
 
-        <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={isSubmitting}>
+        <TouchableOpacity
+          style={styles.submitBtn}
+          onPress={handleSubmit}
+          disabled={isSubmitting}
+          activeOpacity={0.8}
+        >
           <Text style={styles.submitBtnText}>
-            {isOnline ? 'Submit & Upload Proof' : 'Save to Offline Outbox Queue'}
+            {isOnline ? 'Upload Geotagged Report to Central Server' : 'Save to Offline SQLite Outbox'}
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Outbox Status */}
-      <View style={styles.outboxSection}>
-        <View style={styles.outboxHeader}>
-          <Text style={styles.sectionTitle}>Local Outbox Queue ({queuedReports.length})</Text>
-          <TouchableOpacity style={styles.syncBtn} onPress={handleManualSync}>
-            <Text style={styles.syncBtnText}>Sync Outbox</Text>
-          </TouchableOpacity>
+      {/* Outbox Queue Section */}
+      <View style={styles.whiteCard}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Queued Offline Outbox</Text>
+          <View style={styles.queueCountBadge}>
+            <Text style={styles.queueCountText}>{queuedReports.length} Queued</Text>
+          </View>
         </View>
 
         {syncStatus && (
@@ -107,60 +156,374 @@ export const FieldInspectionScreen: React.FC = () => {
           </View>
         )}
 
-        {queuedReports.map((rpt) => (
-          <View key={rpt.id} style={styles.reportCard}>
-            <View style={styles.reportHeader}>
-              <Text style={styles.reportType}>{rpt.reportType}</Text>
-              <View style={[styles.syncBadge, { backgroundColor: rpt.isSynced ? '#065f46' : '#854d0e' }]}>
-                <Text style={styles.syncBadgeText}>{rpt.isSynced ? '✓ Synced' : '⏳ Queued Offline'}</Text>
-              </View>
-            </View>
-            <Text style={styles.reportDesc}>{rpt.description}</Text>
-            <Text style={styles.reportMeta}>
-              {rpt.barangayName} • {rpt.timestamp} • ({rpt.latitude.toFixed(4)}, {rpt.longitude.toFixed(4)})
+        {queuedReports.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyEmoji}>✓</Text>
+            <Text style={styles.emptyTitle}>Outbox Synchronized</Text>
+            <Text style={styles.emptySub}>
+              All offline reports and field inspections have synced with the City Hall Central Server.
             </Text>
           </View>
-        ))}
+        ) : (
+          <View style={styles.queueList}>
+            {queuedReports.map((item) => (
+              <View key={item.id} style={styles.queueItem}>
+                <View style={styles.queueItemHeader}>
+                  <Text style={styles.queueItemType}>{item.reportType}</Text>
+                  <View style={styles.pendingBadge}>
+                    <Text style={styles.pendingBadgeText}>PENDING SYNC</Text>
+                  </View>
+                </View>
+                <Text style={styles.queueItemDesc}>{item.description}</Text>
+                <View style={styles.queueItemFooter}>
+                  <Text style={styles.queueItemMeta}>
+                    📍 {item.barangayName} • {new Date(item.timestamp).toLocaleTimeString()}
+                  </Text>
+                  <Text style={styles.queueItemId}>{item.id.slice(0, 8)}</Text>
+                </View>
+              </View>
+            ))}
+
+            <TouchableOpacity
+              style={styles.syncNowBtn}
+              onPress={handleManualSync}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.syncNowBtnText}>
+                {isOnline ? `Sync ${queuedReports.length} Report(s) to Central Server` : 'Network Offline (Cannot Sync)'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a' },
-  header: { padding: 20, backgroundColor: '#1e293b', borderBottomWidth: 1, borderColor: '#334155' },
-  badgeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  badge: { color: '#38bdf8', fontSize: 11, fontWeight: '700', letterSpacing: 1 },
-  netToggle: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#334155', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  netDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
-  netText: { color: '#e2e8f0', fontSize: 10, fontWeight: '700' },
-  title: { color: '#f8fafc', fontSize: 22, fontWeight: '800' },
-  subtitle: { color: '#64748b', fontSize: 12, marginTop: 2 },
-  formCard: { margin: 16, backgroundColor: '#1e293b', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#334155' },
-  formTitle: { color: '#f8fafc', fontSize: 15, fontWeight: '700', marginBottom: 12 },
-  label: { color: '#94a3b8', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', marginBottom: 6 },
-  typeRow: { flexDirection: 'row', marginBottom: 12 },
-  typeBtn: { flex: 1, paddingVertical: 8, paddingHorizontal: 4, backgroundColor: '#334155', borderRadius: 6, marginHorizontal: 2, alignItems: 'center' },
-  typeBtnActive: { backgroundColor: '#0284c7' },
-  typeBtnText: { color: '#94a3b8', fontSize: 10, fontWeight: '600', textAlign: 'center' },
-  typeBtnTextActive: { color: '#ffffff', fontWeight: '700' },
-  input: { backgroundColor: '#0f172a', color: '#f8fafc', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#334155', textAlignVertical: 'top', minHeight: 70, marginBottom: 10 },
-  metaWatermark: { backgroundColor: '#0f172a', padding: 8, borderRadius: 6, marginBottom: 12, borderWidth: 1, borderColor: '#1e293b' },
-  watermarkText: { color: '#64748b', fontSize: 10, fontFamily: 'monospace' },
-  submitBtn: { backgroundColor: '#0284c7', padding: 12, borderRadius: 8, alignItems: 'center' },
-  submitBtnText: { color: '#ffffff', fontSize: 13, fontWeight: '700' },
-  outboxSection: { paddingHorizontal: 16, paddingBottom: 24 },
-  outboxHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionTitle: { color: '#f8fafc', fontSize: 16, fontWeight: '700' },
-  syncBtn: { backgroundColor: '#10b981', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 6 },
-  syncBtnText: { color: '#ffffff', fontSize: 12, fontWeight: '700' },
-  syncBanner: { backgroundColor: '#065f46', padding: 10, borderRadius: 6, marginBottom: 10 },
-  syncBannerText: { color: '#6ee7b7', fontSize: 12, fontWeight: '600', textAlign: 'center' },
-  reportCard: { backgroundColor: '#1e293b', padding: 14, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: '#334155' },
-  reportHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  reportType: { color: '#38bdf8', fontSize: 13, fontWeight: '700' },
-  syncBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
-  syncBadgeText: { color: '#fef08a', fontSize: 10, fontWeight: '700' },
-  reportDesc: { color: '#e2e8f0', fontSize: 13, lineHeight: 18, marginBottom: 6 },
-  reportMeta: { color: '#64748b', fontSize: 11 }
+  container: {
+    flex: 1,
+    backgroundColor: macosColors.windowBackground,
+  },
+  contentContainer: {
+    padding: 14,
+    gap: 12,
+    paddingBottom: 24,
+  },
+  whiteCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: macosColors.cardBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  headerTop: {
+    marginBottom: 6,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  badgePill: {
+    backgroundColor: macosColors.applePurpleSubtle,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: macosColors.applePurpleBorder,
+  },
+  badgePillText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '700',
+    color: macosColors.applePurple,
+  },
+  netToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    gap: 5,
+  },
+  netDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  netText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '600',
+    color: macosColors.textPrimary,
+  },
+  title: {
+    fontFamily: sfFont,
+    fontSize: 20,
+    fontWeight: '800',
+    color: macosColors.textPrimary,
+    letterSpacing: -0.4,
+  },
+  subtitle: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '400',
+    color: macosColors.textSecondary,
+    marginTop: 2,
+  },
+  composerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+  },
+  composerIcon: {
+    fontSize: 14,
+  },
+  composerTitle: {
+    fontFamily: sfFont,
+    fontSize: 14,
+    fontWeight: '800',
+    color: macosColors.textPrimary,
+  },
+  inputLabel: {
+    fontFamily: sfFont,
+    fontSize: 9,
+    fontWeight: '700',
+    color: macosColors.textTertiary,
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  typeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 12,
+  },
+  typeBtn: {
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 14,
+    backgroundColor: '#f1f5f9',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  typeBtnActive: {
+    backgroundColor: macosColors.appleBlue,
+    borderColor: macosColors.appleBlue,
+  },
+  typeBtnText: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '600',
+    color: macosColors.textSecondary,
+  },
+  typeBtnTextActive: {
+    color: '#ffffff',
+    fontWeight: '700',
+  },
+  textInput: {
+    fontFamily: sfFont,
+    backgroundColor: '#f8f9fc',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    color: macosColors.textPrimary,
+    fontSize: 12,
+    minHeight: 80,
+    textAlignVertical: 'top',
+    marginBottom: 10,
+  },
+  metaBox: {
+    backgroundColor: '#f8f9fc',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    gap: 4,
+    marginBottom: 12,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  metaKey: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '600',
+    color: macosColors.textTertiary,
+  },
+  metaVal: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '500',
+    color: macosColors.textSecondary,
+  },
+  submitBtn: {
+    backgroundColor: macosColors.appleBlue,
+    borderRadius: 12,
+    paddingVertical: 11,
+    alignItems: 'center',
+    shadowColor: '#05389f',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  submitBtnText: {
+    fontFamily: sfFont,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontFamily: sfFont,
+    fontSize: 14,
+    fontWeight: '800',
+    color: macosColors.textPrimary,
+  },
+  queueCountBadge: {
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  queueCountText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '700',
+    color: macosColors.textSecondary,
+  },
+  syncBanner: {
+    backgroundColor: macosColors.appleGreenSubtle,
+    borderWidth: 1,
+    borderColor: macosColors.appleGreenBorder,
+    borderRadius: 10,
+    padding: 8,
+    marginBottom: 10,
+  },
+  syncBannerText: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#065f46',
+    textAlign: 'center',
+  },
+  emptyBox: {
+    alignItems: 'center',
+    paddingVertical: 18,
+    gap: 4,
+  },
+  emptyEmoji: {
+    fontSize: 22,
+    color: macosColors.appleGreen,
+    fontWeight: '800',
+    marginBottom: 2,
+  },
+  emptyTitle: {
+    fontFamily: sfFont,
+    fontSize: 13,
+    fontWeight: '700',
+    color: macosColors.textPrimary,
+  },
+  emptySub: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '400',
+    color: macosColors.textTertiary,
+    textAlign: 'center',
+    maxWidth: 240,
+  },
+  queueList: {
+    gap: 8,
+  },
+  queueItem: {
+    backgroundColor: '#f8f9fc',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  queueItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  queueItemType: {
+    fontFamily: sfFont,
+    fontSize: 12,
+    fontWeight: '700',
+    color: macosColors.appleBlue,
+  },
+  pendingBadge: {
+    backgroundColor: macosColors.nagaGoldSubtle,
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: macosColors.nagaGoldBorder,
+  },
+  pendingBadgeText: {
+    fontFamily: sfFont,
+    fontSize: 8,
+    fontWeight: '700',
+    color: '#854d0e',
+  },
+  queueItemDesc: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '400',
+    color: macosColors.textSecondary,
+    marginBottom: 6,
+  },
+  queueItemFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    paddingTop: 4,
+  },
+  queueItemMeta: {
+    fontFamily: sfFont,
+    fontSize: 9,
+    fontWeight: '500',
+    color: macosColors.textTertiary,
+  },
+  queueItemId: {
+    fontFamily: sfFont,
+    fontSize: 9,
+    fontWeight: '600',
+    color: macosColors.textTertiary,
+  },
+  syncNowBtn: {
+    backgroundColor: macosColors.appleBlue,
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  syncNowBtnText: {
+    fontFamily: sfFont,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
 });

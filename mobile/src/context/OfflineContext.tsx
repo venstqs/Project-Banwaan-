@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { SAMPLE_BARANGAYS_OFFLINE, OfflineBarangay } from '../data/offlineData';
+import { FIELD_REPORT_ENDPOINT } from '../config/api';
 
 export interface QueuedReport {
   id: string;
@@ -26,20 +27,23 @@ interface OfflineContextType {
 
 const OfflineContext = createContext<OfflineContextType | undefined>(undefined);
 
+const DEFAULT_BARANGAY =
+  SAMPLE_BARANGAYS_OFFLINE.find((b) => b.id === 3) ?? SAMPLE_BARANGAYS_OFFLINE[0];
+
 export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isOnline, setIsOnline] = useState<boolean>(false); // Default offline for disaster-first demonstration
   const [allBarangays] = useState<OfflineBarangay[]>(SAMPLE_BARANGAYS_OFFLINE);
-  const [selectedBarangay, setSelectedBarangay] = useState<OfflineBarangay>(SAMPLE_BARANGAYS_OFFLINE[1]); // Default Barangay 3
+  const [selectedBarangay, setSelectedBarangay] = useState<OfflineBarangay>(DEFAULT_BARANGAY);
   const [queuedReports, setQueuedReports] = useState<QueuedReport[]>([
     {
       id: "OFFLINE-RPT-001",
-      barangayId: 3,
-      barangayName: "Barangay 3",
+      barangayId: DEFAULT_BARANGAY.id,
+      barangayName: DEFAULT_BARANGAY.name,
       reportType: "Shelter Inspection",
       description: "Inspected secondary school evacuation facility. Roof flashing intact, generator fuel refilled.",
       timestamp: "2026-10-26 14:30 PHT",
-      latitude: 13.6218,
-      longitude: 123.1948,
+      latitude: DEFAULT_BARANGAY.center[1],
+      longitude: DEFAULT_BARANGAY.center[0],
       isSynced: false
     }
   ]);
@@ -58,15 +62,15 @@ export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...reportData,
       id: `OFFLINE-RPT-${Date.now().toString().slice(-4)}`,
       timestamp: new Date().toLocaleTimeString() + " PHT",
-      isSynced: isOnline // If already online, mark as synced immediately
+      isSynced: false
     };
 
     setQueuedReports((prev) => [newReport, ...prev]);
 
-    // If online, send to server
+    // Only mark as synced after the server confirms the write.
     if (isOnline) {
       try {
-        await fetch('http://localhost:8000/api/mobile/field-report', {
+        const res = await fetch(FIELD_REPORT_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -79,6 +83,11 @@ export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ child
             offline_created_at: newReport.timestamp
           })
         });
+        if (res.ok) {
+          setQueuedReports((prev) =>
+            prev.map((rpt) => (rpt.id === newReport.id ? { ...rpt, isSynced: true } : rpt))
+          );
+        }
       } catch (err) {
         console.warn("Server unreachable, stored in local offline outbox");
       }
@@ -92,7 +101,7 @@ export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ child
       queuedReports.map(async (rpt) => {
         if (!rpt.isSynced) {
           try {
-            await fetch('http://localhost:8000/api/mobile/field-report', {
+            const res = await fetch(FIELD_REPORT_ENDPOINT, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -105,6 +114,7 @@ export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 offline_created_at: rpt.timestamp
               })
             });
+            if (!res.ok) return rpt;
             syncedCount++;
             return { ...rpt, isSynced: true };
           } catch {

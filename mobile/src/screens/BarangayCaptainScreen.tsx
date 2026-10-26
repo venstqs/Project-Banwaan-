@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useOffline } from '../context/OfflineContext';
+import { macosColors, macosTypography, sfFont } from '../config/macosTheme';
 
 export const BarangayCaptainScreen: React.FC = () => {
   const { selectedBarangay, setSelectedBarangayId, allBarangays, isOnline, submitReport } = useOffline();
@@ -12,148 +13,633 @@ export const BarangayCaptainScreen: React.FC = () => {
       barangayName: selectedBarangay.name,
       reportType: "Program Endorsement",
       description: `Barangay Council formally endorses LGU program: ${programTitle} for AIP 2026 inclusion.`,
-      latitude: 13.6218,
-      longitude: 123.1948
+      latitude: selectedBarangay.center[1],
+      longitude: selectedBarangay.center[0]
     });
     setRequestSent(programTitle);
     setTimeout(() => setRequestSent(null), 4000);
   };
 
+  const isCritical = selectedBarangay.vulnerability_index > 65;
+  const categoryName = (typeof selectedBarangay.category === 'object' ? selectedBarangay.category?.name : selectedBarangay.category) || selectedBarangay.category_name || "Barangay Unit";
+
   return (
-    <ScrollView style={styles.container}>
-      {/* Barangay Header with PSA Blue & Gold */}
-      <View style={styles.cardHeader}>
-        <View style={styles.badgeRow}>
-          <Text style={styles.roleBadge}>BARANGAY CAPTAIN PORTAL</Text>
-          <View style={[styles.statusDot, { backgroundColor: isOnline ? '#10b981' : '#fdb813' }]} />
-          <Text style={styles.statusText}>{isOnline ? 'Online Sync Active' : 'Offline Mode (Local Cache)'}</Text>
-        </View>
-        <Text style={styles.title}>{selectedBarangay.name}</Text>
-        <Text style={styles.subtitle}>Naga City, Camarines Sur • PSA CBMS Profile Summary</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      {/* Top Banner Card (White with Header + Barangay Selector) */}
+      <View style={styles.whiteCard}>
+        <View style={styles.headerTopRow}>
+          <View style={styles.titleCol}>
+            <View style={styles.badgeRow}>
+              <View style={styles.categoryPill}>
+                <Text style={styles.categoryPillText}>{categoryName}</Text>
+              </View>
+              <View style={styles.statusChip}>
+                <View style={styles.statusDot} />
+                <Text style={styles.statusChipText}>
+                  {isOnline ? "Setup Complete • Live" : "Offline Cache • Active"}
+                </Text>
+              </View>
+            </View>
 
-        {/* Barangay Selector Pills */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillScroll}>
-          {allBarangays.map((b) => (
-            <TouchableOpacity
-              key={b.id}
-              style={[styles.pill, selectedBarangay.id === b.id && styles.pillActive]}
-              onPress={() => setSelectedBarangayId(b.id)}
-            >
-              <Text style={[styles.pillText, selectedBarangay.id === b.id && styles.pillTextActive]}>
-                {b.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* Vulnerability & Key Stats */}
-      <View style={styles.statsRow}>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Vulnerability Index</Text>
-          <Text style={[styles.statValue, { color: selectedBarangay.vulnerability_index > 65 ? '#ef4444' : '#fdb813' }]}>
-            {selectedBarangay.vulnerability_index}
-          </Text>
-          <Text style={styles.statSub}>PCA Dimension Score</Text>
-        </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Households</Text>
-          <Text style={styles.statValue}>{selectedBarangay.total_households.toLocaleString()}</Text>
-          <Text style={styles.statSub}>Surveyed</Text>
-        </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Population</Text>
-          <Text style={styles.statValue}>{selectedBarangay.total_population.toLocaleString()}</Text>
-          <Text style={styles.statSub}>Residents</Text>
-        </View>
-      </View>
-
-      {/* Top Needs & Gaps */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Identified Barangay Needs & Deficits</Text>
-        <Text style={styles.sectionDesc}>
-          Empirical gaps identified from PSA CBMS indicator analysis:
-        </Text>
-        {selectedBarangay.top_needs.map((need, idx) => (
-          <View key={idx} style={styles.needCard}>
-            <View style={styles.needBullet} />
-            <Text style={styles.needText}>{need}</Text>
+            <Text style={styles.mainTitle}>{selectedBarangay.name}</Text>
+            <Text style={styles.subTitle}>
+              All indicators inferred from PSA Community-Based Monitoring System.
+            </Text>
           </View>
-        ))}
+
+          <View style={styles.mviPill}>
+            <Text style={styles.mviPillLabel}>MVI</Text>
+            <Text style={styles.mviPillVal}>{selectedBarangay.vulnerability_index}</Text>
+          </View>
+        </View>
+
+        {/* Horizontal Barangay Scroller */}
+        <View style={styles.selectorWrapper}>
+          <Text style={styles.selectorLabel}>BARANGAY NAVIGATOR (27 TOTAL)</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.pillScroller}
+          >
+            {allBarangays.map((b) => {
+              const isSelected = selectedBarangay.id === b.id;
+              return (
+                <TouchableOpacity
+                  key={b.id}
+                  style={[styles.pill, isSelected && styles.pillActive]}
+                  onPress={() => setSelectedBarangayId(b.id)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.pillText, isSelected && styles.pillTextActive]}>
+                    {b.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
       </View>
 
-      {/* Recommended LGU Laws & Programs */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recommended City Programs & Statutory Backing</Text>
-        <Text style={styles.sectionDesc}>
-          Tailored to address your barangay's specific indicators, backed by statutory mandates:
-        </Text>
+      {/* Signature Sunshine Yellow Card (Directly from Reference Image) */}
+      <View style={styles.yellowFeatureCard}>
+        <View style={styles.yellowHeader}>
+          <View>
+            <Text style={styles.yellowTitle}>
+              {isCritical ? "Priority Calamity Hotspot" : "Statutory Action Queue"}
+            </Text>
+            <Text style={styles.yellowSub}>
+              {isCritical
+                ? `High vulnerable delta requiring urgent DRRM roof retrofit and drainage.`
+                : `Annual Investment Program (AIP) council resolution ready for Mayor review.`}
+            </Text>
+          </View>
+          <View style={styles.yellowBadge}>
+            <Text style={styles.yellowBadgeText}>Do first</Text>
+          </View>
+        </View>
+
+        <View style={styles.yellowActionRow}>
+          <View style={styles.yellowTag}>
+            <Text style={styles.yellowTagText}>⚖️ RA 7160 Sec 106</Text>
+          </View>
+          <View style={styles.yellowTag}>
+            <Text style={styles.yellowTagText}>⏱ AIP 2026</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.yellowButton}
+            onPress={() => handleEndorseProgram(selectedBarangay.recommended_programs[0]?.program || "AIP Capital Interventions")}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.yellowButtonText}>Endorse Now →</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Detected 4-Grid Diagnostic Cards (Matching Reference Image) */}
+      <View style={styles.gridContainer}>
+        <View style={styles.gridCard}>
+          <View style={[styles.gridIconCircle, { backgroundColor: macosColors.appleBlueSubtle }]}>
+            <Text style={styles.gridEmoji}>👥</Text>
+          </View>
+          <Text style={styles.gridVal}>{selectedBarangay.total_population.toLocaleString()}</Text>
+          <Text style={styles.gridLabel}>Residents</Text>
+          <Text style={styles.gridSub}>{selectedBarangay.total_households.toLocaleString()} Households</Text>
+        </View>
+
+        <View style={styles.gridCard}>
+          <View style={[styles.gridIconCircle, { backgroundColor: macosColors.applePurpleSubtle }]}>
+            <Text style={styles.gridEmoji}>💧</Text>
+          </View>
+          <Text style={[styles.gridVal, { color: macosColors.appleBlue }]}>
+            {selectedBarangay.infrastructure_ceo?.drinking_refilling_pct || 75}%
+          </Text>
+          <Text style={styles.gridLabel}>Refilling Dependency</Text>
+          <Text style={styles.gridSub}>Water Access Gap</Text>
+        </View>
+
+        <View style={styles.gridCard}>
+          <View style={[styles.gridIconCircle, { backgroundColor: macosColors.appleGreenSubtle }]}>
+            <Text style={styles.gridEmoji}>🌾</Text>
+          </View>
+          <Text style={[styles.gridVal, { color: macosColors.appleOrange }]}>
+            {selectedBarangay.health_cho?.food_insecurity_pct || 18.4}%
+          </Text>
+          <Text style={styles.gridLabel}>Food Insecure HHs</Text>
+          <Text style={styles.gridSub}>{selectedBarangay.health_cho?.food_insecurity_count || 240} Families</Text>
+        </View>
+
+        <View style={styles.gridCard}>
+          <View style={[styles.gridIconCircle, { backgroundColor: macosColors.nagaGoldSubtle }]}>
+            <Text style={styles.gridEmoji}>🏠</Text>
+          </View>
+          <Text style={[styles.gridVal, { color: macosColors.appleRed }]}>
+            {selectedBarangay.vulnerability_index > 65 ? "Tier 1" : "Tier 2"}
+          </Text>
+          <Text style={styles.gridLabel}>Intervention Level</Text>
+          <Text style={styles.gridSub}>PCA Vulnerability</Text>
+        </View>
+      </View>
+
+      {/* Identified Deficits & Programs */}
+      <View style={styles.whiteCard}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Identified Needs & Deficits</Text>
+          <View style={styles.countBadge}>
+            <Text style={styles.countBadgeText}>{selectedBarangay.top_needs.length} Identified</Text>
+          </View>
+        </View>
 
         {requestSent && (
-          <View style={styles.successBanner}>
-            <Text style={styles.successText}>✓ Official Endorsement Queued ({requestSent})</Text>
+          <View style={styles.toastBanner}>
+            <Text style={styles.toastText}>✓ Successfully queued endorsement for "{requestSent}"</Text>
           </View>
         )}
 
-        {selectedBarangay.recommended_programs.map((prog, idx) => (
-          <View key={idx} style={styles.progCard}>
-            <View style={styles.progHeader}>
-              <Text style={styles.progOfficeBadge}>{prog.office}</Text>
-              <Text style={styles.progSdg}>{prog.sdg}</Text>
+        <View style={styles.needsList}>
+          {selectedBarangay.top_needs.map((need, idx) => (
+            <View key={idx} style={styles.needRow}>
+              <View style={styles.needNumberBadge}>
+                <Text style={styles.needNumberText}>0{idx + 1}</Text>
+              </View>
+              <Text style={styles.needText}>{need}</Text>
             </View>
-            <Text style={styles.progTitle}>{prog.program}</Text>
-            <Text style={styles.progStatute}>Legal Mandate: {prog.statute}</Text>
-            <View style={styles.progFooter}>
-              <Text style={styles.progBudget}>Est. Budget: {prog.estimated_budget}</Text>
-              <TouchableOpacity
-                style={styles.endorseBtn}
-                onPress={() => handleEndorseProgram(prog.program)}
-              >
-                <Text style={styles.endorseBtnText}>Endorse to Mayor</Text>
-              </TouchableOpacity>
-            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* Recommended Statutory Pipeline */}
+      <View style={styles.whiteCard}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recommended Statutory Pipeline</Text>
+          <View style={[styles.countBadge, { backgroundColor: macosColors.appleBlueSubtle }]}>
+            <Text style={[styles.countBadgeText, { color: macosColors.appleBlue }]}>RA 7160</Text>
           </View>
-        ))}
+        </View>
+
+        <View style={styles.programsList}>
+          {selectedBarangay.recommended_programs.map((prog, idx) => (
+            <View key={idx} style={styles.programCard}>
+              <View style={styles.progTop}>
+                <View style={styles.progOfficeBadge}>
+                  <Text style={styles.progOfficeText}>{prog.office}</Text>
+                </View>
+                <Text style={styles.progSdg}>{prog.sdg}</Text>
+              </View>
+
+              <Text style={styles.progTitle}>{prog.program}</Text>
+              <Text style={styles.progStatute}>Legal Mandate: {prog.statute}</Text>
+
+              <View style={styles.progFooter}>
+                <Text style={styles.progBudget}>{prog.estimated_budget}</Text>
+                <TouchableOpacity
+                  style={styles.endorseBtn}
+                  onPress={() => handleEndorseProgram(prog.program)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.endorseBtnText}>Endorse to Mayor ↗</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+        </View>
       </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#060e1e' },
-  cardHeader: { padding: 20, backgroundColor: '#07152b', borderBottomWidth: 1, borderColor: '#0038a8' },
-  badgeRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-  roleBadge: { color: '#fdb813', fontSize: 11, fontWeight: '800', letterSpacing: 1 },
-  statusDot: { width: 8, height: 8, borderRadius: 4, marginLeft: 12, marginRight: 6 },
-  statusText: { color: '#b8bac0', fontSize: 11 },
-  title: { color: '#ffffff', fontSize: 24, fontWeight: '900' },
-  subtitle: { color: '#b8bac0', fontSize: 13, marginTop: 2, marginBottom: 16 },
-  pillScroll: { flexDirection: 'row', marginTop: 4 },
-  pill: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: '#091a38', marginRight: 8, borderWidth: 1, borderColor: '#0038a8' },
-  pillActive: { backgroundColor: '#0038a8', borderColor: '#fdb813' },
-  pillText: { color: '#b8bac0', fontSize: 12, fontWeight: '600' },
-  pillTextActive: { color: '#fdb813', fontWeight: '900' },
-  statsRow: { flexDirection: 'row', padding: 16, justifyContent: 'space-between' },
-  statBox: { flex: 1, backgroundColor: '#07152b', padding: 14, borderRadius: 12, marginHorizontal: 4, borderWidth: 1, borderColor: '#0038a8' },
-  statLabel: { color: '#b8bac0', fontSize: 10, textTransform: 'uppercase', fontWeight: '700' },
-  statValue: { color: '#ffffff', fontSize: 20, fontWeight: '900', marginTop: 4 },
-  statSub: { color: '#94a3b8', fontSize: 10, marginTop: 2 },
-  section: { padding: 16 },
-  sectionTitle: { color: '#ffffff', fontSize: 16, fontWeight: '800' },
-  sectionDesc: { color: '#b8bac0', fontSize: 12, marginTop: 4, marginBottom: 12 },
-  needCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#07152b', padding: 12, borderRadius: 8, marginBottom: 8, borderWidth: 1, borderColor: '#0038a8' },
-  needBullet: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#fdb813', marginRight: 10 },
-  needText: { color: '#e2e8f0', fontSize: 13, fontWeight: '500' },
-  progCard: { backgroundColor: '#07152b', padding: 16, borderRadius: 12, marginBottom: 12, borderWidth: 1, borderColor: '#0038a8' },
-  progHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  progOfficeBadge: { backgroundColor: '#0038a8', color: '#fff', fontSize: 11, fontWeight: '800', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4, borderWidth: 1, borderColor: '#fdb813' },
-  progSdg: { color: '#10b981', fontSize: 11, fontWeight: '700' },
-  progTitle: { color: '#ffffff', fontSize: 15, fontWeight: '800', marginBottom: 6 },
-  progStatute: { color: '#b8bac0', fontSize: 12, marginBottom: 12 },
-  progFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderColor: '#0038a8', paddingTop: 10 },
-  progBudget: { color: '#fdb813', fontSize: 13, fontWeight: '900' },
-  endorseBtn: { backgroundColor: '#0038a8', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 6, borderWidth: 1, borderColor: '#fdb813' },
-  endorseBtnText: { color: '#ffffff', fontSize: 12, fontWeight: '800' },
-  successBanner: { backgroundColor: '#065f46', padding: 12, borderRadius: 8, marginBottom: 12 },
-  successText: { color: '#6ee7b7', fontSize: 12, fontWeight: '700', textAlign: 'center' }
+  container: {
+    flex: 1,
+    backgroundColor: macosColors.windowBackground,
+  },
+  contentContainer: {
+    padding: 14,
+    gap: 12,
+    paddingBottom: 24,
+  },
+  whiteCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: macosColors.cardBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  titleCol: {
+    flex: 1,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  categoryPill: {
+    backgroundColor: macosColors.appleBlueSubtle,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: macosColors.appleBlueBorder,
+  },
+  categoryPillText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '700',
+    color: macosColors.appleBlue,
+  },
+  statusChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: macosColors.appleGreenSubtle,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: macosColors.appleGreenBorder,
+    gap: 5,
+  },
+  statusDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: macosColors.appleGreen,
+  },
+  statusChipText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#065f46',
+  },
+  mainTitle: {
+    fontFamily: sfFont,
+    fontSize: 22,
+    fontWeight: '800',
+    color: macosColors.textPrimary,
+    letterSpacing: -0.4,
+  },
+  subTitle: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '400',
+    color: macosColors.textSecondary,
+    marginTop: 2,
+  },
+  mviPill: {
+    backgroundColor: '#f8f9fc',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: macosColors.cardBorder,
+  },
+  mviPillLabel: {
+    fontFamily: sfFont,
+    fontSize: 9,
+    fontWeight: '700',
+    color: macosColors.textTertiary,
+  },
+  mviPillVal: {
+    fontFamily: sfFont,
+    fontSize: 18,
+    fontWeight: '800',
+    color: macosColors.appleBlue,
+  },
+  selectorWrapper: {
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    paddingTop: 12,
+    marginTop: 12,
+  },
+  selectorLabel: {
+    fontFamily: sfFont,
+    fontSize: 9,
+    fontWeight: '700',
+    color: macosColors.textTertiary,
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  pillScroller: {
+    gap: 6,
+  },
+  pill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#f1f5f9',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  pillActive: {
+    backgroundColor: macosColors.appleBlue,
+    borderColor: macosColors.appleBlue,
+  },
+  pillText: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '600',
+    color: macosColors.textSecondary,
+  },
+  pillTextActive: {
+    color: '#ffffff',
+    fontWeight: '700',
+  },
+  yellowFeatureCard: {
+    backgroundColor: macosColors.nagaGold,
+    borderRadius: 20,
+    padding: 16,
+    shadowColor: '#ca8a04',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  yellowHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginBottom: 12,
+  },
+  yellowTitle: {
+    fontFamily: sfFont,
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  yellowSub: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#334155',
+    marginTop: 2,
+    maxWidth: 240,
+  },
+  yellowBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  yellowBadgeText: {
+    fontFamily: sfFont,
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  yellowActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  yellowTag: {
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  yellowTagText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  yellowButton: {
+    marginLeft: 'auto',
+    backgroundColor: '#0f172a',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  yellowButtonText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  gridCard: {
+    flex: 1,
+    minWidth: '46%',
+    backgroundColor: '#ffffff',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: macosColors.cardBorder,
+  },
+  gridIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  gridEmoji: {
+    fontSize: 15,
+  },
+  gridVal: {
+    fontFamily: sfFont,
+    fontSize: 17,
+    fontWeight: '800',
+    color: macosColors.textPrimary,
+    letterSpacing: -0.3,
+  },
+  gridLabel: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '700',
+    color: macosColors.textPrimary,
+    marginTop: 2,
+  },
+  gridSub: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '500',
+    color: macosColors.textTertiary,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontFamily: sfFont,
+    fontSize: 14,
+    fontWeight: '800',
+    color: macosColors.textPrimary,
+  },
+  countBadge: {
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  countBadgeText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '700',
+    color: macosColors.textSecondary,
+  },
+  toastBanner: {
+    backgroundColor: macosColors.appleGreenSubtle,
+    borderWidth: 1,
+    borderColor: macosColors.appleGreenBorder,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+  },
+  toastText: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#065f46',
+    textAlign: 'center',
+  },
+  needsList: {
+    gap: 8,
+  },
+  needRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fc',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    gap: 10,
+  },
+  needNumberBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    backgroundColor: '#e2e8f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  needNumberText: {
+    fontFamily: sfFont,
+    fontSize: 9,
+    fontWeight: '800',
+    color: macosColors.textSecondary,
+  },
+  needText: {
+    flex: 1,
+    fontFamily: sfFont,
+    fontSize: 12,
+    fontWeight: '500',
+    color: macosColors.textPrimary,
+  },
+  programsList: {
+    gap: 10,
+  },
+  programCard: {
+    backgroundColor: '#f8f9fc',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  progTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  progOfficeBadge: {
+    backgroundColor: macosColors.appleBlueSubtle,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: macosColors.appleBlueBorder,
+  },
+  progOfficeText: {
+    fontFamily: sfFont,
+    fontSize: 9,
+    fontWeight: '800',
+    color: macosColors.appleBlue,
+  },
+  progSdg: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '600',
+    color: macosColors.appleGreen,
+  },
+  progTitle: {
+    fontFamily: sfFont,
+    fontSize: 13,
+    fontWeight: '700',
+    color: macosColors.textPrimary,
+    marginTop: 2,
+  },
+  progStatute: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '500',
+    color: macosColors.textSecondary,
+    marginBottom: 8,
+  },
+  progFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    paddingTop: 8,
+  },
+  progBudget: {
+    fontFamily: sfFont,
+    fontSize: 12,
+    fontWeight: '800',
+    color: macosColors.appleBlue,
+  },
+  endorseBtn: {
+    backgroundColor: macosColors.appleBlue,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  endorseBtnText: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
 });

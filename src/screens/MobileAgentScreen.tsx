@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useOffline } from '../context/OfflineContext';
+import { AGENT_ENDPOINT } from '../config/api';
+import { macosColors, macosTypography, sfFont } from '../config/macosTheme';
 
 interface AgentMessage {
   id: string;
@@ -9,7 +11,15 @@ interface AgentMessage {
   statute?: string;
   sdg?: string;
   suggestedAction?: string;
+  budget?: string;
 }
+
+const QUICK_PROMPTS = [
+  { label: '🛡️ Typhoon Evac & Light Roofs', query: 'Synthesize DRRMO flood disaster shelter and light roof assistance for my barangay.' },
+  { label: '💧 Safe Drinking Water Gap', query: 'Draft CEO infrastructure proposal for refilling station and water testing.' },
+  { label: '🍚 Food Insecurity & Malnutrition', query: 'Formulate CHO nutrition and feeding program justification under RA 11223.' },
+  { label: '💼 Unbanked & NEET Youth Aid', query: 'CSWDO cash aid payout and technical livelihood training for youth.' },
+];
 
 export const MobileAgentScreen: React.FC = () => {
   const { selectedBarangay, isOnline } = useOffline();
@@ -19,49 +29,56 @@ export const MobileAgentScreen: React.FC = () => {
     {
       id: "msg-1",
       sender: "agent",
-      text: `Kumusta, Kapitan! I am Banwaan Mobile AI. I specialize in evidence-based barangay recommendations for ${selectedBarangay.name}, strictly aligned with the 17 UN Sustainable Development Goals and Philippine statutory laws. How can I assist your council today?`,
+      text: `Kumusta, Kapitan! I am Banwaan Mobile Copilot (Statutory Decision Engine). Analyzing ${selectedBarangay.name} (${selectedBarangay.total_households.toLocaleString()} HHs, ${selectedBarangay.total_population.toLocaleString()} residents, MVI ${selectedBarangay.vulnerability_index}). I ensure all council resolutions and AIP proposals align with Philippine statutes and UN SDGs. How can I assist today?`,
       statute: "RA 7160 (Local Government Code Sec. 389)",
-      sdg: "SDG 11 Sustainable Cities and Communities"
+      sdg: "SDG 11 Sustainable Cities & Communities",
+      budget: "20% Local Development Fund (LDF)"
     }
   ]);
 
-  const handleSend = async () => {
-    if (!query.trim()) return;
+  const handleSend = async (customText?: string) => {
+    const activeQuery = (customText ?? query).trim();
+    if (!activeQuery) return;
 
     const userMsg: AgentMessage = {
       id: `usr-${Date.now()}`,
       sender: 'user',
-      text: query
+      text: activeQuery
     };
 
     setMessages((prev) => [...prev, userMsg]);
-    const currentQuery = query;
-    setQuery('');
+    if (!customText) setQuery('');
     setIsLoading(true);
 
-    // If online, query FastAPI endpoint; if offline, use local offline rule-based knowledge engine
     if (isOnline) {
       try {
-        const res = await fetch('http://localhost:8000/api/agent/query', {
+        const res = await fetch(AGENT_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             role: "barangay_captain",
-            query: currentQuery,
+            query: activeQuery,
             barangay_id: selectedBarangay.id
           })
         });
+        if (!res.ok) throw new Error("Agent endpoint rejected the query");
         const data = await res.json();
-        const p = data.proposal_draft;
+        const p = data.proposal_draft || data.drafted_proposal || {};
+        const basis = p.statutory_basis || data.statutory_basis || {};
+        const sdgs: string[] = p.sdgs || data.sdgs || [];
+        const actions: string[] = p.suggested_actions || data.suggested_actions || [];
         setMessages((prev) => [
           ...prev,
           {
             id: `agt-${Date.now()}`,
             sender: 'agent',
-            text: data.ai_synthesis,
-            statute: `${p.statutory_basis.law} - ${p.statutory_basis.section}`,
-            sdg: p.sdgs.join(', '),
-            suggestedAction: p.suggested_actions.join(' • ')
+            text: data.ai_synthesis || data.response_text || "Synthesis completed.",
+            statute: basis.law ? `${basis.law} - ${basis.section || ""}` : undefined,
+            sdg: sdgs.length ? sdgs.join(', ') : undefined,
+            suggestedAction: actions.length ? actions.join(' • ') : undefined,
+            budget: p.estimated_budget_php
+              ? `₱${Number(p.estimated_budget_php).toLocaleString()}`
+              : undefined
           }
         ]);
         setIsLoading(false);
@@ -71,38 +88,47 @@ export const MobileAgentScreen: React.FC = () => {
       }
     }
 
-    // Local Offline Intelligence
+    // Local Offline Statutory Decision Engine
     setTimeout(() => {
       let reply: AgentMessage;
-      const q = currentQuery.toLowerCase();
-      if (q.includes("disaster") || q.includes("typhoon") || q.includes("flood") || q.includes("plan")) {
+      const q = activeQuery.toLowerCase();
+      const hh = selectedBarangay.total_households;
+      const pop = selectedBarangay.total_population;
+      const mvi = selectedBarangay.vulnerability_index;
+
+      if (q.includes("disaster") || q.includes("typhoon") || q.includes("flood") || q.includes("roof")) {
+        const calcBudget = Math.round((120000 + hh * 85) / 5000) * 5000;
         reply = {
           id: `agt-${Date.now()}`,
           sender: "agent",
-          text: `Under Republic Act 10121, ${selectedBarangay.name} is entitled to allocate 5% of its Local Disaster Risk Reduction and Management Fund (LDRRMF) to establish early warning megaphones, repair evacuation centers, and formalize the Barangay DRRM Plan.`,
-          statute: "RA 10121 Section 12 (c) (6)",
-          sdg: "SDG 11.5 & SDG 13.1 (Disaster Resilience & Climate Action)",
-          suggestedAction: "Pass a Sangguniang Barangay Resolution adopting the 2026 BDRRM Plan and request DRRMO technical assistance."
+          text: `[DRRMO Synthesis] Analyzing ${selectedBarangay.name} (${hh.toLocaleString()} HHs, ${pop.toLocaleString()} residents, MVI ${mvi}). Under RA 10121, your council can allocate 5% LDRRMF to reinforce vulnerable light-roof shelters and broadcast localized Bikol storm bulletins.`,
+          statute: "RA 10121 Section 12 (c) (6) & Section 21",
+          sdg: "SDG 11.5 & SDG 13.1 (Climate Resilience)",
+          suggestedAction: `Pass Sangguniang Barangay Resolution adopting the BDRRM Plan for ${selectedBarangay.name} and route to Mayor.`,
+          budget: `₱${calcBudget.toLocaleString()}`
         };
-      } else if (q.includes("water") || q.includes("toilet") || q.includes("infrastructure") || q.includes("light")) {
+      } else if (q.includes("water") || q.includes("drinking") || q.includes("station") || q.includes("ceo")) {
         reply = {
           id: `agt-${Date.now()}`,
           sender: "agent",
-          text: `Under Section 17 of RA 7160 (Local Government Code), the city must support communal sanitation and clean water connections for barangays with high refilling station dependency.`,
-          statute: "RA 7160 Section 17 (b) (1)",
-          sdg: "SDG 6 Clean Water and Sanitation & SDG 9 Resilient Infrastructure",
-          suggestedAction: "Submit an engineering project request to the City Engineer's Office (CEO) for piped water extension."
+          text: `[CEO Synthesis] For ${selectedBarangay.name}, where drinking refilling dependence is ${selectedBarangay.infrastructure_ceo?.drinking_refilling_pct || 75}%, RA 7160 Sec. 17 mandates local water supply and communal refilling infrastructure.`,
+          statute: "RA 7160 Sec. 17 (b) (1) (vii)",
+          sdg: "SDG 6.1 (Clean Water & Sanitation)",
+          suggestedAction: `Request City Engineer's Office pipeline inspection and solar-powered communal filtration unit.`,
+          budget: `₱650,000`
         };
       } else {
         reply = {
           id: `agt-${Date.now()}`,
           sender: "agent",
-          text: `Based on the CBMS profile for ${selectedBarangay.name}, priority programs should focus on social protection targeting and youth skills development under RA 11310.`,
-          statute: "RA 11310 (4Ps Act Sec. 13)",
-          sdg: "SDG 1 No Poverty & SDG 8 Decent Work",
-          suggestedAction: "Coordinate with CSWDO for community-based livelihood registration."
+          text: `[Executive Synthesis] For ${selectedBarangay.name}, aligning empirical CBMS indicators with City Ordinance No. 2024-089. Sangguniang Barangay can initiate an AIP capital investment resolution backed by 20% Local Development Fund.`,
+          statute: "RA 7160 Sec. 287 (20% LDF Statutory Mandate)",
+          sdg: "SDG 11 (Sustainable Cities) & SDG 16 (Peace & Strong Institutions)",
+          suggestedAction: "Submit formal endorsement to CPDO Head for inclusion in AIP 2026 executive agenda.",
+          budget: `₱${(hh * 120).toLocaleString()}`
         };
       }
+
       setMessages((prev) => [...prev, reply]);
       setIsLoading(false);
     }, 600);
@@ -110,65 +136,115 @@ export const MobileAgentScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      {/* Header Card */}
+      <View style={styles.headerCard}>
         <View style={styles.badgeRow}>
-          <Text style={styles.badge}>SDG-ALIGNED AGENTIC AI ASSISTANT</Text>
-          <View style={[styles.modePill, { backgroundColor: isOnline ? '#065f46' : '#854d0e' }]}>
-            <Text style={styles.modeText}>{isOnline ? 'Cloud Synced' : 'Offline Local Rules'}</Text>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>STATUTORY COPILOT</Text>
+          </View>
+          <View style={styles.modelPill}>
+            <Text style={styles.modelText}>Local Rule-Based & CBMS Engine</Text>
           </View>
         </View>
-        <Text style={styles.title}>Barangay Policy Advisor</Text>
-        <Text style={styles.subtitle}>Strict statutory grounding in RA 10121, RA 7160, RA 9003, and UN SDGs</Text>
+        <Text style={styles.title}>Banwaan Statutory Decision Support</Text>
+        <Text style={styles.subtitle}>
+          Target: {selectedBarangay.name} • Grounded in RA 7160, RA 10121 & UN SDGs
+        </Text>
       </View>
 
-      <ScrollView style={styles.chatArea}>
-        {messages.map((m) => (
-          <View key={m.id} style={[styles.bubble, m.sender === 'user' ? styles.userBubble : styles.agentBubble]}>
-            <Text style={[styles.bubbleText, m.sender === 'user' ? styles.userText : styles.agentText]}>
-              {m.text}
-            </Text>
+      {/* Quick Prompt Chips */}
+      <View style={styles.quickPromptsWrapper}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickPromptsList}>
+          {QUICK_PROMPTS.map((p, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={styles.promptChip}
+              onPress={() => handleSend(p.query)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.promptChipText}>{p.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
-            {m.statute && (
-              <View style={styles.statuteBox}>
-                <Text style={styles.statuteLabel}>📜 Legal Citation:</Text>
-                <Text style={styles.statuteVal}>{m.statute}</Text>
-              </View>
-            )}
+      {/* Messages Scroll View */}
+      <ScrollView style={styles.chatScroll} contentContainerStyle={styles.chatContent}>
+        {messages.map((m) => {
+          const isUser = m.sender === 'user';
+          return (
+            <View
+              key={m.id}
+              style={[
+                styles.messageRow,
+                isUser ? styles.messageRowUser : styles.messageRowAgent,
+              ]}
+            >
+              <View
+                style={[
+                  styles.bubble,
+                  isUser ? styles.bubbleUser : styles.bubbleAgent,
+                ]}
+              >
+                {!isUser && (
+                  <View style={styles.bubbleAgentHeader}>
+                    <Text style={styles.agentBadge}>BANWAAN STATUTORY SYNTHESIS</Text>
+                  </View>
+                )}
+                <Text
+                  style={[
+                    styles.messageText,
+                    isUser ? styles.messageTextUser : styles.messageTextAgent,
+                  ]}
+                >
+                  {m.text}
+                </Text>
 
-            {m.sdg && (
-              <View style={styles.sdgBox}>
-                <Text style={styles.sdgLabel}>🎯 Aligned UN SDGs:</Text>
-                <Text style={styles.sdgVal}>{m.sdg}</Text>
+                {/* Statutory Citations & SDG Badges */}
+                {m.statute && (
+                  <View style={styles.citationBox}>
+                    <Text style={styles.citationText}>⚖️ Statutory Mandate: {m.statute}</Text>
+                    {m.sdg && <Text style={styles.sdgText}>🎯 {m.sdg}</Text>}
+                    {m.suggestedAction && (
+                      <Text style={styles.actionText}>💡 Suggested Action: {m.suggestedAction}</Text>
+                    )}
+                    {m.budget && (
+                      <View style={styles.budgetRow}>
+                        <Text style={styles.budgetTag}>EST. ALLOTMENT: {m.budget}</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
               </View>
-            )}
+            </View>
+          );
+        })}
 
-            {m.suggestedAction && (
-              <View style={styles.actionBox}>
-                <Text style={styles.actionLabel}>💡 Recommended Action:</Text>
-                <Text style={styles.actionVal}>{m.suggestedAction}</Text>
-              </View>
-            )}
-          </View>
-        ))}
         {isLoading && (
-          <View style={styles.loadingBox}>
-            <ActivityIndicator size="small" color="#38bdf8" />
-            <Text style={styles.loadingText}>Synthesizing CBMS metrics & statutory references...</Text>
+          <View style={styles.loadingRow}>
+            <ActivityIndicator size="small" color={macosColors.appleBlue} />
+            <Text style={styles.loadingText}>Synthesizing CBMS indicators & statutory corpus...</Text>
           </View>
         )}
       </ScrollView>
 
-      {/* Input row */}
+      {/* macOS Spotlight / Siri Style Prompt Bar */}
       <View style={styles.inputContainer}>
         <TextInput
-          style={styles.chatInput}
-          placeholder="Ask policy recommendations (e.g., funding for flood defense)..."
-          placeholderTextColor="#64748b"
+          style={styles.input}
+          placeholder="Ask statutory basis, DRRM allocation, or AIP proposal..."
+          placeholderTextColor={macosColors.textTertiary}
           value={query}
           onChangeText={setQuery}
+          onSubmitEditing={() => handleSend()}
         />
-        <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
-          <Text style={styles.sendBtnText}>Ask AI</Text>
+        <TouchableOpacity
+          style={[styles.sendBtn, !query.trim() && styles.sendBtnDisabled]}
+          onPress={() => handleSend()}
+          disabled={!query.trim() || isLoading}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.sendBtnText}>↑</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -176,34 +252,231 @@ export const MobileAgentScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a' },
-  header: { padding: 18, backgroundColor: '#1e293b', borderBottomWidth: 1, borderColor: '#334155' },
-  badgeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  badge: { color: '#38bdf8', fontSize: 10, fontWeight: '700', letterSpacing: 1 },
-  modePill: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
-  modeText: { color: '#fef08a', fontSize: 9, fontWeight: '700' },
-  title: { color: '#f8fafc', fontSize: 20, fontWeight: '800' },
-  subtitle: { color: '#94a3b8', fontSize: 11, marginTop: 2 },
-  chatArea: { flex: 1, padding: 16 },
-  bubble: { padding: 14, borderRadius: 12, marginBottom: 12, maxWidth: '92%' },
-  userBubble: { alignSelf: 'flex-end', backgroundColor: '#0284c7' },
-  agentBubble: { alignSelf: 'flex-start', backgroundColor: '#1e293b', borderWidth: 1, borderColor: '#334155' },
-  bubbleText: { fontSize: 13, lineHeight: 19 },
-  userText: { color: '#ffffff', fontWeight: '500' },
-  agentText: { color: '#f1f5f9' },
-  statuteBox: { marginTop: 10, backgroundColor: '#0f172a', padding: 8, borderRadius: 6, borderLeftWidth: 3, borderLeftColor: '#38bdf8' },
-  statuteLabel: { color: '#38bdf8', fontSize: 10, fontWeight: '700' },
-  statuteVal: { color: '#cbd5e1', fontSize: 11, marginTop: 2 },
-  sdgBox: { marginTop: 6, backgroundColor: '#0f172a', padding: 8, borderRadius: 6, borderLeftWidth: 3, borderLeftColor: '#10b981' },
-  sdgLabel: { color: '#10b981', fontSize: 10, fontWeight: '700' },
-  sdgVal: { color: '#cbd5e1', fontSize: 11, marginTop: 2 },
-  actionBox: { marginTop: 6, backgroundColor: '#0f172a', padding: 8, borderRadius: 6, borderLeftWidth: 3, borderLeftColor: '#f59e0b' },
-  actionLabel: { color: '#f59e0b', fontSize: 10, fontWeight: '700' },
-  actionVal: { color: '#e2e8f0', fontSize: 11, marginTop: 2 },
-  loadingBox: { flexDirection: 'row', alignItems: 'center', padding: 12 },
-  loadingText: { color: '#94a3b8', fontSize: 11, marginLeft: 8 },
-  inputContainer: { flexDirection: 'row', padding: 12, backgroundColor: '#1e293b', borderTopWidth: 1, borderColor: '#334155' },
-  chatInput: { flex: 1, backgroundColor: '#0f172a', color: '#f8fafc', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: '#334155', fontSize: 13 },
-  sendBtn: { marginLeft: 8, backgroundColor: '#0284c7', paddingHorizontal: 16, justifyContent: 'center', borderRadius: 8 },
-  sendBtnText: { color: '#ffffff', fontSize: 13, fontWeight: '700' }
+  container: {
+    flex: 1,
+    backgroundColor: macosColors.windowBackground,
+  },
+  headerCard: {
+    backgroundColor: macosColors.cardBackground,
+    padding: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: macosColors.cardBorder,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  badge: {
+    backgroundColor: macosColors.appleBlueSubtle,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(10, 132, 255, 0.3)',
+  },
+  badgeText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '700',
+    color: macosColors.appleBlue,
+    letterSpacing: 0.5,
+  },
+  modelPill: {
+    backgroundColor: macosColors.controlBackground,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  modelText: {
+    fontFamily: sfFont,
+    fontSize: 9,
+    fontWeight: '600',
+    color: macosColors.textTertiary,
+  },
+  title: {
+    fontFamily: sfFont,
+    fontSize: 18,
+    fontWeight: '700',
+    color: macosColors.textPrimary,
+    letterSpacing: -0.3,
+  },
+  subtitle: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '400',
+    color: macosColors.textSecondary,
+    marginTop: 2,
+  },
+  quickPromptsWrapper: {
+    backgroundColor: macosColors.sidebarBackground,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: macosColors.cardBorder,
+  },
+  quickPromptsList: {
+    paddingHorizontal: 12,
+    gap: 6,
+  },
+  promptChip: {
+    backgroundColor: macosColors.controlBackground,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: macosColors.controlBorder,
+  },
+  promptChipText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '600',
+    color: macosColors.textSecondary,
+  },
+  chatScroll: {
+    flex: 1,
+  },
+  chatContent: {
+    padding: 14,
+    gap: 12,
+    paddingBottom: 20,
+  },
+  messageRow: {
+    flexDirection: 'row',
+  },
+  messageRowUser: {
+    justifyContent: 'flex-end',
+  },
+  messageRowAgent: {
+    justifyContent: 'flex-start',
+  },
+  bubble: {
+    maxWidth: '88%',
+    borderRadius: 14,
+    padding: 12,
+  },
+  bubbleUser: {
+    backgroundColor: macosColors.appleBlue,
+    borderBottomRightRadius: 4,
+  },
+  bubbleAgent: {
+    backgroundColor: macosColors.cardBackground,
+    borderWidth: 1,
+    borderColor: macosColors.cardBorder,
+    borderBottomLeftRadius: 4,
+  },
+  bubbleAgentHeader: {
+    marginBottom: 4,
+  },
+  agentBadge: {
+    fontFamily: sfFont,
+    fontSize: 9,
+    fontWeight: '700',
+    color: macosColors.nagaGold,
+    letterSpacing: 0.5,
+  },
+  messageText: {
+    fontFamily: sfFont,
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  messageTextUser: {
+    color: '#ffffff',
+    fontWeight: '500',
+  },
+  messageTextAgent: {
+    color: macosColors.textPrimary,
+    fontWeight: '400',
+  },
+  citationBox: {
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: macosColors.cardBorder,
+    gap: 4,
+  },
+  citationText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '700',
+    color: macosColors.appleYellow,
+  },
+  sdgText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '600',
+    color: macosColors.appleGreen,
+  },
+  actionText: {
+    fontFamily: sfFont,
+    fontSize: 10,
+    fontWeight: '500',
+    color: macosColors.textSecondary,
+  },
+  budgetRow: {
+    marginTop: 4,
+  },
+  budgetTag: {
+    fontFamily: sfFont,
+    fontSize: 9,
+    fontWeight: '700',
+    color: macosColors.appleBlue,
+    backgroundColor: macosColors.appleBlueSubtle,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  loadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 8,
+  },
+  loadingText: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '500',
+    color: macosColors.textTertiary,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: macosColors.sidebarBackground,
+    borderTopWidth: 1,
+    borderTopColor: macosColors.cardBorder,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  input: {
+    flex: 1,
+    fontFamily: sfFont,
+    backgroundColor: macosColors.inputBackground,
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    fontSize: 12,
+    color: macosColors.textPrimary,
+    borderWidth: 1,
+    borderColor: macosColors.inputBorder,
+  },
+  sendBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: macosColors.appleBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendBtnDisabled: {
+    backgroundColor: macosColors.controlBackground,
+    opacity: 0.5,
+  },
+  sendBtnText: {
+    fontFamily: sfFont,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
 });

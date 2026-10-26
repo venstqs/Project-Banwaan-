@@ -7,9 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI(
-    title="Project Banwaan Core Intelligence API (Gemini 3.8 Flash Engine)",
-    description="Backend engine for Naga City CBMS Analytics, PCA Vulnerability, SDG Alignment, and Gemini 3.8 Flash Algorithmic Synthesis",
-    version="3.8.0"
+    title="Project Banwaan Core Intelligence API",
+    description="Backend engine for Naga City CBMS Analytics, PCA Vulnerability, SDG Alignment, and Statutory Synthesis",
+    version="1.0.0"
 )
 
 # Enable CORS for Next.js web portal and React Native mobile app
@@ -61,7 +61,7 @@ proposals_db = [
         "expected_indicator_delta": "Establish written plan and hotline within 45 days",
         "confidence_score": 0.96,
         "status": "APPROVED",
-        "created_by": "Gemini 3.8 Flash • DRRMO Agent"
+        "created_by": "DRRMO Statutory Agent"
     },
     {
         "id": "PROP-NAGA-2026-CEO-002",
@@ -84,7 +84,7 @@ proposals_db = [
         "expected_indicator_delta": "Reduce refilling station dependency by 30% and eliminate open defecation",
         "confidence_score": 0.93,
         "status": "PENDING",
-        "created_by": "Gemini 3.8 Flash • CEO Agent"
+        "created_by": "CEO Infrastructure Agent"
     },
     {
         "id": "PROP-NAGA-2026-CHO-003",
@@ -106,7 +106,7 @@ proposals_db = [
         "expected_indicator_delta": "Verify 100% of flagged households and test all refilling stations",
         "confidence_score": 0.91,
         "status": "PENDING",
-        "created_by": "Gemini 3.8 Flash • CHO Agent"
+        "created_by": "CHO Health Agent"
     },
     {
         "id": "PROP-NAGA-2026-SWO-004",
@@ -129,7 +129,7 @@ proposals_db = [
         "expected_indicator_delta": "Onboard 350+ unbanked households to e-money accounts and train 137 NEET youth",
         "confidence_score": 0.94,
         "status": "PENDING",
-        "created_by": "Gemini 3.8 Flash • SWO Agent"
+        "created_by": "SWO Social Welfare Agent"
     }
 ]
 
@@ -199,7 +199,7 @@ class ProposalCreateRequest(BaseModel):
     sdgs: List[str]
     estimated_budget_php: float
     confidence_score: Optional[float] = 0.95
-    created_by: Optional[str] = "Gemini 3.8 Flash • Statutory Copilot"
+    created_by: Optional[str] = "Statutory Decision Support"
 
 class ProposalActionRequest(BaseModel):
     action: str # "approve", "reject", "fund"
@@ -224,7 +224,7 @@ def health_check():
     return {
         "status": "healthy",
         "city": "Naga City",
-        "model_engine": "Gemini 3.8 Flash (Local Algorithmic CBMS + Statutory Synthesis)",
+        "model_engine": "Banwaan Core Statutory Synthesis",
         "total_barangays": len(cbms_cache_fresh.get("barangays", [])),
         "total_households": cbms_cache_fresh.get("summary", {}).get("total_households", 44892),
         "total_population": cbms_cache_fresh.get("summary", {}).get("total_population", 181197),
@@ -343,7 +343,7 @@ def create_proposal(req: ProposalCreateRequest):
         "estimated_budget_php": req.estimated_budget_php,
         "confidence_score": req.confidence_score or 0.95,
         "status": "PENDING",
-        "created_by": req.created_by or "Gemini 3.8 Flash • Statutory Copilot"
+        "created_by": req.created_by or "Statutory Decision Support"
     }
     proposals_db.insert(0, new_prop)
     return {"message": "Proposal queued to Mayor's Review Deck", "proposal": new_prop}
@@ -366,7 +366,7 @@ def review_proposal(prop_id: str, req: ProposalActionRequest, role: str = Query(
 @app.post("/api/agent/query")
 def agent_query(req: AgentQueryRequest):
     """
-    Gemini 3.8 Flash Algorithmic Multi-Factor Synthesis Engine (Zero External API Dependency):
+    Algorithmic Multi-Factor Statutory Synthesis Engine:
     - Dynamically inspects exact household counts, PCA dimensions, and sector deficits for any Barangay 1-27
     - Computes empirical engineering/social costings from exact household deficits
     - Cites exact statutory articles from legal_corpus.json
@@ -459,7 +459,7 @@ def agent_query(req: AgentQueryRequest):
             "estimated_budget_php": float(calc_budget),
             "confidence_score": 0.96,
             "status": "PENDING",
-            "created_by": "Gemini 3.8 Flash • DRRMO Engine"
+            "created_by": "DRRMO Statutory Agent"
         }
     elif domain == "CEO":
         statute = legal_cache["statutes"][1] # RA 7160
@@ -491,7 +491,7 @@ def agent_query(req: AgentQueryRequest):
             "estimated_budget_php": float(calc_budget),
             "confidence_score": 0.94,
             "status": "PENDING",
-            "created_by": "Gemini 3.8 Flash • CEO Engine"
+            "created_by": "CEO Infrastructure Agent"
         }
     elif domain == "CHO":
         statute = legal_cache["statutes"][3] # RA 11223
@@ -524,7 +524,7 @@ def agent_query(req: AgentQueryRequest):
             "estimated_budget_php": float(calc_budget),
             "confidence_score": 0.93,
             "status": "PENDING",
-            "created_by": "Gemini 3.8 Flash • CHO Engine"
+            "created_by": "CHO Health Agent"
         }
     elif domain == "SWO":
         statute = legal_cache["statutes"][5] # RA 11310
@@ -557,7 +557,7 @@ def agent_query(req: AgentQueryRequest):
             "estimated_budget_php": float(calc_budget),
             "confidence_score": 0.95,
             "status": "PENDING",
-            "created_by": "Gemini 3.8 Flash • SWO Engine"
+            "created_by": "SWO Social Welfare Agent"
         }
     else:
         statute = legal_cache["statutes"][1] # RA 7160 Sec 287
@@ -585,7 +585,7 @@ def agent_query(req: AgentQueryRequest):
             "estimated_budget_php": float(calc_budget),
             "confidence_score": 0.97,
             "status": "PENDING",
-            "created_by": "Gemini 3.8 Flash • CPDO Engine"
+            "created_by": "CPDO Planning Agent"
         }
 
     proposal["project_title"] = proposal["title"]
@@ -606,19 +606,22 @@ def agent_query(req: AgentQueryRequest):
         })
 
     ai_synthesis = (
-        f"[Gemini 3.8 Flash • PCA & Statutory Synthesis] Analyzing {brgy_name} ({hh:,} households, {pop:,} residents, PCA Vulnerability Index: {mvi}/100). "
+        f"[Statutory Decision Synthesis] Analyzing {brgy_name} ({hh:,} households, {pop:,} residents, PCA Vulnerability Index: {mvi}/100). "
         f"{proposal['problem_statement']} Pursuant to {proposal['statutory_basis']['law']} ({proposal['statutory_basis']['section']}), "
         f"an evidence-based {domain} intervention of ₱{proposal['estimated_budget_php']:,.0f} is formulated to advance {', '.join(proposal['sdgs'])}."
     )
 
     return {
-        "model": "gemini-3.8-flash-algorithmic",
+        "model": "banwaan-statutory-engine",
         "query": req.query,
         "target_office": domain,
         "barangay": brgy_name,
         "barangay_id": detected_brgy_id,
         "ai_synthesis": ai_synthesis,
         "response_text": ai_synthesis,
+        "statutory_basis": proposal["statutory_basis"],
+        "sdgs": proposal["sdgs"],
+        "suggested_actions": proposal["suggested_actions"],
         "proposal_draft": proposal,
         "drafted_proposal": proposal
     }

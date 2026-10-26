@@ -5,11 +5,11 @@
 
 ## 🌟 Overview & Architecture
 
-Project Banwaan operationalizes raw CBMS data (67 survey dimensions across 43,827 households and 176,719 residents in Naga City) into a multi-tiered decision intelligence platform:
+Project Banwaan operationalizes raw CBMS data (44,892 households and 181,197 residents across 27 Naga City barangays) into a multi-tiered decision intelligence platform:
 
-1. **Web Command Center (`web/`)**: Built on Next.js 14+ (App Router), TypeScript, and Tailwind CSS. Features an interactive 3D Geo-Vulnerability grid, Super Admin 5-Control Deck, isolated department portals for 5 city offices, and an embedded Agentic AI synthesis drawer.
-2. **React Native Mobile App (`mobile/`)**: Built for typhoon-resilient field operations (offline-first with local SQLite outbox). Tailored for Barangay Captains (local needs & law availment), field inspectors (geotagged proof updates), and residents (Bikol/Filipino calamity alerts & 1-tap offline hotlines).
-3. **Intelligence API & PCA Engine (`server/`)**: FastAPI backend performing PCA dimensionality reduction (explaining ~83.5% variance across 4 core dimensions), role-based row-level data isolation, and Agentic AI statutory drafting.
+1. **Web Command Center (`web/`)**: Built on Next.js 16 (App Router), TypeScript, and Tailwind CSS. Features an interactive Geo-Vulnerability map, Super Admin 5-Control Deck, isolated department portals for 5 city offices, and an embedded Agentic AI synthesis drawer.
+2. **React Native Mobile App (`mobile/`)**: Built for typhoon-resilient field operations (offline-first with a bundled 27-barangay dataset and local outbox). Tailored for Barangay Captains (local needs & law availment), field inspectors (geotagged proof updates), and residents (Bikol/Filipino calamity alerts & 1-tap offline hotlines). Includes an offline centroid spatial profile for all 27 barangays.
+3. **Intelligence API & PCA Engine (`server/`)**: FastAPI backend performing PCA dimensionality reduction (explaining ~77.7% variance across 4 core dimensions), role-based row-level data isolation, and Agentic AI statutory drafting.
 4. **Data & Knowledge Store (`data/`)**: Curated datasets for the 17 UN Sustainable Development Goals (`sdg_dataset.json`), Philippine statutory corpus (`legal_corpus.json`), and parsed CBMS metrics (`processed_cbms_data.json`).
 
 ---

@@ -86,26 +86,34 @@
   <div id="cesiumContainer"></div>
   <canvas id="threeCanvas"></canvas>
 
-  <div class="hud-overlay">
-    <div class="hud-title">
-      <span class="status-dot"></span>
-      <span>Cesium 3D Digital Twin • Naga City</span>
+  <div id="hudOverlay" class="hud-overlay">
+    <div class="hud-title" style="justify-content: space-between; width: 100%; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span class="status-dot"></span>
+        <span>Cesium 3D Digital Twin • Naga City</span>
+      </div>
+      <button onclick="const sub = document.getElementById('hudSub'); sub.style.display = sub.style.display === 'none' ? 'block' : 'none';" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #f8fafc; border-radius: 6px; padding: 2px 6px; font-size: 10px; cursor: pointer;">—</button>
     </div>
-    <div class="hud-sub">
+    <div id="hudSub" class="hud-sub">
       27 Administrative Barangays • Mt. Isarog Elevation Model
     </div>
   </div>
 
   <div id="tooltipCard" class="tooltip-card">
-    <div id="tooltipBrgy" style="font-size: 14px; font-weight: 800; color: #38bdf8;">Barangay</div>
-    <div id="tooltipType" style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Zone Type</div>
-    <div style="margin-top: 10px; display: flex; justify-content: space-between; border-top: 1px solid rgba(51, 65, 85, 0.6); padding-top: 8px;">
-      <span style="font-size: 11px; color: #cbd5e1;">PCA Vulnerability:</span>
-      <span id="tooltipMvi" style="font-size: 13px; font-weight: 800; color: #f43f5e;">62.4 / 100</span>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div id="tooltipBrgy" style="font-size: 14px; font-weight: 800; color: #38bdf8;">Barangay</div>
+      <button onclick="const details = document.getElementById('tooltipDetails'); details.style.display = details.style.display === 'none' ? 'block' : 'none';" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #f8fafc; border-radius: 6px; padding: 2px 6px; font-size: 10px; cursor: pointer;">—</button>
     </div>
-    <div style="margin-top: 4px; display: flex; justify-content: space-between;">
-      <span style="font-size: 11px; color: #cbd5e1;">Households:</span>
-      <span id="tooltipHH" style="font-size: 12px; font-weight: 700; color: #f8fafc;">1,508</span>
+    <div id="tooltipDetails">
+      <div id="tooltipType" style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Zone Type</div>
+      <div style="margin-top: 10px; display: flex; justify-content: space-between; border-top: 1px solid rgba(51, 65, 85, 0.6); padding-top: 8px;">
+        <span style="font-size: 11px; color: #cbd5e1;">PCA Vulnerability:</span>
+        <span id="tooltipMvi" style="font-size: 13px; font-weight: 800; color: #f43f5e;">62.4 / 100</span>
+      </div>
+      <div style="margin-top: 4px; display: flex; justify-content: space-between;">
+        <span style="font-size: 11px; color: #cbd5e1;">Households:</span>
+        <span id="tooltipHH" style="font-size: 12px; font-weight: 700; color: #f8fafc;">1,508</span>
+      </div>
     </div>
   </div>
 
@@ -139,11 +147,11 @@
       }
 
       try {
-        // Initialize Cesium Viewer with Carto Dark Matter / OpenStreetMap tiles
+        // Initialize Cesium Viewer with ONLY Esri World Imagery Satellite in strict 2D mode
         viewer = new Cesium.Viewer('cesiumContainer', {
+          sceneMode: Cesium.SceneMode.SCENE2D,
           imageryProvider: new Cesium.UrlTemplateImageryProvider({
-            url: 'https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
-            subdomains: ['a', 'b', 'c', 'd'],
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
             maximumLevel: 19
           }),
           baseLayerPicker: false,
@@ -153,25 +161,22 @@
           selectionIndicator: false,
           timeline: false,
           animation: false,
-          sceneModePicker: true,
+          sceneModePicker: false,
           navigationHelpButton: false,
           fullscreenButton: false
         });
 
         viewer.scene.globe.depthTestAgainstTerrain = false;
-        viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#060e1a');
+        viewer.scene.screenSpaceCameraController.enableRotate = false;
+        viewer.scene.screenSpaceCameraController.enableTilt = false;
+        viewer.scene.screenSpaceCameraController.enableLook = false;
 
-        // Set camera over Naga City (13.6218 N, 123.1948 E) with isometric tilt looking east towards Mt. Isarog
+        // Set 2D top-down camera over Naga City
         viewer.camera.setView({
-          destination: Cesium.Cartesian3.fromDegrees(123.165, 13.580, 14000),
-          orientation: {
-            heading: Cesium.Math.toRadians(35),
-            pitch: Cesium.Math.toRadians(-42),
-            roll: 0.0
-          }
+          destination: Cesium.Cartesian3.fromDegrees(123.218, 13.628, 13500)
         });
 
-        // 1. Add 27 3D Extruded Barangays
+        // 1. Add 27 Flat 2D Barangays
         if (geoData && geoData.barangays_geojson) {
           geoData.barangays_geojson.features.forEach(feat => {
             const p = feat.properties;
@@ -181,24 +186,29 @@
               flatHierarchy.push(pt[0], pt[1]);
             });
 
-            const mvi = p.vulnerability_index;
-            let fillColor = Cesium.Color.fromCssColorString('#0f766e').withAlpha(0.75); // Teal
-            if (mvi > 70) {
-              fillColor = Cesium.Color.fromCssColorString('#e11d48').withAlpha(0.85); // Alert Coral/Crimson
-            } else if (mvi > 55) {
-              fillColor = Cesium.Color.fromCssColorString('#d97706').withAlpha(0.8); // Amber
-            }
+            const fillColor = Cesium.Color.fromCssColorString(p.admin_color || '#0f766e').withAlpha(0.65);
 
             const entity = viewer.entities.add({
-              name: p.name,
+              name: p.real_name || p.name,
               id: 'brgy_' + p.id,
+              position: Cesium.Cartesian3.fromDegrees(p.center[0], p.center[1]),
               polygon: {
                 hierarchy: Cesium.Cartesian3.fromDegreesArray(flatHierarchy),
-                extrudedHeight: p.extrusion_height_m * 10.0, // Extruded prism
-                material: fillColor,
-                outline: true,
-                outlineColor: Cesium.Color.WHITE.withAlpha(0.6),
-                outlineWidth: 2
+                material: fillColor
+              },
+              polyline: {
+                positions: Cesium.Cartesian3.fromDegreesArray(flatHierarchy),
+                width: 2,
+                material: Cesium.Color.WHITE.withAlpha(0.9)
+              },
+              label: {
+                text: p.real_name || p.name,
+                font: 'bold 11px sans-serif',
+                fillColor: Cesium.Color.WHITE,
+                showBackground: true,
+                backgroundColor: Cesium.Color.fromCssColorString('rgba(15, 23, 42, 0.80)'),
+                verticalOrigin: Cesium.VerticalOrigin.CENTER,
+                horizontalOrigin: Cesium.HorizontalOrigin.CENTER
               },
               properties: p
             });
@@ -206,7 +216,7 @@
           });
         }
 
-        // 2. Add Naga River Flood Corridor
+        // 2. Add Naga River Flood Corridor (Flat 2D)
         if (geoData && geoData.flood_hazard_zone) {
           const floodCoords = geoData.flood_hazard_zone.geometry.coordinates[0];
           const flatFlood = [];
@@ -216,10 +226,7 @@
             name: "Naga River Lowland Inundation Basin",
             polygon: {
               hierarchy: Cesium.Cartesian3.fromDegreesArray(flatFlood),
-              extrudedHeight: 80.0,
-              material: Cesium.Color.fromCssColorString('#0284c7').withAlpha(0.4),
-              outline: true,
-              outlineColor: Cesium.Color.fromCssColorString('#38bdf8').withAlpha(0.8)
+              material: Cesium.Color.fromCssColorString('#0284c7').withAlpha(0.32)
             }
           });
         }
@@ -279,7 +286,7 @@
       const card = document.getElementById('tooltipCard');
       card.style.display = 'block';
       document.getElementById('tooltipBrgy').innerText = p.name + ' (B' + p.id + ')';
-      document.getElementById('tooltipType').innerText = p.type + ' • Naga City';
+      document.getElementById('tooltipType').innerText = (p.category_name || p.category || 'Barangay') + ' • Naga City';
       document.getElementById('tooltipMvi').innerText = p.vulnerability_index + ' / 100';
       document.getElementById('tooltipHH').innerText = p.households.toLocaleString() + ' HHs';
 

@@ -1,0 +1,2496 @@
+{
+  "summary": {
+    "city_name": "Naga City",
+    "total_barangays": 27,
+    "total_households": 44892,
+    "total_population": 181197,
+    "avg_citywide_vulnerability": 58.3,
+    "highest_vulnerability_barangay": "Barangay 16",
+    "lowest_vulnerability_barangay": "Barangay 10",
+    "pca_variance_explained": [
+      0.401,
+      0.163,
+      0.122,
+      0.091
+    ],
+    "data_quality_issues": [
+      {
+        "barangay": "Barangay 16",
+        "issue": "Extreme food-insecurity reading outlier detected (flags verification).",
+        "office": "CHO"
+      },
+      {
+        "table": "DRRM",
+        "issue": "15 of 27 barangays lack emergency hotline; Barangay 3 has no written plan.",
+        "office": "DRRMO"
+      },
+      {
+        "table": "TVET graduate not in school",
+        "issue": "TVET table labels broken in raw survey source; excluded from direct calculation.",
+        "office": "SWO"
+      },
+      {
+        "privacy_notice": "PSA Anonymized dataset to Barangay 1 - 27 to protect household confidentiality under RA 10173."
+      }
+    ]
+  },
+  "barangays": [
+    {
+      "id": 1,
+      "name": "Barangay 1",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 1065,
+      "total_population": 4478,
+      "males": 2165,
+      "females": 2313,
+      "avg_household_size": 4.2,
+      "demographics": {
+        "overcrowded_hh_count": 142,
+        "pct_overcrowded": 13.3
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 23.1,
+        "weak_roof_pct": 2.0,
+        "weak_wall_pct": 33.7
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 23.1,
+        "weak_roof_pct": 2.0,
+        "weak_wall_pct": 33.7,
+        "unimproved_toilet_pct": 29.7,
+        "households_needing_sanitation": 316,
+        "drinking_refilling_pct": 43.4,
+        "piped_water_pct": 56.3,
+        "without_electricity_pct": 1.6,
+        "households_needing_electricity": 17
+      },
+      "health_cho": {
+        "pct_overcrowded": 13.3,
+        "food_insecurity_count": 322,
+        "food_insecurity_pct": 30.2,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 29.7,
+        "refilling_station_dependency_pct": 43.4,
+        "seniors_count": 448,
+        "seniors_without_id_pct": 10.3
+      },
+      "social_swo": {
+        "food_insecurity_pct": 30.2,
+        "seniors_without_id_count": 46,
+        "unbanked_pct": 33.4,
+        "digital_wallet_pct": 40.1,
+        "neet_youth_count": 137,
+        "neet_youth_pct": 14.8
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 58.4,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -0.062,
+        "dim2_disaster_shelter_frailty": 1.165,
+        "dim3_basic_utilities_deficit": -0.148,
+        "dim4_demographic_pressure": -1.554
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 55.5,
+        "drrmo_disaster_risk": 1.6,
+        "ceo_infrastructure_deficit": 47.8,
+        "cho_health_risk": 39.0,
+        "swo_social_vulnerability": 37.8
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 73.3,
+        "SDG 2 Zero Hunger": 63.8,
+        "SDG 3 Good Health": 55.5,
+        "SDG 6 Clean Water & Sanitation": 46.5,
+        "SDG 7 Clean Energy": 95.2,
+        "SDG 8 Decent Work": 77.8,
+        "SDG 11 Sustainable Cities": 50.4,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "Abella",
+      "display_name": "Abella (Barangay 1)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#72b0a8",
+      "district": "Naga River North Bank",
+      "center": [
+        123.17973,
+        13.62665
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Barangay 2",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 532,
+      "total_population": 1946,
+      "males": 963,
+      "females": 983,
+      "avg_household_size": 3.66,
+      "demographics": {
+        "overcrowded_hh_count": 23,
+        "pct_overcrowded": 4.3
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 12.2,
+        "weak_roof_pct": 2.8,
+        "weak_wall_pct": 18.6
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 12.2,
+        "weak_roof_pct": 2.8,
+        "weak_wall_pct": 18.6,
+        "unimproved_toilet_pct": 8.6,
+        "households_needing_sanitation": 46,
+        "drinking_refilling_pct": 78.8,
+        "piped_water_pct": 20.7,
+        "without_electricity_pct": 3.0,
+        "households_needing_electricity": 16
+      },
+      "health_cho": {
+        "pct_overcrowded": 4.3,
+        "food_insecurity_count": 165,
+        "food_insecurity_pct": 31.0,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 8.6,
+        "refilling_station_dependency_pct": 78.8,
+        "seniors_count": 233,
+        "seniors_without_id_pct": 12.9
+      },
+      "social_swo": {
+        "food_insecurity_pct": 31.0,
+        "seniors_without_id_count": 30,
+        "unbanked_pct": 17.3,
+        "digital_wallet_pct": 60.2,
+        "neet_youth_count": 84,
+        "neet_youth_pct": 20.5
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 48.4,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -0.665,
+        "dim2_disaster_shelter_frailty": -1.333,
+        "dim3_basic_utilities_deficit": -0.868,
+        "dim4_demographic_pressure": 1.326
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 46.0,
+        "drrmo_disaster_risk": 22.2,
+        "ceo_infrastructure_deficit": 18.9,
+        "cho_health_risk": 26.9,
+        "swo_social_vulnerability": 35.0
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 86.2,
+        "SDG 2 Zero Hunger": 62.8,
+        "SDG 3 Good Health": 87.1,
+        "SDG 6 Clean Water & Sanitation": 84.5,
+        "SDG 7 Clean Energy": 91.0,
+        "SDG 8 Decent Work": 69.2,
+        "SDG 11 Sustainable Cities": 58.9,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Bagumbayan Norte",
+      "display_name": "Bagumbayan Norte (Barangay 2)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#4a4e82",
+      "district": "North Urban Corridor",
+      "center": [
+        123.18594,
+        13.63712
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Barangay 3",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 1508,
+      "total_population": 5916,
+      "males": 2891,
+      "females": 3025,
+      "avg_household_size": 3.92,
+      "demographics": {
+        "overcrowded_hh_count": 76,
+        "pct_overcrowded": 5.0
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": false,
+        "has_response_team": true,
+        "preparedness_gap_score": 90,
+        "pct_without_internet": 18.1,
+        "weak_roof_pct": 8.8,
+        "weak_wall_pct": 18.3
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 18.1,
+        "weak_roof_pct": 8.8,
+        "weak_wall_pct": 18.3,
+        "unimproved_toilet_pct": 18.1,
+        "households_needing_sanitation": 273,
+        "drinking_refilling_pct": 58.2,
+        "piped_water_pct": 41.2,
+        "without_electricity_pct": 1.7,
+        "households_needing_electricity": 25
+      },
+      "health_cho": {
+        "pct_overcrowded": 5.0,
+        "food_insecurity_count": 384,
+        "food_insecurity_pct": 25.5,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 18.1,
+        "refilling_station_dependency_pct": 58.2,
+        "seniors_count": 735,
+        "seniors_without_id_pct": 9.9
+      },
+      "social_swo": {
+        "food_insecurity_pct": 25.5,
+        "seniors_without_id_count": 73,
+        "unbanked_pct": 24.9,
+        "digital_wallet_pct": 62.7,
+        "neet_youth_count": 187,
+        "neet_youth_pct": 15.1
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 49.6,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -0.414,
+        "dim2_disaster_shelter_frailty": -2.505,
+        "dim3_basic_utilities_deficit": 1.435,
+        "dim4_demographic_pressure": -0.098
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 47.1,
+        "drrmo_disaster_risk": 52.0,
+        "ceo_infrastructure_deficit": 30.6,
+        "cho_health_risk": 28.7,
+        "swo_social_vulnerability": 33.1
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 80.1,
+        "SDG 2 Zero Hunger": 69.4,
+        "SDG 3 Good Health": 72.8,
+        "SDG 6 Clean Water & Sanitation": 67.4,
+        "SDG 7 Clean Energy": 94.9,
+        "SDG 8 Decent Work": 77.3,
+        "SDG 11 Sustainable Cities": 57.8,
+        "SDG 13 Climate Action": 19.0
+      },
+      "real_name": "Bagumbayan Sur",
+      "display_name": "Bagumbayan Sur (Barangay 3)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#c97793",
+      "district": "Naga River Confluence (Lowland)",
+      "center": [
+        123.18479,
+        13.63026
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Barangay 4",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 2305,
+      "total_population": 9850,
+      "males": 4869,
+      "females": 4981,
+      "avg_household_size": 4.27,
+      "demographics": {
+        "overcrowded_hh_count": 246,
+        "pct_overcrowded": 10.7
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 22.1,
+        "weak_roof_pct": 6.2,
+        "weak_wall_pct": 21.9
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 22.1,
+        "weak_roof_pct": 6.2,
+        "weak_wall_pct": 21.9,
+        "unimproved_toilet_pct": 39.1,
+        "households_needing_sanitation": 902,
+        "drinking_refilling_pct": 29.9,
+        "piped_water_pct": 69.8,
+        "without_electricity_pct": 3.2,
+        "households_needing_electricity": 74
+      },
+      "health_cho": {
+        "pct_overcrowded": 10.7,
+        "food_insecurity_count": 932,
+        "food_insecurity_pct": 40.4,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 39.1,
+        "refilling_station_dependency_pct": 29.9,
+        "seniors_count": 879,
+        "seniors_without_id_pct": 9.2
+      },
+      "social_swo": {
+        "food_insecurity_pct": 40.4,
+        "seniors_without_id_count": 81,
+        "unbanked_pct": 25.9,
+        "digital_wallet_pct": 55.1,
+        "neet_youth_count": 432,
+        "neet_youth_pct": 20.9
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 70.7,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": 0.937,
+        "dim2_disaster_shelter_frailty": 0.947,
+        "dim3_basic_utilities_deficit": 0.076,
+        "dim4_demographic_pressure": 0.461
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 67.2,
+        "drrmo_disaster_risk": 5.0,
+        "ceo_infrastructure_deficit": 65.1,
+        "cho_health_risk": 51.7,
+        "swo_social_vulnerability": 40.6
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 79.3,
+        "SDG 2 Zero Hunger": 51.5,
+        "SDG 3 Good Health": 41.3,
+        "SDG 6 Clean Water & Sanitation": 29.6,
+        "SDG 7 Clean Energy": 90.4,
+        "SDG 8 Decent Work": 68.7,
+        "SDG 11 Sustainable Cities": 39.9,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "Balatas",
+      "display_name": "Balatas (Barangay 4)",
+      "category": "growth",
+      "category_name": "Suburban Growth & Institutional Corridor",
+      "category_short": "Growth Corridor",
+      "category_color": "#0284c7",
+      "admin_color": "#c4cf7e",
+      "district": "Magsaysay-Balatas Civic Zone",
+      "center": [
+        123.20467,
+        13.62953
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Barangay 5",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 2214,
+      "total_population": 9151,
+      "males": 4475,
+      "females": 4676,
+      "avg_household_size": 4.13,
+      "demographics": {
+        "overcrowded_hh_count": 221,
+        "pct_overcrowded": 10.0
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 23.8,
+        "weak_roof_pct": 1.8,
+        "weak_wall_pct": 22.0
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 23.8,
+        "weak_roof_pct": 1.8,
+        "weak_wall_pct": 22.0,
+        "unimproved_toilet_pct": 19.4,
+        "households_needing_sanitation": 429,
+        "drinking_refilling_pct": 83.6,
+        "piped_water_pct": 16.4,
+        "without_electricity_pct": 2.4,
+        "households_needing_electricity": 53
+      },
+      "health_cho": {
+        "pct_overcrowded": 10.0,
+        "food_insecurity_count": 820,
+        "food_insecurity_pct": 37.0,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 19.4,
+        "refilling_station_dependency_pct": 83.6,
+        "seniors_count": 969,
+        "seniors_without_id_pct": 8.4
+      },
+      "social_swo": {
+        "food_insecurity_pct": 37.0,
+        "seniors_without_id_count": 81,
+        "unbanked_pct": 25.5,
+        "digital_wallet_pct": 54.6,
+        "neet_youth_count": 316,
+        "neet_youth_pct": 16.2
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 56.0,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -0.205,
+        "dim2_disaster_shelter_frailty": 0.881,
+        "dim3_basic_utilities_deficit": -0.808,
+        "dim4_demographic_pressure": -0.793
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 53.2,
+        "drrmo_disaster_risk": 1.4,
+        "ceo_infrastructure_deficit": 33.9,
+        "cho_health_risk": 37.5,
+        "swo_social_vulnerability": 34.7
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 79.6,
+        "SDG 2 Zero Hunger": 55.6,
+        "SDG 3 Good Health": 70.9,
+        "SDG 6 Clean Water & Sanitation": 65.1,
+        "SDG 7 Clean Energy": 92.8,
+        "SDG 8 Decent Work": 75.7,
+        "SDG 11 Sustainable Cities": 52.4,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "Calauag",
+      "display_name": "Calauag (Barangay 5)",
+      "category": "riverine",
+      "category_name": "Riverine & High Flood-Hazard Delta",
+      "category_short": "Riverine Flood Delta",
+      "category_color": "#ea580c",
+      "admin_color": "#24a549",
+      "district": "Northwest Residential Belt",
+      "center": [
+        123.19415,
+        13.64107
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Barangay 6",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 3237,
+      "total_population": 14393,
+      "males": 7338,
+      "females": 7055,
+      "avg_household_size": 4.45,
+      "demographics": {
+        "overcrowded_hh_count": 209,
+        "pct_overcrowded": 6.5
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 28.3,
+        "weak_roof_pct": 6.7,
+        "weak_wall_pct": 29.0
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 28.3,
+        "weak_roof_pct": 6.7,
+        "weak_wall_pct": 29.0,
+        "unimproved_toilet_pct": 20.7,
+        "households_needing_sanitation": 669,
+        "drinking_refilling_pct": 32.7,
+        "piped_water_pct": 64.8,
+        "without_electricity_pct": 5.4,
+        "households_needing_electricity": 175
+      },
+      "health_cho": {
+        "pct_overcrowded": 6.5,
+        "food_insecurity_count": 1331,
+        "food_insecurity_pct": 41.1,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 20.7,
+        "refilling_station_dependency_pct": 32.7,
+        "seniors_count": 1163,
+        "seniors_without_id_pct": 13.8
+      },
+      "social_swo": {
+        "food_insecurity_pct": 41.1,
+        "seniors_without_id_count": 160,
+        "unbanked_pct": 29.6,
+        "digital_wallet_pct": 47.8,
+        "neet_youth_count": 564,
+        "neet_youth_pct": 19.3
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 70.1,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": 1.361,
+        "dim2_disaster_shelter_frailty": 0.62,
+        "dim3_basic_utilities_deficit": -0.728,
+        "dim4_demographic_pressure": -0.057
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 66.6,
+        "drrmo_disaster_risk": 5.4,
+        "ceo_infrastructure_deficit": 41.8,
+        "cho_health_risk": 41.2,
+        "swo_social_vulnerability": 40.9
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 76.3,
+        "SDG 2 Zero Hunger": 50.7,
+        "SDG 3 Good Health": 69.0,
+        "SDG 6 Clean Water & Sanitation": 62.7,
+        "SDG 7 Clean Energy": 83.8,
+        "SDG 8 Decent Work": 71.0,
+        "SDG 11 Sustainable Cities": 40.4,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "Cararayan",
+      "display_name": "Cararayan (Barangay 6)",
+      "category": "upland",
+      "category_name": "Upland Watershed & Agro-Forestry",
+      "category_short": "Upland Watershed",
+      "category_color": "#b59410",
+      "admin_color": "#843b8c",
+      "district": "Mid-Valley Agro-Urban",
+      "center": [
+        123.21993,
+        13.64011
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Barangay 7",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 1845,
+      "total_population": 7491,
+      "males": 3833,
+      "females": 3658,
+      "avg_household_size": 4.06,
+      "demographics": {
+        "overcrowded_hh_count": 203,
+        "pct_overcrowded": 11.0
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 25.5,
+        "weak_roof_pct": 13.3,
+        "weak_wall_pct": 31.4
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 25.5,
+        "weak_roof_pct": 13.3,
+        "weak_wall_pct": 31.4,
+        "unimproved_toilet_pct": 34.9,
+        "households_needing_sanitation": 643,
+        "drinking_refilling_pct": 24.7,
+        "piped_water_pct": 41.0,
+        "without_electricity_pct": 5.7,
+        "households_needing_electricity": 105
+      },
+      "health_cho": {
+        "pct_overcrowded": 11.0,
+        "food_insecurity_count": 910,
+        "food_insecurity_pct": 49.3,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 34.9,
+        "refilling_station_dependency_pct": 24.7,
+        "seniors_count": 739,
+        "seniors_without_id_pct": 19.8
+      },
+      "social_swo": {
+        "food_insecurity_pct": 49.3,
+        "seniors_without_id_count": 146,
+        "unbanked_pct": 37.8,
+        "digital_wallet_pct": 36.2,
+        "neet_youth_count": 270,
+        "neet_youth_pct": 18.1
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 81.9,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": 2.818,
+        "dim2_disaster_shelter_frailty": -0.754,
+        "dim3_basic_utilities_deficit": 1.11,
+        "dim4_demographic_pressure": -0.415
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 77.8,
+        "drrmo_disaster_risk": 30.6,
+        "ceo_infrastructure_deficit": 63.7,
+        "cho_health_risk": 55.4,
+        "swo_social_vulnerability": 44.4
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 69.8,
+        "SDG 2 Zero Hunger": 40.8,
+        "SDG 3 Good Health": 47.7,
+        "SDG 6 Clean Water & Sanitation": 37.2,
+        "SDG 7 Clean Energy": 82.9,
+        "SDG 8 Decent Work": 72.8,
+        "SDG 11 Sustainable Cities": 30.4,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Carolina",
+      "display_name": "Carolina (Barangay 7)",
+      "category": "upland",
+      "category_name": "Upland Watershed & Agro-Forestry",
+      "category_short": "Upland Watershed",
+      "category_color": "#b59410",
+      "admin_color": "#8682b9",
+      "district": "Mt. Isarog Upland West",
+      "center": [
+        123.24527,
+        13.65472
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Barangay 8",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 2667,
+      "total_population": 10245,
+      "males": 4869,
+      "females": 5376,
+      "avg_household_size": 3.84,
+      "demographics": {
+        "overcrowded_hh_count": 137,
+        "pct_overcrowded": 5.1
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 17.7,
+        "weak_roof_pct": 4.0,
+        "weak_wall_pct": 19.7
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 17.7,
+        "weak_roof_pct": 4.0,
+        "weak_wall_pct": 19.7,
+        "unimproved_toilet_pct": 43.6,
+        "households_needing_sanitation": 1164,
+        "drinking_refilling_pct": 42.9,
+        "piped_water_pct": 56.8,
+        "without_electricity_pct": 2.4,
+        "households_needing_electricity": 63
+      },
+      "health_cho": {
+        "pct_overcrowded": 5.1,
+        "food_insecurity_count": 843,
+        "food_insecurity_pct": 31.6,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 43.6,
+        "refilling_station_dependency_pct": 42.9,
+        "seniors_count": 1534,
+        "seniors_without_id_pct": 10.8
+      },
+      "social_swo": {
+        "food_insecurity_pct": 31.6,
+        "seniors_without_id_count": 165,
+        "unbanked_pct": 22.8,
+        "digital_wallet_pct": 52.5,
+        "neet_youth_count": 338,
+        "neet_youth_pct": 18.7
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 58.1,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -0.441,
+        "dim2_disaster_shelter_frailty": -0.223,
+        "dim3_basic_utilities_deficit": 1.001,
+        "dim4_demographic_pressure": 0.912
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 55.2,
+        "drrmo_disaster_risk": 23.2,
+        "ceo_infrastructure_deficit": 70.2,
+        "cho_health_risk": 48.3,
+        "swo_social_vulnerability": 36.1
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 81.8,
+        "SDG 2 Zero Hunger": 62.1,
+        "SDG 3 Good Health": 34.6,
+        "SDG 6 Clean Water & Sanitation": 21.5,
+        "SDG 7 Clean Energy": 92.8,
+        "SDG 8 Decent Work": 72.0,
+        "SDG 11 Sustainable Cities": 50.6,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Concepcion Grande",
+      "display_name": "Concepcion Grande (Barangay 8)",
+      "category": "growth",
+      "category_name": "Suburban Growth & Institutional Corridor",
+      "category_short": "Growth Corridor",
+      "category_color": "#0284c7",
+      "admin_color": "#43b593",
+      "district": "Eastern Growth Corridor",
+      "center": [
+        123.21493,
+        13.62259
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Barangay 9",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 5706,
+      "total_population": 23171,
+      "males": 11348,
+      "females": 11823,
+      "avg_household_size": 4.06,
+      "demographics": {
+        "overcrowded_hh_count": 469,
+        "pct_overcrowded": 8.2
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 19.7,
+        "weak_roof_pct": 2.2,
+        "weak_wall_pct": 24.0
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 19.7,
+        "weak_roof_pct": 2.2,
+        "weak_wall_pct": 24.0,
+        "unimproved_toilet_pct": 33.3,
+        "households_needing_sanitation": 1900,
+        "drinking_refilling_pct": 33.9,
+        "piped_water_pct": 65.8,
+        "without_electricity_pct": 2.2,
+        "households_needing_electricity": 127
+      },
+      "health_cho": {
+        "pct_overcrowded": 8.2,
+        "food_insecurity_count": 2336,
+        "food_insecurity_pct": 40.9,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 33.3,
+        "refilling_station_dependency_pct": 33.9,
+        "seniors_count": 2306,
+        "seniors_without_id_pct": 11.7
+      },
+      "social_swo": {
+        "food_insecurity_pct": 40.9,
+        "seniors_without_id_count": 269,
+        "unbanked_pct": 23.0,
+        "digital_wallet_pct": 52.4,
+        "neet_youth_count": 680,
+        "neet_youth_pct": 14.9
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 53.2,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -0.645,
+        "dim2_disaster_shelter_frailty": 0.697,
+        "dim3_basic_utilities_deficit": -0.245,
+        "dim4_demographic_pressure": -0.722
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 50.5,
+        "drrmo_disaster_risk": 1.8,
+        "ceo_infrastructure_deficit": 54.3,
+        "cho_health_risk": 48.6,
+        "swo_social_vulnerability": 31.7
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 81.6,
+        "SDG 2 Zero Hunger": 50.9,
+        "SDG 3 Good Health": 50.1,
+        "SDG 6 Clean Water & Sanitation": 40.1,
+        "SDG 7 Clean Energy": 93.4,
+        "SDG 8 Decent Work": 77.7,
+        "SDG 11 Sustainable Cities": 54.8,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "Concepcion Peque\u00f1a",
+      "display_name": "Concepcion Peque\u00f1a (Barangay 9)",
+      "category": "growth",
+      "category_name": "Suburban Growth & Institutional Corridor",
+      "category_short": "Growth Corridor",
+      "category_color": "#0284c7",
+      "admin_color": "#a19c43",
+      "district": "Panganiban-City Hall Hub",
+      "center": [
+        123.20298,
+        13.61604
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Barangay 10",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 803,
+      "total_population": 2983,
+      "males": 1425,
+      "females": 1558,
+      "avg_household_size": 3.71,
+      "demographics": {
+        "overcrowded_hh_count": 15,
+        "pct_overcrowded": 1.9
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 6.1,
+        "weak_roof_pct": 0.1,
+        "weak_wall_pct": 30.3
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 6.1,
+        "weak_roof_pct": 0.1,
+        "weak_wall_pct": 30.3,
+        "unimproved_toilet_pct": 19.1,
+        "households_needing_sanitation": 153,
+        "drinking_refilling_pct": 55.7,
+        "piped_water_pct": 44.3,
+        "without_electricity_pct": 0.1,
+        "households_needing_electricity": 1
+      },
+      "health_cho": {
+        "pct_overcrowded": 1.9,
+        "food_insecurity_count": 67,
+        "food_insecurity_pct": 8.3,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 19.1,
+        "refilling_station_dependency_pct": 55.7,
+        "seniors_count": 450,
+        "seniors_without_id_pct": 11.3
+      },
+      "social_swo": {
+        "food_insecurity_pct": 8.3,
+        "seniors_without_id_count": 51,
+        "unbanked_pct": 8.6,
+        "digital_wallet_pct": 71.0,
+        "neet_youth_count": 67,
+        "neet_youth_pct": 12.0
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 20.0,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -3.671,
+        "dim2_disaster_shelter_frailty": -1.715,
+        "dim3_basic_utilities_deficit": 0.076,
+        "dim4_demographic_pressure": -0.621
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 19.0,
+        "drrmo_disaster_risk": 20.1,
+        "ceo_infrastructure_deficit": 28.9,
+        "cho_health_risk": 17.3,
+        "swo_social_vulnerability": 19.6
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 93.1,
+        "SDG 2 Zero Hunger": 90.0,
+        "SDG 3 Good Health": 71.3,
+        "SDG 6 Clean Water & Sanitation": 65.6,
+        "SDG 7 Clean Energy": 99.7,
+        "SDG 8 Decent Work": 82.0,
+        "SDG 11 Sustainable Cities": 83.0,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Dayangdang",
+      "display_name": "Dayangdang (Barangay 10)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#9e8e76",
+      "district": "Central Inner Residential",
+      "center": [
+        123.19532,
+        13.62538
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Barangay 11",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 1914,
+      "total_population": 7337,
+      "males": 3605,
+      "females": 3732,
+      "avg_household_size": 3.83,
+      "demographics": {
+        "overcrowded_hh_count": 230,
+        "pct_overcrowded": 12.0
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 23.1,
+        "weak_roof_pct": 0.8,
+        "weak_wall_pct": 14.8
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 23.1,
+        "weak_roof_pct": 0.8,
+        "weak_wall_pct": 14.8,
+        "unimproved_toilet_pct": 9.6,
+        "households_needing_sanitation": 183,
+        "drinking_refilling_pct": 24.8,
+        "piped_water_pct": 75.0,
+        "without_electricity_pct": 2.0,
+        "households_needing_electricity": 39
+      },
+      "health_cho": {
+        "pct_overcrowded": 12.0,
+        "food_insecurity_count": 691,
+        "food_insecurity_pct": 36.1,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 9.6,
+        "refilling_station_dependency_pct": 24.8,
+        "seniors_count": 915,
+        "seniors_without_id_pct": 8.6
+      },
+      "social_swo": {
+        "food_insecurity_pct": 36.1,
+        "seniors_without_id_count": 79,
+        "unbanked_pct": 32.2,
+        "digital_wallet_pct": 37.4,
+        "neet_youth_count": 245,
+        "neet_youth_pct": 17.8
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 58.5,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": 0.211,
+        "dim2_disaster_shelter_frailty": 0.944,
+        "dim3_basic_utilities_deficit": -1.395,
+        "dim4_demographic_pressure": -0.681
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 55.6,
+        "drrmo_disaster_risk": 0.6,
+        "ceo_infrastructure_deficit": 18.4,
+        "cho_health_risk": 31.0,
+        "swo_social_vulnerability": 40.7
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 74.2,
+        "SDG 2 Zero Hunger": 56.7,
+        "SDG 3 Good Health": 85.6,
+        "SDG 6 Clean Water & Sanitation": 82.7,
+        "SDG 7 Clean Energy": 94.0,
+        "SDG 8 Decent Work": 73.3,
+        "SDG 11 Sustainable Cities": 50.3,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "Del Rosario",
+      "display_name": "Del Rosario (Barangay 11)",
+      "category": "growth",
+      "category_name": "Suburban Growth & Institutional Corridor",
+      "category_short": "Growth Corridor",
+      "category_color": "#0284c7",
+      "admin_color": "#b3779e",
+      "district": "Southeast Highway Gateway",
+      "center": [
+        123.22202,
+        13.61063
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Barangay 12",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 82,
+      "total_population": 248,
+      "males": 117,
+      "females": 131,
+      "avg_household_size": 3.02,
+      "demographics": {
+        "overcrowded_hh_count": 8,
+        "pct_overcrowded": 9.8
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 26.8,
+        "weak_roof_pct": 4.6,
+        "weak_wall_pct": 51.8
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 26.8,
+        "weak_roof_pct": 4.6,
+        "weak_wall_pct": 51.8,
+        "unimproved_toilet_pct": 19.5,
+        "households_needing_sanitation": 16,
+        "drinking_refilling_pct": 56.1,
+        "piped_water_pct": 43.9,
+        "without_electricity_pct": 2.4,
+        "households_needing_electricity": 2
+      },
+      "health_cho": {
+        "pct_overcrowded": 9.8,
+        "food_insecurity_count": 6,
+        "food_insecurity_pct": 7.4,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 19.5,
+        "refilling_station_dependency_pct": 56.1,
+        "seniors_count": 44,
+        "seniors_without_id_pct": 9.1
+      },
+      "social_swo": {
+        "food_insecurity_pct": 7.4,
+        "seniors_without_id_count": 4,
+        "unbanked_pct": 19.5,
+        "digital_wallet_pct": 67.1,
+        "neet_youth_count": 12,
+        "neet_youth_pct": 25.5
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 65.1,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": 0.182,
+        "dim2_disaster_shelter_frailty": 1.25,
+        "dim3_basic_utilities_deficit": -0.556,
+        "dim4_demographic_pressure": 1.199
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 61.8,
+        "drrmo_disaster_risk": 3.7,
+        "ceo_infrastructure_deficit": 34.0,
+        "cho_health_risk": 16.9,
+        "swo_social_vulnerability": 42.3
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 84.4,
+        "SDG 2 Zero Hunger": 91.1,
+        "SDG 3 Good Health": 70.8,
+        "SDG 6 Clean Water & Sanitation": 64.9,
+        "SDG 7 Clean Energy": 92.8,
+        "SDG 8 Decent Work": 61.8,
+        "SDG 11 Sustainable Cities": 44.7,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "Dinaga",
+      "display_name": "Dinaga (Barangay 12)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#5299b8",
+      "district": "Centro CBD Commercial Core",
+      "center": [
+        123.18649,
+        13.62039
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Barangay 13",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 574,
+      "total_population": 2307,
+      "males": 1216,
+      "females": 1091,
+      "avg_household_size": 4.02,
+      "demographics": {
+        "overcrowded_hh_count": 50,
+        "pct_overcrowded": 8.7
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 27.0,
+        "weak_roof_pct": 3.3,
+        "weak_wall_pct": 45.1
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 27.0,
+        "weak_roof_pct": 3.3,
+        "weak_wall_pct": 45.1,
+        "unimproved_toilet_pct": 19.5,
+        "households_needing_sanitation": 112,
+        "drinking_refilling_pct": 33.6,
+        "piped_water_pct": 66.4,
+        "without_electricity_pct": 1.9,
+        "households_needing_electricity": 11
+      },
+      "health_cho": {
+        "pct_overcrowded": 8.7,
+        "food_insecurity_count": 190,
+        "food_insecurity_pct": 33.1,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 19.5,
+        "refilling_station_dependency_pct": 33.6,
+        "seniors_count": 204,
+        "seniors_without_id_pct": 14.2
+      },
+      "social_swo": {
+        "food_insecurity_pct": 33.1,
+        "seniors_without_id_count": 29,
+        "unbanked_pct": 23.3,
+        "digital_wallet_pct": 60.8,
+        "neet_youth_count": 84,
+        "neet_youth_pct": 15.9
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 55.7,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -0.308,
+        "dim2_disaster_shelter_frailty": 0.058,
+        "dim3_basic_utilities_deficit": 0.262,
+        "dim4_demographic_pressure": -0.432
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 52.9,
+        "drrmo_disaster_risk": 22.6,
+        "ceo_infrastructure_deficit": 33.0,
+        "cho_health_risk": 34.9,
+        "swo_social_vulnerability": 33.1
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 81.4,
+        "SDG 2 Zero Hunger": 60.3,
+        "SDG 3 Good Health": 70.8,
+        "SDG 6 Clean Water & Sanitation": 64.9,
+        "SDG 7 Clean Energy": 94.3,
+        "SDG 8 Decent Work": 76.2,
+        "SDG 11 Sustainable Cities": 52.7,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Igualdad Interior",
+      "display_name": "Igualdad Interior (Barangay 13)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#43b087",
+      "district": "Downtown West Riverbank",
+      "center": [
+        123.1813,
+        13.62111
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Barangay 14",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 308,
+      "total_population": 1280,
+      "males": 627,
+      "females": 653,
+      "avg_household_size": 4.16,
+      "demographics": {
+        "overcrowded_hh_count": 15,
+        "pct_overcrowded": 4.9
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 7.8,
+        "weak_roof_pct": 1.0,
+        "weak_wall_pct": 46.4
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 7.8,
+        "weak_roof_pct": 1.0,
+        "weak_wall_pct": 46.4,
+        "unimproved_toilet_pct": 23.7,
+        "households_needing_sanitation": 73,
+        "drinking_refilling_pct": 34.4,
+        "piped_water_pct": 65.6,
+        "without_electricity_pct": 2.6,
+        "households_needing_electricity": 8
+      },
+      "health_cho": {
+        "pct_overcrowded": 4.9,
+        "food_insecurity_count": 254,
+        "food_insecurity_pct": 82.5,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 23.7,
+        "refilling_station_dependency_pct": 34.4,
+        "seniors_count": 152,
+        "seniors_without_id_pct": 9.2
+      },
+      "social_swo": {
+        "food_insecurity_pct": 82.5,
+        "seniors_without_id_count": 14,
+        "unbanked_pct": 14.9,
+        "digital_wallet_pct": 67.2,
+        "neet_youth_count": 50,
+        "neet_youth_pct": 21.8
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 58.3,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": 0.074,
+        "dim2_disaster_shelter_frailty": -0.969,
+        "dim3_basic_utilities_deficit": -1.071,
+        "dim4_demographic_pressure": 2.81
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 55.4,
+        "drrmo_disaster_risk": 20.8,
+        "ceo_infrastructure_deficit": 40.8,
+        "cho_health_risk": 72.0,
+        "swo_social_vulnerability": 35.1
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 88.1,
+        "SDG 2 Zero Hunger": 1.0,
+        "SDG 3 Good Health": 64.5,
+        "SDG 6 Clean Water & Sanitation": 57.3,
+        "SDG 7 Clean Energy": 92.2,
+        "SDG 8 Decent Work": 67.3,
+        "SDG 11 Sustainable Cities": 50.4,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Lerma",
+      "display_name": "Lerma (Barangay 14)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#7b8c5e",
+      "district": "Panganiban Commercial West",
+      "center": [
+        123.1905,
+        13.61806
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Barangay 15",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 598,
+      "total_population": 2392,
+      "males": 1114,
+      "females": 1278,
+      "avg_household_size": 4.0,
+      "demographics": {
+        "overcrowded_hh_count": 51,
+        "pct_overcrowded": 8.5
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 24.7,
+        "weak_roof_pct": 0.8,
+        "weak_wall_pct": 6.4
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 24.7,
+        "weak_roof_pct": 0.8,
+        "weak_wall_pct": 6.4,
+        "unimproved_toilet_pct": 94.6,
+        "households_needing_sanitation": 566,
+        "drinking_refilling_pct": 78.1,
+        "piped_water_pct": 21.9,
+        "without_electricity_pct": 0.0,
+        "households_needing_electricity": 0
+      },
+      "health_cho": {
+        "pct_overcrowded": 8.5,
+        "food_insecurity_count": 46,
+        "food_insecurity_pct": 7.7,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 94.6,
+        "refilling_station_dependency_pct": 78.1,
+        "seniors_count": 348,
+        "seniors_without_id_pct": 6.9
+      },
+      "social_swo": {
+        "food_insecurity_pct": 7.7,
+        "seniors_without_id_count": 24,
+        "unbanked_pct": 9.4,
+        "digital_wallet_pct": 7.7,
+        "neet_youth_count": 87,
+        "neet_youth_pct": 17.5
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 58.7,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -2.099,
+        "dim2_disaster_shelter_frailty": 1.882,
+        "dim3_basic_utilities_deficit": 3.914,
+        "dim4_demographic_pressure": 0.843
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 55.8,
+        "drrmo_disaster_risk": 20.6,
+        "ceo_infrastructure_deficit": 100.0,
+        "cho_health_risk": 62.1,
+        "swo_social_vulnerability": 26.6
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 92.5,
+        "SDG 2 Zero Hunger": 90.8,
+        "SDG 3 Good Health": 0,
+        "SDG 6 Clean Water & Sanitation": 0,
+        "SDG 7 Clean Energy": 100,
+        "SDG 8 Decent Work": 73.8,
+        "SDG 11 Sustainable Cities": 50.1,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Liboton",
+      "display_name": "Liboton (Barangay 15)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#857f88",
+      "district": "North-Central Heritage",
+      "center": [
+        123.191,
+        13.63163
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Barangay 16",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 1779,
+      "total_population": 7958,
+      "males": 4041,
+      "females": 3917,
+      "avg_household_size": 4.47,
+      "demographics": {
+        "overcrowded_hh_count": 213,
+        "pct_overcrowded": 12.0
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 40.3,
+        "weak_roof_pct": 1.8,
+        "weak_wall_pct": 41.7
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 40.3,
+        "weak_roof_pct": 1.8,
+        "weak_wall_pct": 41.7,
+        "unimproved_toilet_pct": 35.4,
+        "households_needing_sanitation": 629,
+        "drinking_refilling_pct": 29.1,
+        "piped_water_pct": 67.2,
+        "without_electricity_pct": 4.2,
+        "households_needing_electricity": 75
+      },
+      "health_cho": {
+        "pct_overcrowded": 12.0,
+        "food_insecurity_count": 1459,
+        "food_insecurity_pct": 82.0,
+        "food_insecurity_flag_outlier": true,
+        "wash_risk_score": 35.4,
+        "refilling_station_dependency_pct": 29.1,
+        "seniors_count": 652,
+        "seniors_without_id_pct": 16.9
+      },
+      "social_swo": {
+        "food_insecurity_pct": 82.0,
+        "seniors_without_id_count": 110,
+        "unbanked_pct": 47.9,
+        "digital_wallet_pct": 37.4,
+        "neet_youth_count": 339,
+        "neet_youth_pct": 20.0
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 95.0,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": 3.231,
+        "dim2_disaster_shelter_frailty": 2.042,
+        "dim3_basic_utilities_deficit": 0.185,
+        "dim4_demographic_pressure": 0.767
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 90.2,
+        "drrmo_disaster_risk": 21.4,
+        "ceo_infrastructure_deficit": 61.5,
+        "cho_health_risk": 78.6,
+        "swo_social_vulnerability": 52.7
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 61.7,
+        "SDG 2 Zero Hunger": 1.6,
+        "SDG 3 Good Health": 46.9,
+        "SDG 6 Clean Water & Sanitation": 36.3,
+        "SDG 7 Clean Energy": 87.4,
+        "SDG 8 Decent Work": 70.0,
+        "SDG 11 Sustainable Cities": 19.2,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Mabolo",
+      "display_name": "Mabolo (Barangay 16)",
+      "category": "riverine",
+      "category_name": "Riverine & High Flood-Hazard Delta",
+      "category_short": "Riverine Flood Delta",
+      "category_color": "#ea580c",
+      "admin_color": "#4f78aa",
+      "district": "Southwest Bicol River Basin",
+      "center": [
+        123.17629,
+        13.61029
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Barangay 17",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 4072,
+      "total_population": 15636,
+      "males": 7758,
+      "females": 7878,
+      "avg_household_size": 3.84,
+      "demographics": {
+        "overcrowded_hh_count": 337,
+        "pct_overcrowded": 8.3
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 21.7,
+        "weak_roof_pct": 4.3,
+        "weak_wall_pct": 14.1
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 21.7,
+        "weak_roof_pct": 4.3,
+        "weak_wall_pct": 14.1,
+        "unimproved_toilet_pct": 5.0,
+        "households_needing_sanitation": 204,
+        "drinking_refilling_pct": 50.9,
+        "piped_water_pct": 47.2,
+        "without_electricity_pct": 2.4,
+        "households_needing_electricity": 99
+      },
+      "health_cho": {
+        "pct_overcrowded": 8.3,
+        "food_insecurity_count": 1283,
+        "food_insecurity_pct": 31.5,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 5.0,
+        "refilling_station_dependency_pct": 50.9,
+        "seniors_count": 1285,
+        "seniors_without_id_pct": 12.8
+      },
+      "social_swo": {
+        "food_insecurity_pct": 31.5,
+        "seniors_without_id_count": 165,
+        "unbanked_pct": 24.1,
+        "digital_wallet_pct": 54.2,
+        "neet_youth_count": 550,
+        "neet_youth_pct": 17.9
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 53.9,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -0.051,
+        "dim2_disaster_shelter_frailty": -0.73,
+        "dim3_basic_utilities_deficit": -0.556,
+        "dim4_demographic_pressure": -0.034
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 51.2,
+        "drrmo_disaster_risk": 23.4,
+        "ceo_infrastructure_deficit": 12.3,
+        "cho_health_risk": 25.0,
+        "swo_social_vulnerability": 35.9
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 80.7,
+        "SDG 2 Zero Hunger": 62.2,
+        "SDG 3 Good Health": 92.5,
+        "SDG 6 Clean Water & Sanitation": 91.0,
+        "SDG 7 Clean Energy": 92.8,
+        "SDG 8 Decent Work": 73.2,
+        "SDG 11 Sustainable Cities": 54.2,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Pacol",
+      "display_name": "Pacol (Barangay 17)",
+      "category": "upland",
+      "category_name": "Upland Watershed & Agro-Forestry",
+      "category_short": "Upland Watershed",
+      "category_color": "#b59410",
+      "admin_color": "#99497e",
+      "district": "Northeast Upland Terrace",
+      "center": [
+        123.22693,
+        13.65653
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Barangay 18",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 724,
+      "total_population": 3092,
+      "males": 1574,
+      "females": 1518,
+      "avg_household_size": 4.27,
+      "demographics": {
+        "overcrowded_hh_count": 127,
+        "pct_overcrowded": 17.5
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 12.6,
+        "weak_roof_pct": 13.3,
+        "weak_wall_pct": 43.2
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 12.6,
+        "weak_roof_pct": 13.3,
+        "weak_wall_pct": 43.2,
+        "unimproved_toilet_pct": 30.4,
+        "households_needing_sanitation": 220,
+        "drinking_refilling_pct": 0.4,
+        "piped_water_pct": 97.7,
+        "without_electricity_pct": 9.3,
+        "households_needing_electricity": 67
+      },
+      "health_cho": {
+        "pct_overcrowded": 17.5,
+        "food_insecurity_count": 458,
+        "food_insecurity_pct": 63.3,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 30.4,
+        "refilling_station_dependency_pct": 0.4,
+        "seniors_count": 237,
+        "seniors_without_id_pct": 12.7
+      },
+      "social_swo": {
+        "food_insecurity_pct": 63.3,
+        "seniors_without_id_count": 30,
+        "unbanked_pct": 48.9,
+        "digital_wallet_pct": 29.0,
+        "neet_youth_count": 124,
+        "neet_youth_pct": 20.7
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 94.7,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": 4.901,
+        "dim2_disaster_shelter_frailty": -1.762,
+        "dim3_basic_utilities_deficit": 0.304,
+        "dim4_demographic_pressure": -0.081
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 90.0,
+        "drrmo_disaster_risk": 30.6,
+        "ceo_infrastructure_deficit": 64.2,
+        "cho_health_risk": 62.5,
+        "swo_social_vulnerability": 54.2
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 60.9,
+        "SDG 2 Zero Hunger": 24.0,
+        "SDG 3 Good Health": 54.4,
+        "SDG 6 Clean Water & Sanitation": 45.3,
+        "SDG 7 Clean Energy": 72.1,
+        "SDG 8 Decent Work": 69.0,
+        "SDG 11 Sustainable Cities": 19.5,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Panicuason",
+      "display_name": "Panicuason (Barangay 18)",
+      "category": "upland",
+      "category_name": "Upland Watershed & Agro-Forestry",
+      "category_short": "Upland Watershed",
+      "category_color": "#b59410",
+      "admin_color": "#a99438",
+      "district": "Mt. Isarog Forest Park",
+      "center": [
+        123.261,
+        13.66832
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Barangay 19",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 964,
+      "total_population": 3777,
+      "males": 1824,
+      "females": 1953,
+      "avg_household_size": 3.92,
+      "demographics": {
+        "overcrowded_hh_count": 49,
+        "pct_overcrowded": 5.1
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 21.2,
+        "weak_roof_pct": 0.6,
+        "weak_wall_pct": 23.5
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 21.2,
+        "weak_roof_pct": 0.6,
+        "weak_wall_pct": 23.5,
+        "unimproved_toilet_pct": 11.8,
+        "households_needing_sanitation": 114,
+        "drinking_refilling_pct": 59.4,
+        "piped_water_pct": 40.6,
+        "without_electricity_pct": 3.7,
+        "households_needing_electricity": 36
+      },
+      "health_cho": {
+        "pct_overcrowded": 5.1,
+        "food_insecurity_count": 289,
+        "food_insecurity_pct": 30.0,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 11.8,
+        "refilling_station_dependency_pct": 59.4,
+        "seniors_count": 514,
+        "seniors_without_id_pct": 10.1
+      },
+      "social_swo": {
+        "food_insecurity_pct": 30.0,
+        "seniors_without_id_count": 52,
+        "unbanked_pct": 18.3,
+        "digital_wallet_pct": 58.2,
+        "neet_youth_count": 139,
+        "neet_youth_pct": 16.9
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 49.3,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -0.743,
+        "dim2_disaster_shelter_frailty": -0.545,
+        "dim3_basic_utilities_deficit": -0.491,
+        "dim4_demographic_pressure": 0.271
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 46.8,
+        "drrmo_disaster_risk": 20.5,
+        "ceo_infrastructure_deficit": 25.1,
+        "cho_health_risk": 28.1,
+        "swo_social_vulnerability": 31.3
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 85.4,
+        "SDG 2 Zero Hunger": 64.0,
+        "SDG 3 Good Health": 82.3,
+        "SDG 6 Clean Water & Sanitation": 78.8,
+        "SDG 7 Clean Energy": 88.9,
+        "SDG 8 Decent Work": 74.7,
+        "SDG 11 Sustainable Cities": 58.1,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Pe\u00f1afrancia",
+      "display_name": "Pe\u00f1afrancia (Barangay 19)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#b8865d",
+      "district": "Basilica & Pilgrim District",
+      "center": [
+        123.1971,
+        13.63207
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Barangay 20",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 1220,
+      "total_population": 5363,
+      "males": 2711,
+      "females": 2652,
+      "avg_household_size": 4.4,
+      "demographics": {
+        "overcrowded_hh_count": 207,
+        "pct_overcrowded": 17.0
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 28.4,
+        "weak_roof_pct": 1.1,
+        "weak_wall_pct": 32.0
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 28.4,
+        "weak_roof_pct": 1.1,
+        "weak_wall_pct": 32.0,
+        "unimproved_toilet_pct": 26.6,
+        "households_needing_sanitation": 325,
+        "drinking_refilling_pct": 47.2,
+        "piped_water_pct": 52.0,
+        "without_electricity_pct": 3.9,
+        "households_needing_electricity": 47
+      },
+      "health_cho": {
+        "pct_overcrowded": 17.0,
+        "food_insecurity_count": 717,
+        "food_insecurity_pct": 58.8,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 26.6,
+        "refilling_station_dependency_pct": 47.2,
+        "seniors_count": 518,
+        "seniors_without_id_pct": 6.8
+      },
+      "social_swo": {
+        "food_insecurity_pct": 58.8,
+        "seniors_without_id_count": 35,
+        "unbanked_pct": 30.7,
+        "digital_wallet_pct": 54.3,
+        "neet_youth_count": 209,
+        "neet_youth_pct": 18.7
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 76.3,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": 1.689,
+        "dim2_disaster_shelter_frailty": 1.768,
+        "dim3_basic_utilities_deficit": -0.722,
+        "dim4_demographic_pressure": -0.353
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 72.5,
+        "drrmo_disaster_risk": 0.9,
+        "ceo_infrastructure_deficit": 47.7,
+        "cho_health_risk": 57.1,
+        "swo_social_vulnerability": 40.9
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 75.4,
+        "SDG 2 Zero Hunger": 29.4,
+        "SDG 3 Good Health": 60.1,
+        "SDG 6 Clean Water & Sanitation": 52.1,
+        "SDG 7 Clean Energy": 88.3,
+        "SDG 8 Decent Work": 72.0,
+        "SDG 11 Sustainable Cities": 35.1,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "Sabang",
+      "display_name": "Sabang (Barangay 20)",
+      "category": "riverine",
+      "category_name": "Riverine & High Flood-Hazard Delta",
+      "category_short": "Riverine Flood Delta",
+      "category_color": "#ea580c",
+      "admin_color": "#a88bc4",
+      "district": "Western Riverside Market",
+      "center": [
+        123.17514,
+        13.61965
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Barangay 21",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 5394,
+      "total_population": 20609,
+      "males": 9860,
+      "females": 10749,
+      "avg_household_size": 3.82,
+      "demographics": {
+        "overcrowded_hh_count": 150,
+        "pct_overcrowded": 2.8
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 15.9,
+        "weak_roof_pct": 3.1,
+        "weak_wall_pct": 9.5
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 15.9,
+        "weak_roof_pct": 3.1,
+        "weak_wall_pct": 9.5,
+        "unimproved_toilet_pct": 15.8,
+        "households_needing_sanitation": 851,
+        "drinking_refilling_pct": 71.8,
+        "piped_water_pct": 27.3,
+        "without_electricity_pct": 1.4,
+        "households_needing_electricity": 73
+      },
+      "health_cho": {
+        "pct_overcrowded": 2.8,
+        "food_insecurity_count": 1259,
+        "food_insecurity_pct": 23.3,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 15.8,
+        "refilling_station_dependency_pct": 71.8,
+        "seniors_count": 2084,
+        "seniors_without_id_pct": 12.1
+      },
+      "social_swo": {
+        "food_insecurity_pct": 23.3,
+        "seniors_without_id_count": 252,
+        "unbanked_pct": 14.8,
+        "digital_wallet_pct": 59.7,
+        "neet_youth_count": 684,
+        "neet_youth_pct": 16.5
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 40.2,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -1.721,
+        "dim2_disaster_shelter_frailty": -1.069,
+        "dim3_basic_utilities_deficit": -0.131,
+        "dim4_demographic_pressure": 0.304
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 38.2,
+        "drrmo_disaster_risk": 22.5,
+        "ceo_infrastructure_deficit": 26.5,
+        "cho_health_risk": 25.8,
+        "swo_social_vulnerability": 28.7
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 88.2,
+        "SDG 2 Zero Hunger": 72.0,
+        "SDG 3 Good Health": 76.3,
+        "SDG 6 Clean Water & Sanitation": 71.6,
+        "SDG 7 Clean Energy": 95.8,
+        "SDG 8 Decent Work": 75.2,
+        "SDG 11 Sustainable Cities": 65.8,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "San Felipe",
+      "display_name": "San Felipe (Barangay 21)",
+      "category": "riverine",
+      "category_name": "Riverine & High Flood-Hazard Delta",
+      "category_short": "Riverine Flood Delta",
+      "category_color": "#ea580c",
+      "admin_color": "#7860aa",
+      "district": "North-Central Expansion",
+      "center": [
+        123.2075,
+        13.64287
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Barangay 22",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 149,
+      "total_population": 541,
+      "males": 258,
+      "females": 283,
+      "avg_household_size": 3.63,
+      "demographics": {
+        "overcrowded_hh_count": 9,
+        "pct_overcrowded": 6.0
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 9.4,
+        "weak_roof_pct": 0.7,
+        "weak_wall_pct": 39.6
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 9.4,
+        "weak_roof_pct": 0.7,
+        "weak_wall_pct": 39.6,
+        "unimproved_toilet_pct": 18.1,
+        "households_needing_sanitation": 27,
+        "drinking_refilling_pct": 57.0,
+        "piped_water_pct": 43.0,
+        "without_electricity_pct": 0.7,
+        "households_needing_electricity": 1
+      },
+      "health_cho": {
+        "pct_overcrowded": 6.0,
+        "food_insecurity_count": 38,
+        "food_insecurity_pct": 25.5,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 18.1,
+        "refilling_station_dependency_pct": 57.0,
+        "seniors_count": 68,
+        "seniors_without_id_pct": 0.0
+      },
+      "social_swo": {
+        "food_insecurity_pct": 25.5,
+        "seniors_without_id_count": 0,
+        "unbanked_pct": 18.8,
+        "digital_wallet_pct": 56.4,
+        "neet_youth_count": 18,
+        "neet_youth_pct": 15.4
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 36.4,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -2.014,
+        "dim2_disaster_shelter_frailty": -0.276,
+        "dim3_basic_utilities_deficit": -1.072,
+        "dim4_demographic_pressure": -0.503
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 34.6,
+        "drrmo_disaster_risk": 0.6,
+        "ceo_infrastructure_deficit": 28.6,
+        "cho_health_risk": 28.7,
+        "swo_social_vulnerability": 29.8
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 85.0,
+        "SDG 2 Zero Hunger": 69.4,
+        "SDG 3 Good Health": 72.8,
+        "SDG 6 Clean Water & Sanitation": 67.4,
+        "SDG 7 Clean Energy": 97.9,
+        "SDG 8 Decent Work": 76.9,
+        "SDG 11 Sustainable Cities": 69.1,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "San Francisco",
+      "display_name": "San Francisco (Barangay 22)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#a8453a",
+      "district": "Centro Cathedral Precinct",
+      "center": [
+        123.18876,
+        13.6252
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Barangay 23",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 902,
+      "total_population": 3697,
+      "males": 1889,
+      "females": 1808,
+      "avg_household_size": 4.1,
+      "demographics": {
+        "overcrowded_hh_count": 194,
+        "pct_overcrowded": 21.5
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 14.0,
+        "weak_roof_pct": 13.0,
+        "weak_wall_pct": 26.2
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 14.0,
+        "weak_roof_pct": 13.0,
+        "weak_wall_pct": 26.2,
+        "unimproved_toilet_pct": 21.1,
+        "households_needing_sanitation": 190,
+        "drinking_refilling_pct": 14.6,
+        "piped_water_pct": 77.7,
+        "without_electricity_pct": 6.7,
+        "households_needing_electricity": 60
+      },
+      "health_cho": {
+        "pct_overcrowded": 21.5,
+        "food_insecurity_count": 394,
+        "food_insecurity_pct": 43.7,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 21.1,
+        "refilling_station_dependency_pct": 14.6,
+        "seniors_count": 270,
+        "seniors_without_id_pct": 16.7
+      },
+      "social_swo": {
+        "food_insecurity_pct": 43.7,
+        "seniors_without_id_count": 45,
+        "unbanked_pct": 30.4,
+        "digital_wallet_pct": 45.1,
+        "neet_youth_count": 115,
+        "neet_youth_pct": 16.8
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 76.1,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": 2.982,
+        "dim2_disaster_shelter_frailty": -1.889,
+        "dim3_basic_utilities_deficit": 0.643,
+        "dim4_demographic_pressure": -1.453
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 72.3,
+        "drrmo_disaster_risk": 30.4,
+        "ceo_infrastructure_deficit": 45.1,
+        "cho_health_risk": 43.2,
+        "swo_social_vulnerability": 38.4
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 75.7,
+        "SDG 2 Zero Hunger": 47.6,
+        "SDG 3 Good Health": 68.3,
+        "SDG 6 Clean Water & Sanitation": 62.0,
+        "SDG 7 Clean Energy": 79.9,
+        "SDG 8 Decent Work": 74.8,
+        "SDG 11 Sustainable Cities": 35.3,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "San Isidro",
+      "display_name": "San Isidro (Barangay 23)",
+      "category": "upland",
+      "category_name": "Upland Watershed & Agro-Forestry",
+      "category_short": "Upland Watershed",
+      "category_color": "#b59410",
+      "admin_color": "#80b741",
+      "district": "Eastern Agro-Residential",
+      "center": [
+        123.23712,
+        13.62925
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Barangay 24",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 1265,
+      "total_population": 4880,
+      "males": 2349,
+      "females": 2531,
+      "avg_household_size": 3.86,
+      "demographics": {
+        "overcrowded_hh_count": 32,
+        "pct_overcrowded": 2.5
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 15.4,
+        "weak_roof_pct": 4.5,
+        "weak_wall_pct": 20.3
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 15.4,
+        "weak_roof_pct": 4.5,
+        "weak_wall_pct": 20.3,
+        "unimproved_toilet_pct": 24.2,
+        "households_needing_sanitation": 306,
+        "drinking_refilling_pct": 60.7,
+        "piped_water_pct": 39.2,
+        "without_electricity_pct": 0.7,
+        "households_needing_electricity": 9
+      },
+      "health_cho": {
+        "pct_overcrowded": 2.5,
+        "food_insecurity_count": 276,
+        "food_insecurity_pct": 21.8,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 24.2,
+        "refilling_station_dependency_pct": 60.7,
+        "seniors_count": 630,
+        "seniors_without_id_pct": 7.5
+      },
+      "social_swo": {
+        "food_insecurity_pct": 21.8,
+        "seniors_without_id_count": 47,
+        "unbanked_pct": 14.2,
+        "digital_wallet_pct": 68.5,
+        "neet_youth_count": 165,
+        "neet_youth_pct": 14.8
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 37.0,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -2.149,
+        "dim2_disaster_shelter_frailty": -0.227,
+        "dim3_basic_utilities_deficit": -0.392,
+        "dim4_demographic_pressure": -0.603
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 35.1,
+        "drrmo_disaster_risk": 3.6,
+        "ceo_infrastructure_deficit": 37.7,
+        "cho_health_risk": 29.8,
+        "swo_social_vulnerability": 26.3
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 88.6,
+        "SDG 2 Zero Hunger": 73.8,
+        "SDG 3 Good Health": 63.7,
+        "SDG 6 Clean Water & Sanitation": 56.4,
+        "SDG 7 Clean Energy": 97.9,
+        "SDG 8 Decent Work": 77.8,
+        "SDG 11 Sustainable Cities": 68.5,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "Santa Cruz",
+      "display_name": "Santa Cruz (Barangay 24)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#3ea6b0",
+      "district": "West-Central Urban",
+      "center": [
+        123.18492,
+        13.62397
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Barangay 25",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 797,
+      "total_population": 3387,
+      "males": 1671,
+      "females": 1716,
+      "avg_household_size": 4.25,
+      "demographics": {
+        "overcrowded_hh_count": 22,
+        "pct_overcrowded": 2.8
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 14.8,
+        "weak_roof_pct": 0.0,
+        "weak_wall_pct": 44.5
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 14.8,
+        "weak_roof_pct": 0.0,
+        "weak_wall_pct": 44.5,
+        "unimproved_toilet_pct": 33.0,
+        "households_needing_sanitation": 263,
+        "drinking_refilling_pct": 19.8,
+        "piped_water_pct": 80.2,
+        "without_electricity_pct": 3.1,
+        "households_needing_electricity": 25
+      },
+      "health_cho": {
+        "pct_overcrowded": 2.8,
+        "food_insecurity_count": 303,
+        "food_insecurity_pct": 38.0,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 33.0,
+        "refilling_station_dependency_pct": 19.8,
+        "seniors_count": 384,
+        "seniors_without_id_pct": 12.5
+      },
+      "social_swo": {
+        "food_insecurity_pct": 38.0,
+        "seniors_without_id_count": 48,
+        "unbanked_pct": 29.4,
+        "digital_wallet_pct": 46.7,
+        "neet_youth_count": 116,
+        "neet_youth_pct": 18.0
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 53.6,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -0.633,
+        "dim2_disaster_shelter_frailty": 0.516,
+        "dim3_basic_utilities_deficit": -0.826,
+        "dim4_demographic_pressure": 0.514
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 50.9,
+        "drrmo_disaster_risk": 0.0,
+        "ceo_infrastructure_deficit": 55.7,
+        "cho_health_risk": 46.4,
+        "swo_social_vulnerability": 39.2
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 76.5,
+        "SDG 2 Zero Hunger": 54.4,
+        "SDG 3 Good Health": 50.5,
+        "SDG 6 Clean Water & Sanitation": 40.6,
+        "SDG 7 Clean Energy": 90.7,
+        "SDG 8 Decent Work": 73.0,
+        "SDG 11 Sustainable Cities": 54.4,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "Tabuco",
+      "display_name": "Tabuco (Barangay 25)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#546c94",
+      "district": "South Riverbank Transport",
+      "center": [
+        123.18462,
+        13.61426
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Barangay 26",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 620,
+      "total_population": 2049,
+      "males": 945,
+      "females": 1104,
+      "avg_household_size": 3.3,
+      "demographics": {
+        "overcrowded_hh_count": 13,
+        "pct_overcrowded": 2.1
+      },
+      "drrm": {
+        "has_hotline": true,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 0,
+        "pct_without_internet": 22.3,
+        "weak_roof_pct": 1.0,
+        "weak_wall_pct": 12.1
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 22.3,
+        "weak_roof_pct": 1.0,
+        "weak_wall_pct": 12.1,
+        "unimproved_toilet_pct": 32.6,
+        "households_needing_sanitation": 202,
+        "drinking_refilling_pct": 70.6,
+        "piped_water_pct": 29.0,
+        "without_electricity_pct": 0.6,
+        "households_needing_electricity": 4
+      },
+      "health_cho": {
+        "pct_overcrowded": 2.1,
+        "food_insecurity_count": 111,
+        "food_insecurity_pct": 17.9,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 32.6,
+        "refilling_station_dependency_pct": 70.6,
+        "seniors_count": 342,
+        "seniors_without_id_pct": 13.2
+      },
+      "social_swo": {
+        "food_insecurity_pct": 17.9,
+        "seniors_without_id_count": 45,
+        "unbanked_pct": 6.3,
+        "digital_wallet_pct": 66.0,
+        "neet_youth_count": 54,
+        "neet_youth_pct": 13.3
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 34.6,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": -2.934,
+        "dim2_disaster_shelter_frailty": 0.719,
+        "dim3_basic_utilities_deficit": 0.099,
+        "dim4_demographic_pressure": -0.717
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 32.9,
+        "drrmo_disaster_risk": 0.8,
+        "ceo_infrastructure_deficit": 50.1,
+        "cho_health_risk": 32.1,
+        "swo_social_vulnerability": 19.7
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 95.0,
+        "SDG 2 Zero Hunger": 78.5,
+        "SDG 3 Good Health": 51.1,
+        "SDG 6 Clean Water & Sanitation": 41.3,
+        "SDG 7 Clean Energy": 98.2,
+        "SDG 8 Decent Work": 80.0,
+        "SDG 11 Sustainable Cities": 70.6,
+        "SDG 13 Climate Action": 100
+      },
+      "real_name": "Tinago",
+      "display_name": "Tinago (Barangay 26)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#356598",
+      "district": "Central East Residential",
+      "center": [
+        123.19363,
+        13.62095
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Barangay 27",
+      "city": "Naga City",
+      "anonymized": true,
+      "total_households": 1648,
+      "total_population": 7020,
+      "males": 3526,
+      "females": 3494,
+      "avg_household_size": 4.26,
+      "demographics": {
+        "overcrowded_hh_count": 264,
+        "pct_overcrowded": 16.0
+      },
+      "drrm": {
+        "has_hotline": false,
+        "has_written_plan": true,
+        "has_response_team": true,
+        "preparedness_gap_score": 40,
+        "pct_without_internet": 24.1,
+        "weak_roof_pct": 1.4,
+        "weak_wall_pct": 36.2
+      },
+      "infrastructure_ceo": {
+        "pct_without_internet": 24.1,
+        "weak_roof_pct": 1.4,
+        "weak_wall_pct": 36.2,
+        "unimproved_toilet_pct": 34.5,
+        "households_needing_sanitation": 568,
+        "drinking_refilling_pct": 25.8,
+        "piped_water_pct": 74.0,
+        "without_electricity_pct": 3.3,
+        "households_needing_electricity": 54
+      },
+      "health_cho": {
+        "pct_overcrowded": 16.0,
+        "food_insecurity_count": 479,
+        "food_insecurity_pct": 29.1,
+        "food_insecurity_flag_outlier": false,
+        "wash_risk_score": 34.5,
+        "refilling_station_dependency_pct": 25.8,
+        "seniors_count": 653,
+        "seniors_without_id_pct": 11.3
+      },
+      "social_swo": {
+        "food_insecurity_pct": 29.1,
+        "seniors_without_id_count": 74,
+        "unbanked_pct": 22.1,
+        "digital_wallet_pct": 62.4,
+        "neet_youth_count": 257,
+        "neet_youth_pct": 17.5
+      },
+      "planning_cpdo": {},
+      "raw_indicators": {},
+      "vulnerability_index": 65.0,
+      "pca_dimensions": {
+        "dim1_economic_insecurity": 0.369,
+        "dim2_disaster_shelter_frailty": 0.508,
+        "dim3_basic_utilities_deficit": 0.906,
+        "dim4_demographic_pressure": -0.29
+      },
+      "sector_scores": {
+        "cpdo_planning_gap": 61.8,
+        "drrmo_disaster_risk": 21.1,
+        "ceo_infrastructure_deficit": 58.4,
+        "cho_health_risk": 41.1,
+        "swo_social_vulnerability": 34.3
+      },
+      "sdg_scores": {
+        "SDG 1 No Poverty": 82.3,
+        "SDG 2 Zero Hunger": 65.1,
+        "SDG 3 Good Health": 48.2,
+        "SDG 6 Clean Water & Sanitation": 37.9,
+        "SDG 7 Clean Energy": 90.1,
+        "SDG 8 Decent Work": 73.8,
+        "SDG 11 Sustainable Cities": 44.8,
+        "SDG 13 Climate Action": 64.0
+      },
+      "real_name": "Triangulo",
+      "display_name": "Triangulo (Barangay 27)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#c9af88",
+      "district": "Diversion & Terminal Hub",
+      "center": [
+        123.19327,
+        13.61168
+      ]
+    }
+  ]
+}

@@ -14,12 +14,25 @@ import {
   Crosshair,
   Sliders,
   Search,
+  Globe,
   Globe2,
   Maximize2,
   Minimize2,
   Box,
   Hexagon,
-  Building2
+  Building2,
+  Store,
+  Landmark,
+  Hospital,
+  Sparkles,
+  ShieldAlert,
+  Flame,
+  Droplets,
+  Activity,
+  Check,
+  Tag,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 
 import geospatialData from "../data/naga_geospatial.json";
@@ -38,6 +51,125 @@ export interface SyncedFieldReport {
 
 export type SpatialRenderMode = "hybrid_spatial" | "prism_choropleth" | "flat_geojson";
 
+// Official 27 Barangays Colors extracted directly from City of Naga Administrative Map (Image 2)
+export const NAGA_ADMIN_COLORS: Record<number, { name: string; hex: string; category: string }> = {
+  1:  { name: "Abella",            hex: "#72b0a8", category: "poblacion" }, // soft teal
+  2:  { name: "Bagumbayan Norte",  hex: "#4a4e82", category: "poblacion" }, // dark slate purple
+  3:  { name: "Bagumbayan Sur",    hex: "#c97793", category: "poblacion" }, // dusty rose
+  4:  { name: "Balatas",           hex: "#c4cf7e", category: "growth" },    // light olive / yellow-green
+  5:  { name: "Calauag",           hex: "#24a549", category: "riverine" },  // emerald green
+  6:  { name: "Cararayan",         hex: "#843b8c", category: "upland" },    // rich purple
+  7:  { name: "Carolina",          hex: "#8682b9", category: "upland" },    // periwinkle lavender
+  8:  { name: "Concepcion Grande", hex: "#43b593", category: "growth" },    // sea green
+  9:  { name: "Concepcion Pequeña",hex: "#a19c43", category: "growth" },    // olive green
+  10: { name: "Dayangdang",        hex: "#9e8e76", category: "poblacion" }, // khaki / warm tan
+  11: { name: "Del Rosario",       hex: "#b3779e", category: "growth" },    // mauve orchid
+  12: { name: "Dinaga",            hex: "#5299b8", category: "cbd" },       // sky blue
+  13: { name: "Igualdad Interior", hex: "#43b087", category: "cbd" },       // mint teal
+  14: { name: "Lerma",             hex: "#7b8c5e", category: "poblacion" }, // sage green
+  15: { name: "Liboton",           hex: "#857f88", category: "poblacion" }, // slate gray
+  16: { name: "Mabolo",            hex: "#4f78aa", category: "riverine" },  // steel blue
+  17: { name: "Pacol",             hex: "#99497e", category: "upland" },    // magenta purple
+  18: { name: "Panicuason",        hex: "#a99438", category: "upland" },    // mustard gold (Isarog)
+  19: { name: "Peñafrancia",       hex: "#b8865d", category: "poblacion" }, // terracotta tan
+  20: { name: "Sabang",            hex: "#a88bc4", category: "riverine" },  // lilac lavender
+  21: { name: "San Felipe",        hex: "#7860aa", category: "riverine" },  // indigo purple
+  22: { name: "San Francisco",     hex: "#a8453a", category: "cbd" },       // crimson brick red
+  23: { name: "San Isidro",        hex: "#80b741", category: "upland" },    // bright apple lime green
+  24: { name: "Santa Cruz",        hex: "#3ea6b0", category: "cbd" },       // bright teal
+  25: { name: "Tabuco",            hex: "#546c94", category: "cbd" },       // slate denim blue
+  26: { name: "Tinago",            hex: "#356598", category: "poblacion" }, // deep ocean blue
+  27: { name: "Triangulo",         hex: "#c9af88", category: "cbd" }        // sand tan / beige
+};
+
+export const NAGA_BARANGAY_NAMES: Record<number, string> = {
+  1: "Abella",
+  2: "Bagumbayan Norte",
+  3: "Bagumbayan Sur",
+  4: "Balatas",
+  5: "Calauag",
+  6: "Cararayan",
+  7: "Carolina",
+  8: "Concepcion Grande",
+  9: "Concepcion Pequeña",
+  10: "Dayangdang",
+  11: "Del Rosario",
+  12: "Dinaga",
+  13: "Igualdad Interior",
+  14: "Lerma",
+  15: "Liboton",
+  16: "Mabolo",
+  17: "Pacol",
+  18: "Panicuason",
+  19: "Peñafrancia",
+  20: "Sabang",
+  21: "San Felipe",
+  22: "San Francisco",
+  23: "San Isidro",
+  24: "Santa Cruz",
+  25: "Tabuco",
+  26: "Tinago",
+  27: "Triangulo"
+};
+
+export const CATEGORIES = [
+  { id: "all", name: "All 27 Barangays", short: "All 27 Brgys", count: 27, color: "#05389f", icon: Globe, description: "All 27 Naga City Administrative Barangays" },
+  { id: "upland", name: "Upland Watershed & Agro-Forestry", short: "Upland Watershed", count: 5, color: "#b59410", icon: Mountain, description: "Mt. Isarog slope, watershed recharge, hot springs eco-tourism & agro-forestry" },
+  { id: "cbd", name: "Central Business District (CBD Core)", short: "CBD Commercial", count: 6, color: "#05389f", icon: Store, description: "CBD I, CBD II, SM City, Bicol Central Bus Terminal & Plaza Rizal/Quezon core" },
+  { id: "poblacion", name: "Poblacion Urban & Heritage Core", short: "Poblacion Heritage", count: 8, color: "#7c3aed", icon: Landmark, description: "Dense historic poblacion, Peñafrancia pilgrimage shrine & civic institutions" },
+  { id: "growth", name: "Suburban Growth & Institutional Corridor", short: "Growth Corridor", count: 4, color: "#0284c7", icon: Hospital, description: "Maharlika Highway southern spine, Bicol Medical Center & emerging commercial belt" },
+  { id: "riverine", name: "Riverine & High Flood-Hazard Delta", short: "Riverine Flood Delta", count: 4, color: "#ea580c", icon: Waves, description: "Bicol River basin, critical river surge hazard & low-lying drainage catchment" }
+];
+
+export const BARANGAY_CATEGORY_LOOKUP: Record<number, { id: string; name: string; short: string; color: string; icon: string }> = {
+  18: { id: "upland", name: "Upland Watershed & Agro-Forestry", short: "Upland Watershed", color: "#b59410", icon: "⛰️" },
+  7:  { id: "upland", name: "Upland Watershed & Agro-Forestry", short: "Upland Watershed", color: "#b59410", icon: "⛰️" },
+  17: { id: "upland", name: "Upland Watershed & Agro-Forestry", short: "Upland Watershed", color: "#b59410", icon: "⛰️" },
+  6:  { id: "upland", name: "Upland Watershed & Agro-Forestry", short: "Upland Watershed", color: "#b59410", icon: "⛰️" },
+  23: { id: "upland", name: "Upland Watershed & Agro-Forestry", short: "Upland Watershed", color: "#b59410", icon: "⛰️" },
+
+  27: { id: "cbd", name: "Central Business District (CBD Core)", short: "CBD Commercial", color: "#05389f", icon: "🏢" },
+  25: { id: "cbd", name: "Central Business District (CBD Core)", short: "CBD Commercial", color: "#05389f", icon: "🏢" },
+  22: { id: "cbd", name: "Central Business District (CBD Core)", short: "CBD Commercial", color: "#05389f", icon: "🏢" },
+  12: { id: "cbd", name: "Central Business District (CBD Core)", short: "CBD Commercial", color: "#05389f", icon: "🏢" },
+  24: { id: "cbd", name: "Central Business District (CBD Core)", short: "CBD Commercial", color: "#05389f", icon: "🏢" },
+  13: { id: "cbd", name: "Central Business District (CBD Core)", short: "CBD Commercial", color: "#05389f", icon: "🏢" },
+
+  9:  { id: "growth", name: "Suburban Growth Corridor", short: "Growth Corridor", color: "#0284c7", icon: "🏥" },
+  8:  { id: "growth", name: "Suburban Growth Corridor", short: "Growth Corridor", color: "#0284c7", icon: "🏥" },
+  11: { id: "growth", name: "Suburban Growth Corridor", short: "Growth Corridor", color: "#0284c7", icon: "🏥" },
+  4:  { id: "growth", name: "Suburban Growth Corridor", short: "Growth Corridor", color: "#0284c7", icon: "🏥" },
+
+  1:  { id: "poblacion", name: "Poblacion Urban Core", short: "Poblacion Heritage", color: "#7c3aed", icon: "🏛️" },
+  26: { id: "poblacion", name: "Poblacion Urban Core", short: "Poblacion Heritage", color: "#7c3aed", icon: "🏛️" },
+  14: { id: "poblacion", name: "Poblacion Urban Core", short: "Poblacion Heritage", color: "#7c3aed", icon: "🏛️" },
+  15: { id: "poblacion", name: "Poblacion Urban Core", short: "Poblacion Heritage", color: "#7c3aed", icon: "🏛️" },
+  10: { id: "poblacion", name: "Poblacion Urban Core", short: "Poblacion Heritage", color: "#7c3aed", icon: "🏛️" },
+  19: { id: "poblacion", name: "Poblacion Urban Core", short: "Poblacion Heritage", color: "#7c3aed", icon: "🏛️" },
+  2:  { id: "poblacion", name: "Poblacion Urban Core", short: "Poblacion Heritage", color: "#7c3aed", icon: "🏛️" },
+  3:  { id: "poblacion", name: "Poblacion Urban Core", short: "Poblacion Heritage", color: "#7c3aed", icon: "🏛️" },
+
+  16: { id: "riverine", name: "Riverine & Flood Delta", short: "Riverine Flood Delta", color: "#ea580c", icon: "🌊" },
+  20: { id: "riverine", name: "Riverine & Flood Delta", short: "Riverine Flood Delta", color: "#ea580c", icon: "🌊" },
+  5:  { id: "riverine", name: "Riverine & Flood Delta", short: "Riverine Flood Delta", color: "#ea580c", icon: "🌊" },
+  21: { id: "riverine", name: "Riverine & Flood Delta", short: "Riverine Flood Delta", color: "#ea580c", icon: "🌊" }
+};
+
+// Subtle spatial offsets for dense downtown cluster to prevent label collision
+const DOWNTOWN_LABEL_OFFSETS: Record<number, [number, number]> = {
+  1:  [0, 0.0007],     // Abella (north)
+  22: [0.0006, 0.0001], // San Francisco (east)
+  13: [-0.0006, -0.0004], // Igualdad (southwest)
+  12: [0.0006, -0.0005],  // Dinaga (southeast)
+  26: [0.0007, 0.0004],   // Tinago (northeast)
+  14: [-0.0006, 0.0004],  // Lerma (northwest)
+  24: [-0.0005, 0.0006],  // Santa Cruz (northwest)
+  20: [-0.0008, -0.0005], // Sabang (southwest)
+  10: [0.0007, -0.0001],  // Dayangdang (east)
+  3:  [0, -0.0006],    // Bagumbayan Sur (south)
+  2:  [0, 0.0007],     // Bagumbayan Norte (north)
+};
+
 interface CesiumViewerProps {
   selectedBarangayId: number;
   onSelectBarangay: (id: number) => void;
@@ -46,17 +178,19 @@ interface CesiumViewerProps {
   fieldReports?: SyncedFieldReport[];
   spatialMode?: SpatialRenderMode;
   onSpatialModeChange?: (mode: SpatialRenderMode) => void;
+  selectedCategoryFilter?: string;
+  onSelectCategory?: (category: string) => void;
 }
 
-type ChoroplethMode =
+export type ChoroplethMode =
+  | "admin_colors"
+  | "category_zones"
   | "vulnerability"
   | "wash_vector"
   | "sanitation"
   | "roof_frailty"
   | "food_insecurity"
   | "unbanked";
-
-type BasemapStyle = "satellite" | "dark" | "osm" | "topo";
 
 declare global {
   interface Window {
@@ -71,39 +205,34 @@ export default function CesiumViewer({
   activeRole,
   calamitySimActive = false,
   fieldReports = [],
-  spatialMode: externalSpatialMode,
-  onSpatialModeChange,
+  selectedCategoryFilter = "all",
+  onSelectCategory
 }: CesiumViewerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<any>(null);
   const prevSelectedIdRef = useRef<number>(selectedBarangayId);
+  const prevCategoryFilterRef = useRef<string>(selectedCategoryFilter);
 
   const [isCesiumLoaded, setIsCesiumLoaded] = useState<boolean>(false);
-  const [basemap, setBasemap] = useState<BasemapStyle>("satellite");
-  const [sceneMode, setSceneMode] = useState<"3D" | "2D" | "COLUMBUS">("3D");
-  const [internalSpatialMode, setInternalSpatialMode] = useState<SpatialRenderMode>("hybrid_spatial");
-  const spatialMode = externalSpatialMode || internalSpatialMode;
-
-  const setSpatialMode = (mode: SpatialRenderMode) => {
-    setInternalSpatialMode(mode);
-    if (onSpatialModeChange) onSpatialModeChange(mode);
-  };
-
   const [choroplethMode, setChoroplethMode] = useState<ChoroplethMode>("vulnerability");
-  const [extrusionScale, setExtrusionScale] = useState<number>(1.0);
-  const [polygonOpacity, setPolygonOpacity] = useState<number>(0.55);
+  const [polygonOpacity] = useState<number>(0.72);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
-  // GeoJSON & 3D Spatial Layer Toggles
+  // Administrative Map Legend & Floating Panels Minimize State
+  const [showAdminLegend, setShowAdminLegend] = useState<boolean>(false);
+  const [isTelemetryMinimized, setIsTelemetryMinimized] = useState<boolean>(false);
+  const [isLayersMinimized, setIsLayersMinimized] = useState<boolean>(true);
+  const [isCameraControlsMinimized, setIsCameraControlsMinimized] = useState<boolean>(false);
+  const [isTwinMinimized, setIsTwinMinimized] = useState<boolean>(false);
+
+  // 2D GeoJSON Layer Toggles (Defaulting to clean 2D Administrative Map on Esri World Imagery)
   const [showBarangayZones, setShowBarangayZones] = useState<boolean>(true);
-  const [showHexHotspots, setShowHexHotspots] = useState<boolean>(true);
-  const [show3DBuildings, setShow3DBuildings] = useState<boolean>(true);
-  const [showFloodHazard, setShowFloodHazard] = useState<boolean>(true);
-  const [showRiverAndRoads, setShowRiverAndRoads] = useState<boolean>(true);
-  const [showFacilities, setShowFacilities] = useState<boolean>(true);
-  const [showActiveProjects, setShowActiveProjects] = useState<boolean>(true);
-  const [showAttributeTable, setShowAttributeTable] = useState<boolean>(false);
-  const [searchFilter, setSearchFilter] = useState<string>("");
+  const [showBarangayLabels, setShowBarangayLabels] = useState<boolean>(true);
+  const [showHexHotspots, setShowHexHotspots] = useState<boolean>(false);
+  const [show3DBuildings, setShow3DBuildings] = useState<boolean>(false);
+  const [showFloodHazard, setShowFloodHazard] = useState<boolean>(false);
+  const [showRiverAndRoads, setShowRiverAndRoads] = useState<boolean>(false);
+  const [showFacilities, setShowFacilities] = useState<boolean>(false);
 
   const [hoveredInfo, setHoveredInfo] = useState<{
     barangayId: number;
@@ -114,7 +243,7 @@ export default function CesiumViewer({
   const [cursorCoords, setCursorCoords] = useState<{ lng: number; lat: number; alt: number }>({
     lng: 123.1948,
     lat: 13.6218,
-    alt: 3800,
+    alt: 11500
   });
 
   const barangays = geospatialData.barangays_geojson.features;
@@ -133,15 +262,6 @@ export default function CesiumViewer({
     const targetId = hoveredInfo?.barangayId || selectedBarangayId;
     return barangays.find((f: any) => f.properties.id === targetId) || selectedFeature;
   }, [barangays, hoveredInfo, selectedBarangayId, selectedFeature]);
-
-  // Sync symbology layer to active department role
-  useEffect(() => {
-    if (activeRole === "ceo") setChoroplethMode("sanitation");
-    else if (activeRole === "drrmo") setChoroplethMode("roof_frailty");
-    else if (activeRole === "cho") setChoroplethMode("wash_vector");
-    else if (activeRole === "swo") setChoroplethMode("unbanked");
-    else setChoroplethMode("vulnerability");
-  }, [activeRole]);
 
   // Load CesiumJS WebGL Engine from official distribution
   useEffect(() => {
@@ -178,85 +298,20 @@ export default function CesiumViewer({
     document.body.appendChild(script);
   }, []);
 
-  // Resolve metric value & CSS color string for each barangay / spatial cluster
-  const getMetricAndColor = useCallback(
-    (props: any, isSelected: boolean, isHovered: boolean) => {
-      let val = props.vulnerability_index ?? props.local_mvi ?? 50;
-      let norm = (val - 20) / 72;
-      let unitLabel = "MVI";
-
-      if (choroplethMode === "wash_vector") {
-        val = props.wash_risk_score ?? props.wash_vector_risk ?? 22;
-        norm = val / 42;
-        unitLabel = "WASH/Vector";
-      } else if (choroplethMode === "sanitation") {
-        val = props.unimproved_toilet_pct ?? (props.sanitation_deficit_hh ? Math.min(45, props.sanitation_deficit_hh / 3) : 15);
-        norm = val / 42;
-        unitLabel = "Sanitation %";
-      } else if (choroplethMode === "roof_frailty") {
-        val = props.weak_roof_pct ?? (props.weak_roof_hh ? Math.min(18, props.weak_roof_hh / 4) : 5);
-        norm = val / 15;
-        unitLabel = "Weak Roof %";
-      } else if (choroplethMode === "food_insecurity") {
-        val = props.food_insecurity_pct ?? (props.food_insecurity_hh ? Math.min(80, props.food_insecurity_hh / 5) : 25);
-        norm = val / 75;
-        unitLabel = "Food Risk %";
-      } else if (choroplethMode === "unbanked") {
-        val = props.unbanked_pct ?? 35;
-        norm = val / 65;
-        unitLabel = "Unbanked %";
-      }
-
-      norm = Math.max(0.1, Math.min(1.0, norm));
-
-      if (isSelected) {
-        return {
-          val,
-          norm,
-          unitLabel,
-          hex: "#0ea5e9",
-          outlineHex: "#ffffff",
-          alpha: Math.min(0.88, polygonOpacity + 0.2),
-        };
-      }
-      if (isHovered) {
-        return {
-          val,
-          norm,
-          unitLabel,
-          hex: "#14b8a6",
-          outlineHex: "#f8fafc",
-          alpha: Math.min(0.82, polygonOpacity + 0.15),
-        };
-      }
-
-      if (norm > 0.72) {
-        return { val, norm, unitLabel, hex: "#e11d48", outlineHex: "#fda4af", alpha: polygonOpacity };
-      }
-      if (norm > 0.48) {
-        return { val, norm, unitLabel, hex: "#d97706", outlineHex: "#fde68a", alpha: polygonOpacity };
-      }
-      if (norm > 0.28) {
-        return { val, norm, unitLabel, hex: "#0284c7", outlineHex: "#7dd3fc", alpha: polygonOpacity };
-      }
-      return { val, norm, unitLabel, hex: "#059669", outlineHex: "#6ee7b7", alpha: polygonOpacity };
-    },
-    [choroplethMode, polygonOpacity]
-  );
-
-  // Initialize Cesium.Viewer instance once CesiumJS is loaded
+  // Initialize Cesium.Viewer in strict 2D Mode with ONLY Esri World Imagery Satellite
   useEffect(() => {
     if (!isCesiumLoaded || !containerRef.current || viewerRef.current) return;
     const Cesium = window.Cesium;
     if (!Cesium) return;
 
-    const satelliteProvider = new Cesium.UrlTemplateImageryProvider({
+    const esriWorldImageryProvider = new Cesium.UrlTemplateImageryProvider({
       url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      maximumLevel: 19,
+      maximumLevel: 19
     });
 
     const viewer = new Cesium.Viewer(containerRef.current, {
-      baseLayer: new Cesium.ImageryLayer(satelliteProvider),
+      sceneMode: Cesium.SceneMode.SCENE2D,
+      baseLayer: new Cesium.ImageryLayer(esriWorldImageryProvider),
       baseLayerPicker: false,
       geocoder: false,
       homeButton: false,
@@ -267,32 +322,29 @@ export default function CesiumViewer({
       fullscreenButton: false,
       infoBox: false,
       selectionIndicator: false,
-      shouldAnimate: true,
+      shouldAnimate: false,
+      requestRenderMode: true,
+      maximumRenderTimeChange: Infinity
     });
-
-    const labelsProvider = new Cesium.UrlTemplateImageryProvider({
-      url: "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-      maximumLevel: 19,
-    });
-    viewer.imageryLayers.addImageryProvider(labelsProvider);
 
     if (viewer.cesiumWidget?.creditContainer) {
       (viewer.cesiumWidget.creditContainer as HTMLElement).style.display = "none";
     }
-    viewer.resolutionScale = window.devicePixelRatio || 1;
+    viewer.resolutionScale = 1.0;
     if (viewer.scene?.postProcessStages?.fxaa) {
-      viewer.scene.postProcessStages.fxaa.enabled = true;
+      viewer.scene.postProcessStages.fxaa.enabled = false;
     }
     viewer.scene.globe.depthTestAgainstTerrain = false;
+    viewer.scene.globe.maximumScreenSpaceError = 2;
 
-    // Initial 3D Spatial Camera View over Naga City Urban Core
+    // Lock camera controls strictly to 2D panning & zooming (no 3D tilt or rotation)
+    viewer.scene.screenSpaceCameraController.enableRotate = false;
+    viewer.scene.screenSpaceCameraController.enableTilt = false;
+    viewer.scene.screenSpaceCameraController.enableLook = false;
+
+    // Initial 2D Top-Down Map View covering all 27 Naga City Barangays
     viewer.camera.setView({
-      destination: Cesium.Cartesian3.fromDegrees(123.1925, 13.591, 3600),
-      orientation: {
-        heading: Cesium.Math.toRadians(0),
-        pitch: Cesium.Math.toRadians(-44),
-        roll: 0.0,
-      },
+      destination: Cesium.Cartesian3.fromDegrees(123.218, 13.628, 13500)
     });
 
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
@@ -318,7 +370,7 @@ export default function CesiumViewer({
         setHoveredInfo({
           barangayId: pickedObject.id.barangayId,
           title: pickedObject.id.name || `Barangay #${pickedObject.id.barangayId}`,
-          subtitle: pickedObject.id.featureSubtitle || "GeoJSON 3D Spatial Feature",
+          subtitle: pickedObject.id.featureSubtitle || "Administrative Barangay"
         });
         if (containerRef.current) containerRef.current.style.cursor = "pointer";
       } else {
@@ -338,73 +390,67 @@ export default function CesiumViewer({
     };
   }, [isCesiumLoaded, onSelectBarangay]);
 
-  // Smooth Camera Fly-To when selectedBarangayId changes externally
+  // Unified 2D Camera Fly-To when Category Filter or selectedBarangayId changes
   useEffect(() => {
-    if (prevSelectedIdRef.current === selectedBarangayId) return;
+    const categoryChanged = prevCategoryFilterRef.current !== selectedCategoryFilter;
+    const barangayChanged = prevSelectedIdRef.current !== selectedBarangayId;
+
+    if (!categoryChanged && !barangayChanged) return;
+
+    prevCategoryFilterRef.current = selectedCategoryFilter;
     prevSelectedIdRef.current = selectedBarangayId;
 
     const viewer = viewerRef.current;
     const Cesium = window.Cesium;
-    if (!viewer || !Cesium || !selectedFeature) return;
-
-    const center = selectedFeature.properties.center;
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(center[0], center[1] - 0.018, 2100),
-      orientation: {
-        heading: Cesium.Math.toRadians(0),
-        pitch: Cesium.Math.toRadians(-46),
-        roll: 0,
-      },
-      duration: 1.1,
-    });
-  }, [selectedBarangayId, selectedFeature]);
-
-  // Switch Basemap Layer
-  useEffect(() => {
-    const viewer = viewerRef.current;
-    const Cesium = window.Cesium;
     if (!viewer || !Cesium) return;
 
-    viewer.imageryLayers.removeAll();
-
-    if (basemap === "satellite") {
-      viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-          url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-          maximumLevel: 19,
-        })
-      );
-      viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-          url: "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-          maximumLevel: 19,
-        })
-      );
-    } else if (basemap === "dark") {
-      viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-          url: "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-          maximumLevel: 19,
-        })
-      );
-    } else if (basemap === "osm") {
-      viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-          url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-          maximumLevel: 19,
-        })
-      );
-    } else if (basemap === "topo") {
-      viewer.imageryLayers.addImageryProvider(
-        new Cesium.UrlTemplateImageryProvider({
-          url: "https://tile.opentopomap.org/{z}/{x}/{y}.png",
-          maximumLevel: 17,
-        })
-      );
+    // If category filter was explicitly changed, pan/zoom in 2D to the category sector
+    if (categoryChanged) {
+      if (selectedCategoryFilter === "all") {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(123.218, 13.628, 13500),
+          duration: 1.0
+        });
+      } else if (selectedCategoryFilter === "upland") {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(123.248, 13.642, 10500),
+          duration: 1.0
+        });
+      } else if (selectedCategoryFilter === "cbd") {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(123.188, 13.620, 4200),
+          duration: 1.0
+        });
+      } else if (selectedCategoryFilter === "poblacion") {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(123.190, 13.628, 5200),
+          duration: 1.0
+        });
+      } else if (selectedCategoryFilter === "growth") {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(123.212, 13.622, 6800),
+          duration: 1.0
+        });
+      } else if (selectedCategoryFilter === "riverine") {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(123.190, 13.620, 6200),
+          duration: 1.0
+        });
+      }
+      return;
     }
-  }, [basemap, isCesiumLoaded]);
 
-  // Render GeoJSON 3D Spatial Layers (Barangay Zones, 3D Hex Hotspot Pillars, 3D Urban Buildings, Flood Basin, Facilities)
+    // Otherwise pan/zoom directly over the selected barangay's true 2D interior centroid
+    if (barangayChanged && selectedFeature) {
+      const center = selectedFeature.properties.center;
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(center[0], center[1], 4500),
+        duration: 0.9
+      });
+    }
+  }, [selectedBarangayId, selectedCategoryFilter, selectedFeature]);
+
+  // Render Pure 2D Spatial Entities on Esri World Imagery Satellite
   useEffect(() => {
     const viewer = viewerRef.current;
     const Cesium = window.Cesium;
@@ -412,285 +458,255 @@ export default function CesiumViewer({
 
     viewer.entities.removeAll();
 
-    // 1. GEOJSON LAYER: Flood Hazard Inundation Basin (3D Water Volume)
+    // 1. 2D LAYER: Flood Hazard Inundation Basin (Flat 2D Polygon)
     if (showFloodHazard || calamitySimActive) {
       const flatCoords: number[] = [];
       floodPolygon.forEach((pt: number[]) => {
         flatCoords.push(pt[0], pt[1]);
       });
 
-      const waterHeight = calamitySimActive ? 78 : 12;
       const waterColor = calamitySimActive
-        ? Cesium.Color.fromCssColorString("#ef4444").withAlpha(0.42)
-        : Cesium.Color.fromCssColorString("#06b6d4").withAlpha(0.22);
+        ? Cesium.Color.fromCssColorString("#ef4444").withAlpha(0.45)
+        : Cesium.Color.fromCssColorString("#06b6d4").withAlpha(0.32);
 
       viewer.entities.add({
         name: "Naga-Bicol River Flood Inundation Zone",
         polygon: {
           hierarchy: Cesium.Cartesian3.fromDegreesArray(flatCoords),
-          height: 1,
-          extrudedHeight: waterHeight,
-          material: waterColor,
-          outline: true,
-          outlineColor: calamitySimActive
-            ? Cesium.Color.fromCssColorString("#fca5a5")
-            : Cesium.Color.fromCssColorString("#22d3ee").withAlpha(0.65),
+          material: waterColor
         },
+        polyline: {
+          positions: Cesium.Cartesian3.fromDegreesArray(flatCoords),
+          width: 2,
+          material: calamitySimActive
+            ? Cesium.Color.fromCssColorString("#fca5a5")
+            : Cesium.Color.fromCssColorString("#22d3ee")
+        }
       });
     }
 
-    // 2. GEOJSON LAYER: Naga River Hydrological Corridor & Arterial Roads
+    // 2. 2D LAYER: Naga River Hydrological Corridor & Arterial Roads
     if (showRiverAndRoads) {
       if (riverPath.length > 0) {
         const riverDegs: number[] = [];
-        riverPath.forEach((c: number[]) => riverDegs.push(c[0], c[1], 8));
+        riverPath.forEach((c: number[]) => riverDegs.push(c[0], c[1]));
         viewer.entities.add({
           name: "Naga River Waterway",
           polyline: {
-            positions: Cesium.Cartesian3.fromDegreesArrayHeights(riverDegs),
-            width: calamitySimActive ? 10 : 6,
-            material: new Cesium.PolylineGlowMaterialProperty({
-              glowPower: 0.25,
-              color: calamitySimActive
-                ? Cesium.Color.fromCssColorString("#f43f5e")
-                : Cesium.Color.fromCssColorString("#38bdf8"),
-            }),
-          },
+            positions: Cesium.Cartesian3.fromDegreesArray(riverDegs),
+            width: calamitySimActive ? 8 : 4,
+            material: calamitySimActive
+              ? Cesium.Color.fromCssColorString("#f43f5e")
+              : Cesium.Color.fromCssColorString("#38bdf8")
+          }
         });
       }
 
       roadNetwork.forEach((road: any) => {
         const roadDegs: number[] = [];
-        road.coordinates.forEach((c: number[]) => roadDegs.push(c[0], c[1], 6));
+        road.coordinates.forEach((c: number[]) => roadDegs.push(c[0], c[1]));
         viewer.entities.add({
           name: road.name,
           polyline: {
-            positions: Cesium.Cartesian3.fromDegreesArrayHeights(roadDegs),
-            width: road.type === "National Primary" ? 3.5 : 2.0,
+            positions: Cesium.Cartesian3.fromDegreesArray(roadDegs),
+            width: road.type === "National Primary" ? 3.0 : 1.8,
             material: Cesium.Color.fromCssColorString(
-              road.type === "National Primary" ? "#f59e0b" : "#94a3b8"
-            ).withAlpha(0.65),
-          },
+              road.type === "National Primary" ? "#fccf17" : "#e2e8f0"
+            ).withAlpha(0.75)
+          }
         });
       });
     }
 
-    // 3. GEOJSON LAYER: 27 Naga City Barangay Boundaries & Choropleth Polygons
+    // 3. 2D LAYER: 27 Naga City Barangays (Flat 2D Contiguous Polygons + Crisp Borders + Centroid Labels)
     if (showBarangayZones) {
       barangays.forEach((feat: any) => {
         const p = feat.properties;
+        const adminData = NAGA_ADMIN_COLORS[p.id] || {
+          name: p.real_name || p.name,
+          hex: p.admin_color || "#05389f",
+          category: p.category || "poblacion"
+        };
+        const realName = adminData.name;
+        const adminColorHex = adminData.hex;
+
+        const catMeta = BARANGAY_CATEGORY_LOOKUP[p.id] || {
+          id: adminData.category,
+          name: p.category_name || "Administrative Barangay",
+          short: p.category_short || "Barangay",
+          color: p.category_color || adminColorHex,
+          icon: "🏛️"
+        };
+
         const isSelected = p.id === selectedBarangayId;
         const isHovered = hoveredInfo?.barangayId === p.id;
-        const sym = getMetricAndColor(p, isSelected, isHovered);
+        const matchesCategory =
+          selectedCategoryFilter === "all" || catMeta.id === selectedCategoryFilter;
 
         const ring = feat.geometry.coordinates[0];
         const flatCoords: number[] = [];
         ring.forEach((c: number[]) => flatCoords.push(c[0], c[1]));
 
-        // In hybrid_spatial mode, keep barangay polygons low (12m) so 3D hex columns & 3D buildings stand out clearly over satellite imagery!
-        // In prism_choropleth mode, extrude the entire barangay polygon up to 350m.
-        const extrudeMeters =
-          spatialMode === "prism_choropleth"
-            ? Math.max(35, Math.round(sym.norm * 340 * extrusionScale)) + (isSelected ? 45 : 0)
-            : spatialMode === "hybrid_spatial"
-            ? isSelected
-              ? 18
-              : 8
-            : 3;
+        // Determine 2D polygon fill color from active ChoroplethMode
+        const mviVal = p.vulnerability_index || 50;
+        const mviColorHex =
+          mviVal >= 70
+            ? "#ef4444" // Red: High risk level
+            : mviVal >= 50
+            ? "#facc15" // Yellow: Medium risk level
+            : "#10b981"; // Green: Low risk level
 
-        const zoneAlpha =
-          spatialMode === "hybrid_spatial"
-            ? isSelected
-              ? 0.38
-              : Math.min(0.26, sym.alpha * 0.48)
-            : sym.alpha;
+        const activeFillHex =
+          choroplethMode === "category_zones"
+            ? catMeta.color
+            : choroplethMode === "vulnerability"
+            ? mviColorHex
+            : adminColorHex;
+
+        // Dim non-matching barangays when category filter is active
+        const zoneAlpha = matchesCategory
+          ? isSelected
+            ? 0.78
+            : polygonOpacity
+          : 0.14;
+
+        const outlineColor = isSelected
+          ? "#fccf17"
+          : isHovered
+          ? "#ffffff"
+          : matchesCategory
+          ? "#ffffff"
+          : "#64748b";
+
+        const labelLng = p.center[0];
+        const labelLat = p.center[1];
 
         viewer.entities.add({
-          name: p.name,
+          name: realName,
           barangayId: p.id,
-          featureSubtitle: `${p.district} • ${p.households.toLocaleString()} HHs`,
-          position: Cesium.Cartesian3.fromDegrees(
-            p.center[0],
-            p.center[1],
-            spatialMode === "prism_choropleth" ? extrudeMeters + 28 : 95
-          ),
+          featureSubtitle: `${catMeta.name} • ${p.households.toLocaleString()} Households`,
+          position: Cesium.Cartesian3.fromDegrees(labelLng, labelLat),
           polygon: {
             hierarchy: Cesium.Cartesian3.fromDegreesArray(flatCoords),
-            height: 2,
-            extrudedHeight: extrudeMeters,
-            material: Cesium.Color.fromCssColorString(sym.hex).withAlpha(zoneAlpha),
-            outline: true,
-            outlineColor: Cesium.Color.fromCssColorString(isSelected ? "#38bdf8" : sym.outlineHex),
-            outlineWidth: isSelected ? 3 : 1.5,
+            material: Cesium.Color.fromCssColorString(activeFillHex).withAlpha(zoneAlpha)
           },
-          label: {
-            text:
-              isSelected || isHovered
-                ? `${p.short_name || p.name}\n${sym.unitLabel}: ${sym.val}`
-                : `${p.short_name || `B${p.id}`}`,
-            font: isSelected || isHovered ? "700 12px Inter, sans-serif" : "600 10.5px Inter, sans-serif",
-            fillColor: Cesium.Color.WHITE,
-            outlineColor: Cesium.Color.fromCssColorString("#0f172a"),
-            outlineWidth: 3,
-            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-            showBackground: true,
-            backgroundColor: isSelected
-              ? Cesium.Color.fromCssColorString("#0284c7").withAlpha(0.92)
-              : Cesium.Color.fromCssColorString("#0f172a").withAlpha(0.82),
-            backgroundPadding: new Cesium.Cartesian2(6, 4),
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 24000),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-          },
+          polyline: {
+            positions: Cesium.Cartesian3.fromDegreesArray(flatCoords),
+            width: isSelected ? 3.5 : matchesCategory ? 1.8 : 1.0,
+            material: Cesium.Color.fromCssColorString(outlineColor).withAlpha(matchesCategory ? 0.95 : 0.35)
+          }
         });
       });
     }
 
-    // 4. GEOJSON LAYER: 81 3D Spatial Hex Hotspot Columns (Dengue / WASH / CBMS Purok Surveillance Pillars)
-    if (showHexHotspots && spatialMode === "hybrid_spatial") {
+    // 4. 2D LAYER: 81 Purok Hex Cells (Flat 2D Hex Grid)
+    if (showHexHotspots) {
       hexClusters.forEach((hexFeat: any) => {
         const hp = hexFeat.properties;
         const isSelected = hp.barangay_id === selectedBarangayId;
-        const isHovered = hoveredInfo?.barangayId === hp.barangay_id;
-        const sym = getMetricAndColor(hp, isSelected, isHovered);
-
         const ring = hexFeat.geometry.coordinates[0];
         const flatCoords: number[] = [];
         ring.forEach((c: number[]) => flatCoords.push(c[0], c[1]));
 
-        const pillarHeight = Math.max(28, Math.round(sym.norm * 240 * extrusionScale)) + (isSelected ? 30 : 0);
+        const hexMvi = hp.local_mvi ?? hp.vulnerability_index ?? 50;
+        const hexColor = isSelected
+          ? "#fccf17"
+          : hexMvi >= 70
+          ? "#f43f5e"
+          : hexMvi >= 50
+          ? "#f59e0b"
+          : "#0284c7";
 
         viewer.entities.add({
           name: hp.zone_name,
           barangayId: hp.barangay_id,
-          featureSubtitle: `3D Spatial Hex • Sanitation: ${hp.sanitation_deficit_hh} HH • Food Risk: ${hp.food_insecurity_hh} HH`,
+          featureSubtitle: `Purok Hex • Local MVI ${hexMvi} • WASH Risk ${hp.wash_vector_risk}%`,
           polygon: {
             hierarchy: Cesium.Cartesian3.fromDegreesArray(flatCoords),
-            height: 10,
-            extrudedHeight: pillarHeight,
-            material: Cesium.Color.fromCssColorString(sym.hex).withAlpha(
-              isSelected ? 0.86 : Math.min(0.78, polygonOpacity + 0.15)
-            ),
-            outline: true,
-            outlineColor: Cesium.Color.fromCssColorString(isSelected ? "#ffffff" : sym.outlineHex),
-            outlineWidth: isSelected ? 2 : 1,
+            material: Cesium.Color.fromCssColorString(hexColor).withAlpha(0.68)
           },
+          polyline: {
+            positions: Cesium.Cartesian3.fromDegreesArray(flatCoords),
+            width: 1.2,
+            material: Cesium.Color.WHITE.withAlpha(0.8)
+          }
         });
       });
     }
 
-    // 5. GEOJSON LAYER: 153 3D Urban Buildings (Structural & Roof Frailty Footprints)
-    if (show3DBuildings && spatialMode !== "flat_geojson") {
+    // 5. 2D LAYER: 162 Building Footprints (Flat 2D Footprints)
+    if (show3DBuildings) {
       buildings.forEach((bFeat: any) => {
         const bp = bFeat.properties;
-        const isSelected = bp.barangay_id === selectedBarangayId;
         const ring = bFeat.geometry.coordinates[0];
         const flatCoords: number[] = [];
         ring.forEach((c: number[]) => flatCoords.push(c[0], c[1]));
 
-        const bColor =
-          bp.building_type.includes("Barangay Hall")
-            ? "#38bdf8"
-            : bp.building_type.includes("Health")
-            ? "#10b981"
-            : bp.structural_risk === "Elevated"
-            ? "#fb7185"
-            : isSelected
-            ? "#e2e8f0"
-            : "#94a3b8";
-
         viewer.entities.add({
           name: `${bp.building_type} (${bp.barangay_name})`,
           barangayId: bp.barangay_id,
-          featureSubtitle: `Height: ${bp.height_m}m • Structural Risk: ${bp.structural_risk}`,
+          featureSubtitle: `Footprint • Risk: ${bp.structural_risk}`,
           polygon: {
             hierarchy: Cesium.Cartesian3.fromDegreesArray(flatCoords),
-            height: 2,
-            extrudedHeight: Math.round(bp.height_m * 1.8 * extrusionScale),
-            material: Cesium.Color.fromCssColorString(bColor).withAlpha(isSelected ? 0.88 : 0.72),
-            outline: true,
-            outlineColor: Cesium.Color.fromCssColorString("#0f172a").withAlpha(0.6),
-          },
+            material: Cesium.Color.fromCssColorString(
+              bp.structural_risk === "Elevated" ? "#f43f5e" : "#94a3b8"
+            ).withAlpha(0.75)
+          }
         });
       });
     }
 
-    // 6. LAYER: Critical Facilities & Evacuation Shelters
+    // 6. 2D LAYER: Critical Facilities, Evacuation Shelters & Synced Mobile Field Reports
     if (showFacilities) {
       facilities.forEach((fac: any) => {
         const markerColor = fac.category.includes("Command")
-          ? "#38bdf8"
+          ? "#05389f"
           : fac.category.includes("Shelter")
-          ? "#f59e0b"
+          ? "#fccf17"
           : "#10b981";
 
         viewer.entities.add({
           name: fac.name,
-          position: Cesium.Cartesian3.fromDegrees(fac.lng, fac.lat, 85),
+          position: Cesium.Cartesian3.fromDegrees(fac.lng, fac.lat),
           point: {
-            pixelSize: 10,
+            pixelSize: 9,
             color: Cesium.Color.fromCssColorString(markerColor),
             outlineColor: Cesium.Color.WHITE,
             outlineWidth: 2,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-          },
-          polyline: {
-            positions: Cesium.Cartesian3.fromDegreesArrayHeights([fac.lng, fac.lat, 2, fac.lng, fac.lat, 85]),
-            width: 1.5,
-            material: Cesium.Color.fromCssColorString(markerColor).withAlpha(0.75),
+            disableDepthTestDistance: Number.POSITIVE_INFINITY
           },
           label: {
-            text: fac.name,
-            font: "600 10px Inter, sans-serif",
-            fillColor: Cesium.Color.fromCssColorString("#f8fafc"),
-            showBackground: true,
-            backgroundColor: Cesium.Color.fromCssColorString("#0f172a").withAlpha(0.88),
-            backgroundPadding: new Cesium.Cartesian2(5, 3),
-            pixelOffset: new Cesium.Cartesian2(0, -16),
-            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 12000),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-          },
+            text: fac.name.split(" (")[0],
+            font: "bold 10px 'Plus Jakarta Sans', Arial, sans-serif",
+            fillColor: Cesium.Color.fromCssColorString("#fccf17"),
+            outlineColor: Cesium.Color.fromCssColorString("#0a1128"),
+            outlineWidth: 3,
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            pixelOffset: new Cesium.Cartesian2(0, -10),
+            disableDepthTestDistance: Number.POSITIVE_INFINITY
+          }
         });
       });
-    }
 
-    // 7. LAYER: Synced Mobile Field Reports
-    if (showActiveProjects) {
-      fieldReports.forEach((rpt, idx) => {
-        const matchedBrgy = barangays.find((b: any) => b.properties.id === rpt.barangay_id);
-        const lng = matchedBrgy ? matchedBrgy.properties.center[0] + 0.0011 * (idx + 1) : rpt.longitude;
-        const lat = matchedBrgy ? matchedBrgy.properties.center[1] + 0.0007 * (idx + 1) : rpt.latitude;
-
+      fieldReports.forEach((rpt) => {
         viewer.entities.add({
-          name: rpt.report_type,
+          name: `${rpt.report_type} (${rpt.barangay_name})`,
           barangayId: rpt.barangay_id,
-          featureSubtitle: rpt.description,
-          position: Cesium.Cartesian3.fromDegrees(lng, lat, 125),
+          featureSubtitle: `${rpt.reporter_role || "Field Unit"} • ${rpt.offline_created_at}`,
+          position: Cesium.Cartesian3.fromDegrees(rpt.longitude, rpt.latitude),
           point: {
-            pixelSize: 11,
-            color: Cesium.Color.fromCssColorString("#10b981"),
+            pixelSize: 10,
+            color: Cesium.Color.fromCssColorString("#ec4899"),
             outlineColor: Cesium.Color.WHITE,
             outlineWidth: 2,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-          },
-          polyline: {
-            positions: Cesium.Cartesian3.fromDegreesArrayHeights([lng, lat, 2, lng, lat, 125]),
-            width: 2,
-            material: Cesium.Color.fromCssColorString("#10b981"),
-          },
-          label: {
-            text: `Field Pin: ${rpt.report_type}`,
-            font: "700 10px Inter, sans-serif",
-            fillColor: Cesium.Color.fromCssColorString("#a7f3d0"),
-            showBackground: true,
-            backgroundColor: Cesium.Color.fromCssColorString("#064e3b").withAlpha(0.92),
-            backgroundPadding: new Cesium.Cartesian2(6, 4),
-            pixelOffset: new Cesium.Cartesian2(0, -16),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-          },
+            disableDepthTestDistance: Number.POSITIVE_INFINITY
+          }
         });
       });
     }
+
+    viewer.scene.requestRender();
   }, [
     isCesiumLoaded,
     barangays,
@@ -701,21 +717,18 @@ export default function CesiumViewer({
     roadNetwork,
     floodPolygon,
     selectedBarangayId,
-    hoveredInfo,
-    spatialMode,
+    selectedCategoryFilter,
     choroplethMode,
-    extrusionScale,
     polygonOpacity,
     showBarangayZones,
+    showBarangayLabels,
     showHexHotspots,
     show3DBuildings,
     showFloodHazard,
     showRiverAndRoads,
     showFacilities,
-    showActiveProjects,
     calamitySimActive,
-    fieldReports,
-    getMetricAndColor,
+    fieldReports
   ]);
 
   const flyToPreset = (preset: "overview" | "river" | "isarog" | "selected") => {
@@ -725,57 +738,28 @@ export default function CesiumViewer({
 
     if (preset === "overview") {
       viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(123.1925, 13.591, 3600),
-        orientation: {
-          heading: Cesium.Math.toRadians(0),
-          pitch: Cesium.Math.toRadians(-44),
-          roll: 0,
-        },
-        duration: 1.2,
+        destination: Cesium.Cartesian3.fromDegrees(123.218, 13.628, 13500),
+        duration: 1.0
       });
     } else if (preset === "river") {
-      onSelectBarangay(3);
+      onSelectBarangay(16);
       viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(123.1865, 13.606, 2100),
-        orientation: {
-          heading: Cesium.Math.toRadians(-10),
-          pitch: Cesium.Math.toRadians(-42),
-          roll: 0,
-        },
-        duration: 1.2,
+        destination: Cesium.Cartesian3.fromDegrees(123.180, 13.619, 4500),
+        duration: 1.0
       });
     } else if (preset === "isarog") {
       onSelectBarangay(18);
       viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(123.245, 13.642, 3400),
-        orientation: {
-          heading: Cesium.Math.toRadians(12),
-          pitch: Cesium.Math.toRadians(-40),
-          roll: 0,
-        },
-        duration: 1.2,
+        destination: Cesium.Cartesian3.fromDegrees(123.285, 13.658, 7500),
+        duration: 1.0
       });
     } else if (preset === "selected") {
       const center = selectedFeature.properties.center;
       viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(center[0], center[1] - 0.018, 2000),
-        orientation: {
-          heading: Cesium.Math.toRadians(0),
-          pitch: Cesium.Math.toRadians(-46),
-          roll: 0,
-        },
-        duration: 1.1,
+        destination: Cesium.Cartesian3.fromDegrees(center[0], center[1], 4500),
+        duration: 0.9
       });
     }
-  };
-
-  const handleSceneModeChange = (mode: "3D" | "2D" | "COLUMBUS") => {
-    setSceneMode(mode);
-    const viewer = viewerRef.current;
-    if (!viewer) return;
-    if (mode === "3D") viewer.scene.morphTo3D(1.0);
-    else if (mode === "2D") viewer.scene.morphTo2D(1.0);
-    else if (mode === "COLUMBUS") viewer.scene.morphToColumbusView(1.0);
   };
 
   const handleZoom = (direction: "in" | "out") => {
@@ -786,423 +770,433 @@ export default function CesiumViewer({
     else viewer.camera.zoomOut(height * 0.4);
   };
 
-  const filteredBarangays = useMemo(() => {
-    return barangays.filter(
-      (b: any) =>
-        b.properties.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        (b.properties.district || "").toLowerCase().includes(searchFilter.toLowerCase())
-    );
-  }, [barangays, searchFilter]);
+  // List of all 27 Barangays for the legend (sorted alphabetically like Image 2)
+  const sortedLegendBarangays = useMemo(() => {
+    return Object.entries(NAGA_ADMIN_COLORS)
+      .map(([idStr, val]) => ({
+        id: Number(idStr),
+        name: val.name,
+        hex: val.hex,
+        category: val.category
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, []);
+
+  const filteredLegendBarangays = useMemo(() => {
+    if (selectedCategoryFilter === "all") return sortedLegendBarangays;
+    return sortedLegendBarangays.filter((b) => b.category === selectedCategoryFilter);
+  }, [sortedLegendBarangays, selectedCategoryFilter]);
 
   return (
     <div
-      className={`relative w-full rounded-xl overflow-hidden border border-slate-800 bg-[#0b0f17] shadow-xl flex flex-col transition-all ${
+      className={`relative w-full rounded-2xl overflow-hidden border border-slate-200/90 bg-slate-900 shadow-md flex flex-col transition-all ${
         isExpanded ? "fixed inset-3 z-50 h-auto" : ""
       }`}
     >
-      {/* Top GIS Control Header */}
-      <div className="bg-[#0f172a] border-b border-slate-800 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 z-30">
+      {/* ─────────────────────────────────────────────────────────────
+          1. TOP 2D SATELLITE GIS COMMAND BAR (ESRI WORLD IMAGERY ONLY)
+         ───────────────────────────────────────────────────────────── */}
+      <div className="bg-white border-b border-slate-200/90 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2.5 z-30 select-none">
         <div className="flex items-center space-x-2.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-teal-400 shadow-sm shadow-teal-400/50" />
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-bold tracking-wide text-white">
-              CesiumJS + GeoJSON 3D Spatial Intelligence
-            </span>
-            <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700 rounded">
-              EPSG:4326 • 27 Barangays • 81 Hex Zones • 153 3D Structures
-            </span>
-            {calamitySimActive && (
-              <span className="px-2 py-0.5 text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded animate-pulse">
-                Flood Surge Level 3 Active
+          <div className="w-8 h-8 rounded-xl bg-[#05389f] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+            <Globe className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-extrabold tracking-tight text-slate-900 font-sans">
+                City of Naga GIS Digital Twin
               </span>
-            )}
+              <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-50 text-[#05389f] border border-blue-200 font-mono">
+                27 Barangays
+              </span>
+              {calamitySimActive && (
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200 rounded-full animate-pulse">
+                  Flood Surge Active
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-slate-500 font-medium">
+              Esri World Imagery • 2D Contiguous CLUP Zoning & Statutory Risk Levels
+            </p>
           </div>
         </div>
 
-        {/* Spatial Mode, Basemap, Symbology & Scene Controls */}
+        {/* 2D Mode Badge, Color Scheme, Legend & Controls */}
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
-          {/* 3D Spatial Render Mode Switcher */}
-          <div className="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5">
-            <button
-              onClick={() => setSpatialMode("hybrid_spatial")}
-              className={`flex items-center space-x-1 px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors cursor-pointer ${
-                spatialMode === "hybrid_spatial"
-                  ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-              title="3D Spatial Hex Clusters + 3D Buildings + GeoJSON Zones"
-            >
-              <Hexagon className="w-3 h-3" />
-              <span>3D Spatial Hex + Buildings</span>
-            </button>
-            <button
-              onClick={() => setSpatialMode("prism_choropleth")}
-              className={`flex items-center space-x-1 px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors cursor-pointer ${
-                spatialMode === "prism_choropleth"
-                  ? "bg-sky-500/20 text-sky-300 border border-sky-500/40"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-              title="QGIS 3D Extruded Barangay Polygons"
-            >
-              <Box className="w-3 h-3" />
-              <span>3D Barangay Prisms</span>
-            </button>
-            <button
-              onClick={() => setSpatialMode("flat_geojson")}
-              className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors cursor-pointer ${
-                spatialMode === "flat_geojson"
-                  ? "bg-sky-500/20 text-sky-300 border border-sky-500/40"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              GeoJSON 2D
-            </button>
-          </div>
-
-          {/* Choropleth / Spatial Metric Selector */}
-          <div className="flex items-center space-x-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1">
-            <Sliders className="w-3.5 h-3.5 text-teal-400" />
-            <select
-              value={choroplethMode}
-              onChange={(e) => setChoroplethMode(e.target.value as ChoroplethMode)}
-              className="bg-transparent text-[11px] font-medium text-slate-200 outline-none cursor-pointer"
-            >
-              <option value="vulnerability" className="bg-slate-900">Metric: PCA Vulnerability (MVI)</option>
-              <option value="wash_vector" className="bg-slate-900">Metric: WASH & Water/Vector Risk</option>
-              <option value="sanitation" className="bg-slate-900">Metric: Sanitation Deficit (%)</option>
-              <option value="roof_frailty" className="bg-slate-900">Metric: Shelter Roof Frailty (%)</option>
-              <option value="food_insecurity" className="bg-slate-900">Metric: Food Insecurity (%)</option>
-              <option value="unbanked" className="bg-slate-900">Metric: Unbanked Households (%)</option>
-            </select>
-          </div>
-
-          {/* Basemap Selector */}
-          <div className="flex items-center space-x-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1">
-            <Globe2 className="w-3.5 h-3.5 text-sky-400" />
-            <select
-              value={basemap}
-              onChange={(e) => setBasemap(e.target.value as BasemapStyle)}
-              className="bg-transparent text-[11px] font-medium text-slate-200 outline-none cursor-pointer"
-            >
-              <option value="satellite" className="bg-slate-900">Esri World Imagery (Satellite)</option>
-              <option value="dark" className="bg-slate-900">CartoDB Dark Matter</option>
-              <option value="osm" className="bg-slate-900">OpenStreetMap Vector</option>
-              <option value="topo" className="bg-slate-900">OpenTopoMap Contours</option>
-            </select>
-          </div>
-
-          {/* Cesium Camera Projection (3D / 2.5D / 2D) */}
-          <div className="hidden md:flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5">
-            {(["3D", "COLUMBUS", "2D"] as const).map((m) => (
+          {/* Color Scheme Switcher: Red/Yellow/Green Risk Levels vs Categories vs 27 Colors */}
+          <div className="flex items-center bg-slate-100 border border-slate-200 rounded-xl p-0.5">
+            {(
+              [
+                { id: "vulnerability", label: "🔴🟡🟢 Risk Levels" },
+                { id: "category_zones", label: "5 Sectors" },
+                { id: "admin_colors", label: "27 Colors" }
+              ] as const
+            ).map((cm) => (
               <button
-                key={m}
-                onClick={() => handleSceneModeChange(m)}
-                className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer ${
-                  sceneMode === m
-                    ? "bg-sky-500/20 text-sky-300 border border-sky-500/40"
-                    : "text-slate-400 hover:text-slate-200"
+                key={cm.id}
+                onClick={() => setChoroplethMode(cm.id)}
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                  choroplethMode === cm.id
+                    ? "bg-white text-slate-900 shadow-2xs font-black"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
+                title={`Color 27 Barangays by ${cm.label}`}
               >
-                {m === "COLUMBUS" ? "2.5D" : m}
+                {cm.label}
               </button>
             ))}
           </div>
 
-          {/* Attribute Table Toggle */}
+          {/* Toggle Legend Button */}
           <button
-            onClick={() => setShowAttributeTable(!showAttributeTable)}
-            className={`flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-medium cursor-pointer transition-colors border ${
-              showAttributeTable
-                ? "bg-sky-500/20 text-sky-300 border-sky-500/40"
-                : "bg-slate-900 text-slate-300 hover:text-white border-slate-700"
+            onClick={() => setShowAdminLegend(!showAdminLegend)}
+            className={`flex items-center space-x-1.5 px-3 py-1 rounded-xl text-[10px] font-bold cursor-pointer transition-all border ${
+              showAdminLegend
+                ? "bg-[#05389f] text-white border-[#05389f]"
+                : "bg-white text-slate-700 hover:bg-slate-50 border-slate-200 shadow-2xs"
             }`}
           >
-            <Table className="w-3.5 h-3.5" />
-            <span>GeoJSON Table</span>
+            <Tag className="w-3 h-3 text-[#05389f]" />
+            <span>Legend</span>
+            {showAdminLegend ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
+          </button>
+
+          {/* Toggle Layers Bar Button */}
+          <button
+            onClick={() => setIsLayersMinimized(!isLayersMinimized)}
+            className={`flex items-center space-x-1.5 px-3 py-1 rounded-xl text-[10px] font-bold cursor-pointer transition-all border ${
+              !isLayersMinimized
+                ? "bg-[#05389f] text-white border-[#05389f]"
+                : "bg-white text-slate-700 hover:bg-slate-50 border-slate-200 shadow-2xs"
+            }`}
+            title={isLayersMinimized ? "Show Layers Dock" : "Minimize Layers Dock"}
+          >
+            <Layers className="w-3 h-3 text-[#05389f]" />
+            <span>Layers</span>
+            {!isLayersMinimized ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
+          </button>
+
+          {/* Minimize / Collapse 2D Satellite Map Viewport */}
+          <button
+            onClick={() => {
+              if (isExpanded) setIsExpanded(false);
+              setIsTwinMinimized(!isTwinMinimized);
+            }}
+            className={`flex items-center space-x-1 px-2.5 py-1 rounded-xl text-[10px] font-bold cursor-pointer transition-all border ${
+              isTwinMinimized
+                ? "bg-amber-100 text-amber-900 border-amber-300"
+                : "bg-white text-slate-700 hover:bg-slate-50 border-slate-200 shadow-2xs"
+            }`}
+            title={isTwinMinimized ? "Restore 2D Map" : "Minimize 2D Map"}
+          >
+            {isTwinMinimized ? (
+              <>
+                <ChevronDown className="w-3.5 h-3.5" />
+                <span>Restore Map</span>
+              </>
+            ) : (
+              <>
+                <ChevronUp className="w-3.5 h-3.5" />
+                <span>Minimize</span>
+              </>
+            )}
           </button>
 
           {/* Expand / Fullscreen Map */}
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white border border-slate-700 cursor-pointer"
-            title={isExpanded ? "Minimize Map" : "Maximize Map"}
+            onClick={() => {
+              if (isTwinMinimized) setIsTwinMinimized(false);
+              setIsExpanded(!isExpanded);
+            }}
+            className="p-1.5 rounded-xl bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-2xs cursor-pointer"
+            title={isExpanded ? "Exit Fullscreen" : "Fullscreen 2D Satellite Map"}
           >
             {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>
 
-      {/* Main CesiumJS WebGL Viewport */}
-      <div className={`relative w-full ${isExpanded ? "flex-1" : "h-[540px]"} bg-[#090d16] overflow-hidden`}>
+      {/* ─────────────────────────────────────────────────────────────
+          2. MAIN 2D SATELLITE MAP VIEWPORT
+         ───────────────────────────────────────────────────────────── */}
+      <div
+        className={`relative w-full ${
+          isTwinMinimized ? "h-0 overflow-hidden" : isExpanded ? "flex-1" : "h-[580px]"
+        } bg-[#0a1128] overflow-hidden transition-all duration-300`}
+      >
         {!isCesiumLoaded && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#090d16] text-slate-300 space-y-2">
-            <div className="w-7 h-7 border-2 border-teal-400 border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs font-medium tracking-wide text-slate-400">
-              Loading CesiumJS 3D Spatial Engine & Naga City GeoJSON Layers...
-            </span>
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#0a1128] text-white space-y-3">
+            <div className="w-8 h-8 border-3 border-[#fccf17] border-t-transparent rounded-full animate-spin" />
+            <div className="text-center">
+              <span className="text-xs font-bold tracking-wide text-white block">
+                Loading Esri World Imagery 2D Satellite Map...
+              </span>
+              <span className="text-[10px] text-white/60">
+                Rendering 27 Barangays with Official City Administrative Colors in 2D
+              </span>
+            </div>
           </div>
         )}
 
         {/* CesiumJS Container */}
         <div ref={containerRef} className="w-full h-full" />
 
-        {/* Top-Left Active Barangay / Hover Spatial Telemetry HUD */}
-        {hoveredFeature && (
-          <div className="absolute top-3 left-3 z-20 bg-slate-900/92 backdrop-blur-md p-3.5 rounded-xl border border-slate-700/80 shadow-2xl w-72">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-teal-400 font-semibold block">
-                  {hoveredInfo ? "Cursor Spatial Inspect" : "Selected Barangay"}
-                </span>
-                <h4 className="text-xs font-bold text-white leading-tight mt-0.5">
-                  {hoveredFeature.properties.name}
-                </h4>
-              </div>
-              <span className="px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[10px] font-mono font-bold shrink-0">
-                MVI {hoveredFeature.properties.vulnerability_index}
-              </span>
-            </div>
+        {/* Top-Left Active Hover Tooltip (Apple Glass Pill) */}
+        {hoveredFeature && hoveredInfo && (
+          <div className="absolute top-3 left-3 z-20 bg-white/95 backdrop-blur-md rounded-xl border border-slate-200/90 shadow-md px-3 py-1.5 flex items-center space-x-2 text-xs text-slate-800 pointer-events-none animate-in fade-in duration-150 select-none">
+            <span
+              className="w-2.5 h-2.5 rounded-full inline-block shrink-0 shadow-2xs"
+              style={{ backgroundColor: NAGA_ADMIN_COLORS[hoveredFeature.properties.id]?.hex || "#05389f" }}
+            />
+            <span className="font-extrabold text-slate-900">
+              {NAGA_ADMIN_COLORS[hoveredFeature.properties.id]?.name || hoveredFeature.properties.name}
+            </span>
+            <span className="text-slate-400">•</span>
+            <span className="font-mono text-[11px] font-bold text-slate-600">
+              MVI {hoveredFeature.properties.vulnerability_index}
+            </span>
+            {(() => {
+              const mvi = hoveredFeature.properties.vulnerability_index || 50;
+              if (mvi >= 70) return <span className="px-1.5 py-0.2 rounded-md bg-rose-100 text-rose-700 font-bold text-[10px]">🔴 High Risk</span>;
+              if (mvi >= 50) return <span className="px-1.5 py-0.2 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px]">🟡 Medium Risk</span>;
+              return <span className="px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[10px]">🟢 Low Risk</span>;
+            })()}
+          </div>
+        )}
 
-            <div className="text-[10px] text-slate-400 mt-1">
-              {hoveredInfo?.subtitle || `${hoveredFeature.properties.district} • Elev ${hoveredFeature.properties.elevation_m}m`}
+        {/* Floating Statutory Risk Level Pill Legend (Clean Apple Glass) */}
+        {choroplethMode === "vulnerability" && (
+          <div className="absolute bottom-3 left-3 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-full px-3.5 py-1.5 flex items-center space-x-3 text-xs text-slate-700 shadow-md select-none">
+            <span className="font-bold text-slate-900 text-[11px]">
+              Risk Levels:
+            </span>
+            <div className="flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#ef4444] shadow-2xs inline-block animate-pulse" />
+              <span className="font-bold text-rose-600 text-[11px]">🔴 High (≥70)</span>
             </div>
-
-            <div className="mt-2.5 pt-2.5 border-t border-slate-800 grid grid-cols-2 gap-2 text-[10px]">
-              <div className="bg-slate-950/60 px-2 py-1 rounded border border-slate-800/80">
-                <span className="text-slate-400 block">Households / Pop</span>
-                <strong className="text-slate-100 font-mono">
-                  {hoveredFeature.properties.households?.toLocaleString()} / {hoveredFeature.properties.population?.toLocaleString()}
-                </strong>
-              </div>
-              <div className="bg-slate-950/60 px-2 py-1 rounded border border-slate-800/80">
-                <span className="text-slate-400 block">WASH / Water Risk</span>
-                <strong className="text-teal-300 font-mono">
-                  {hoveredFeature.properties.wash_risk_score} ({hoveredFeature.properties.refilling_dependency}% Refill)
-                </strong>
-              </div>
-              <div className="bg-slate-950/60 px-2 py-1 rounded border border-slate-800/80">
-                <span className="text-slate-400 block">Sanitation Deficit</span>
-                <strong className="text-amber-300 font-mono">
-                  {hoveredFeature.properties.unimproved_toilet_pct}% ({hoveredFeature.properties.households_needing_sanitation} HH)
-                </strong>
-              </div>
-              <div className="bg-slate-950/60 px-2 py-1 rounded border border-slate-800/80">
-                <span className="text-slate-400 block">Shelter Weak Roof</span>
-                <strong className="text-rose-300 font-mono">
-                  {hoveredFeature.properties.weak_roof_pct}% • Food {hoveredFeature.properties.food_insecurity_pct}%
-                </strong>
-              </div>
+            <div className="flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#facc15] shadow-2xs inline-block" />
+              <span className="font-bold text-amber-600 text-[11px]">🟡 Medium (50–69)</span>
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#10b981] shadow-2xs inline-block" />
+              <span className="font-bold text-emerald-600 text-[11px]">🟢 Low (&lt;50)</span>
             </div>
           </div>
         )}
 
-        {/* Right Floating Camera & Preset Controls */}
-        <div className="absolute top-3 right-3 z-20 flex flex-col space-y-1.5 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-xl border border-slate-700/80 shadow-xl">
+        {/* Right Floating 2D Camera & Preset Controls (Clean Apple Glass) */}
+        <div className="absolute top-3 right-3 z-20 flex flex-col items-center space-y-1 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/90 shadow-md text-slate-700 select-none">
           <button
-            onClick={() => flyToPreset("overview")}
-            className="p-2 rounded-lg hover:bg-slate-800 text-slate-200 cursor-pointer transition-colors"
-            title="Reset Naga City 3D Overview"
+            onClick={() => setIsCameraControlsMinimized(!isCameraControlsMinimized)}
+            className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer transition-colors w-full flex items-center justify-center"
+            title={isCameraControlsMinimized ? "Expand Map Controls" : "Minimize Map Controls"}
           >
-            <Compass className="w-4 h-4 text-teal-400" />
+            {isCameraControlsMinimized ? (
+              <Compass className="w-4 h-4 text-[#05389f]" />
+            ) : (
+              <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+            )}
           </button>
-          <button
-            onClick={() => handleZoom("in")}
-            className="p-2 rounded-lg hover:bg-slate-800 text-slate-200 cursor-pointer transition-colors"
-            title="Zoom In"
-          >
-            <ZoomIn className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => handleZoom("out")}
-            className="p-2 rounded-lg hover:bg-slate-800 text-slate-200 cursor-pointer transition-colors"
-            title="Zoom Out"
-          >
-            <ZoomOut className="w-4 h-4" />
-          </button>
-          <div className="h-px bg-slate-800 my-0.5" />
-          <button
-            onClick={() => flyToPreset("selected")}
-            className="px-2 py-1.5 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/40 text-[10px] font-bold text-teal-300 cursor-pointer"
-            title="Fly to Selected Barangay"
-          >
-            Fly
-          </button>
-          <button
-            onClick={() => flyToPreset("river")}
-            className="p-2 rounded-lg hover:bg-slate-800 text-slate-300 cursor-pointer"
-            title="Fly to Naga River Confluence"
-          >
-            <Waves className="w-4 h-4 text-sky-400" />
-          </button>
-          <button
-            onClick={() => flyToPreset("isarog")}
-            className="p-2 rounded-lg hover:bg-slate-800 text-slate-300 cursor-pointer"
-            title="Fly to Mt. Isarog Slopes"
-          >
-            <Mountain className="w-4 h-4 text-emerald-400" />
-          </button>
+
+          {!isCameraControlsMinimized && (
+            <>
+              <button
+                onClick={() => flyToPreset("overview")}
+                className="p-2 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer transition-colors"
+                title="Reset 2D City Overview"
+              >
+                <Compass className="w-4 h-4 text-[#05389f]" />
+              </button>
+              <button
+                onClick={() => handleZoom("in")}
+                className="p-2 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer transition-colors"
+                title="Zoom In"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleZoom("out")}
+                className="p-2 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer transition-colors"
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              <div className="h-px w-full bg-slate-200 my-0.5" />
+              <button
+                onClick={() => flyToPreset("selected")}
+                className="px-2 py-1 rounded-xl bg-[#05389f] hover:bg-blue-800 text-[10px] font-bold text-white shadow-2xs cursor-pointer"
+                title="Center on Selected Barangay"
+              >
+                Focus
+              </button>
+              <button
+                onClick={() => flyToPreset("river")}
+                className="p-2 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer"
+                title="Pan to Riverine Delta (Mabolo / Bicol River)"
+              >
+                <Waves className="w-4 h-4 text-orange-600" />
+              </button>
+              <button
+                onClick={() => flyToPreset("isarog")}
+                className="p-2 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer"
+                title="Pan to Upland Watershed (Panicuason / Mt. Isarog)"
+              >
+                <Mountain className="w-4 h-4 text-amber-600" />
+              </button>
+            </>
+          )}
         </div>
 
-        {/* Bottom-Left Floating 3D Spatial Extrusion & Legend Control */}
-        <div className="absolute bottom-3 left-3 z-20 bg-slate-900/92 backdrop-blur-md p-3 rounded-xl border border-slate-700/80 shadow-xl space-y-2 w-64">
-          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-200">
-            <span>3D Spatial Height Scale</span>
-            <span className="font-mono text-teal-400">{extrusionScale.toFixed(1)}x</span>
-          </div>
-          <input
-            type="range"
-            min={0.3}
-            max={2.2}
-            step={0.1}
-            value={extrusionScale}
-            onChange={(e) => setExtrusionScale(Number(e.target.value))}
-            className="w-full accent-teal-400 h-1 cursor-pointer"
-          />
-
-          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-200">
-            <span>GeoJSON Layer Opacity</span>
-            <span className="font-mono text-slate-400">{Math.round(polygonOpacity * 100)}%</span>
-          </div>
-          <input
-            type="range"
-            min={0.2}
-            max={0.9}
-            step={0.05}
-            value={polygonOpacity}
-            onChange={(e) => setPolygonOpacity(Number(e.target.value))}
-            className="w-full accent-teal-400 h-1 cursor-pointer"
-          />
-
-          <div className="pt-1.5 border-t border-slate-800 grid grid-cols-2 gap-1.5 text-[10px] text-slate-300">
-            <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-2.5 rounded-xs bg-rose-600 inline-block" />
-              <span>Critical Risk</span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-2.5 rounded-xs bg-amber-600 inline-block" />
-              <span>Elevated Risk</span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-2.5 rounded-xs bg-sky-600 inline-block" />
-              <span>Moderate</span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-2.5 rounded-xs bg-emerald-600 inline-block" />
-              <span>Resilient</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Slide-Over GeoJSON Attribute Table */}
-        {showAttributeTable && (
-          <div className="absolute inset-y-0 right-0 w-full sm:w-[410px] bg-slate-900/98 backdrop-blur-xl border-l border-slate-800 z-30 flex flex-col shadow-2xl">
-            <div className="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+        {/* OFFICIAL 27 BARANGAYS MAP LEGEND (Clean Apple Glass Modal) */}
+        {showAdminLegend && (
+          <div className="absolute bottom-14 inset-x-3 sm:inset-x-6 z-20 bg-white/98 backdrop-blur-md p-4 rounded-2xl border border-slate-200 shadow-2xl text-slate-800 max-h-56 overflow-y-auto animate-in slide-in-from-bottom duration-200">
+            {/* Legend Header */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-100">
               <div className="flex items-center space-x-2">
-                <Table className="w-4 h-4 text-teal-400" />
-                <span className="text-xs font-bold text-slate-100">
-                  GeoJSON Feature Table (27 Naga Barangays)
+                <span className="w-2.5 h-2.5 rounded-full bg-[#05389f] animate-pulse" />
+                <h4 className="text-xs font-extrabold tracking-tight text-slate-900 font-sans">
+                  List of Barangays (City of Naga Administrative Map)
+                </h4>
+                <span className="px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                  {filteredLegendBarangays.length} / 27 Barangays
                 </span>
               </div>
-              <button
-                onClick={() => setShowAttributeTable(false)}
-                className="text-xs text-slate-400 hover:text-white px-2 cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="p-2 bg-slate-950/60 border-b border-slate-800 flex items-center space-x-2">
-              <Search className="w-3.5 h-3.5 text-slate-400 ml-1" />
-              <input
-                type="text"
-                value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
-                placeholder="Search Abella, Mabolo, Concepcion, Triangulo..."
-                className="w-full bg-transparent text-xs text-slate-100 outline-none"
-              />
-            </div>
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-800/60 text-[11px]">
-              {filteredBarangays.map((f: any) => {
-                const p = f.properties;
-                const isSel = p.id === selectedBarangayId;
-                return (
-                  <div
-                    key={p.id}
-                    onClick={() => onSelectBarangay(p.id)}
-                    className={`p-2.5 flex items-center justify-between cursor-pointer transition-colors ${
-                      isSel ? "bg-teal-500/15 border-l-2 border-teal-400" : "hover:bg-slate-800/50"
-                    }`}
-                  >
-                    <div>
-                      <div className="font-semibold text-slate-100 flex items-center space-x-1.5">
-                        <span>{p.name}</span>
-                      </div>
-                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                        {p.households.toLocaleString()} HH • {p.population.toLocaleString()} Pop • WASH {p.wash_risk_score}
-                      </div>
-                    </div>
-                    <span
-                      className={`px-2 py-0.5 rounded font-mono font-semibold text-[10px] ${
-                        p.vulnerability_index > 70
-                          ? "bg-rose-500/15 text-rose-300 border border-rose-500/30"
-                          : p.vulnerability_index > 55
-                          ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
-                          : "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+
+              {/* Category Filter Chips inside Legend */}
+              <div className="flex flex-wrap items-center gap-1">
+                {CATEGORIES.map((cat) => {
+                  const isActive = selectedCategoryFilter === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => {
+                        if (onSelectCategory) onSelectCategory(cat.id);
+                      }}
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
+                        isActive
+                          ? "bg-[#05389f] text-white shadow-xs"
+                          : "bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200"
                       }`}
                     >
-                      {p.vulnerability_index}
-                    </span>
+                      <span>{cat.short}</span>
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={() => setShowAdminLegend(false)}
+                  className="flex items-center space-x-1 px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold cursor-pointer ml-1"
+                  title="Minimize Legend"
+                >
+                  <ChevronDown className="w-3 h-3" />
+                  <span>Close</span>
+                </button>
+              </div>
+            </div>
+
+            {/* List of 27 Barangays Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-x-3 gap-y-1.5 pt-2.5 text-[11px]">
+              {filteredLegendBarangays.map((item) => {
+                const isSelected = selectedBarangayId === item.id;
+                const catInfo = BARANGAY_CATEGORY_LOOKUP[item.id];
+                const swatchColor =
+                  choroplethMode === "category_zones" && catInfo
+                    ? catInfo.color
+                    : item.hex;
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => onSelectBarangay(item.id)}
+                    className={`flex items-center justify-between space-x-1.5 px-2 py-1 rounded-lg cursor-pointer transition-all ${
+                      isSelected
+                        ? "bg-[#05389f] text-white font-bold shadow-xs scale-102"
+                        : "hover:bg-slate-100 text-slate-700"
+                    }`}
+                    title={`Click to focus on ${item.name} (${catInfo?.short || item.category})`}
+                  >
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <span
+                        className="w-3 h-3 rounded-xs shrink-0 border border-slate-300 shadow-2xs"
+                        style={{ backgroundColor: swatchColor }}
+                      />
+                      <span className="truncate leading-none">{item.name}</span>
+                    </div>
+                    {catInfo && (
+                      <span className="text-[9px] shrink-0 opacity-80">{catInfo.icon}</span>
+                    )}
                   </div>
                 );
               })}
             </div>
           </div>
         )}
-      </div>
 
-      {/* Bottom GeoJSON Layer Dock & Coordinate Telemetry Bar */}
-      <div className="px-4 py-2.5 bg-[#0f172a] border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs z-30">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center space-x-1 mr-1">
-            <Layers className="w-3.5 h-3.5 text-teal-400" />
-            <span>GeoJSON Layers:</span>
-          </span>
-
-          {[
-            { label: "Barangay Zones", state: showBarangayZones, toggle: () => setShowBarangayZones(!showBarangayZones) },
-            { label: "3D Hex Hotspots (81)", state: showHexHotspots, toggle: () => setShowHexHotspots(!showHexHotspots) },
-            { label: "3D Buildings (153)", state: show3DBuildings, toggle: () => setShow3DBuildings(!show3DBuildings) },
-            { label: "Flood Basin", state: showFloodHazard, toggle: () => setShowFloodHazard(!showFloodHazard) },
-            { label: "River & Roads", state: showRiverAndRoads, toggle: () => setShowRiverAndRoads(!showRiverAndRoads) },
-            { label: "EOC & Shelters", state: showFacilities, toggle: () => setShowFacilities(!showFacilities) },
-            { label: `Field Pins (${fieldReports.length})`, state: showActiveProjects, toggle: () => setShowActiveProjects(!showActiveProjects) },
-          ].map((layer) => (
-            <button
-              key={layer.label}
-              onClick={layer.toggle}
-              className={`flex items-center space-x-1 px-2.5 py-1 rounded-md text-[10px] font-medium transition-colors cursor-pointer border ${
-                layer.state
-                  ? "bg-teal-500/15 text-teal-300 border-teal-500/30"
-                  : "bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-300"
-              }`}
-            >
-              <span>{layer.label}</span>
-              {layer.state ? <Eye className="w-3 h-3 text-teal-400" /> : <EyeOff className="w-3 h-3" />}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center space-x-3 text-[10px] text-slate-400 font-mono">
-          <span className="flex items-center space-x-1">
-            <Crosshair className="w-3 h-3 text-teal-400" />
+        {/* Collapsed Floating Dock inside 2D Map (Legend & Layers Pills) */}
+        <div className="absolute bottom-3 right-3 z-20 flex items-center space-x-2 pointer-events-none">
+          <div className="pointer-events-auto flex items-center space-x-2 px-3 py-1 rounded-xl bg-white/90 backdrop-blur-md border border-slate-200/90 text-[10px] text-slate-600 font-mono shadow-sm">
+            <Crosshair className="w-3 h-3 text-[#05389f]" />
             <span>
-              {cursorCoords.lat}°N, {cursorCoords.lng}°E • Alt {cursorCoords.alt}m
+              {cursorCoords.lat}°N, {cursorCoords.lng}°E
             </span>
-          </span>
-          <span className="text-slate-200 font-semibold">
-            {selectedFeature.properties.name}
-          </span>
+          </div>
         </div>
       </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          4. BOTTOM 2D GEOJSON LAYER DOCK (MINIMIZABLE APPLE STYLE)
+         ───────────────────────────────────────────────────────────── */}
+      {!isTwinMinimized && !isLayersMinimized && (
+        <div className="px-4 py-2 bg-white border-t border-slate-200/90 flex flex-wrap items-center justify-between gap-2 text-xs z-30 select-none">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              onClick={() => setIsLayersMinimized(true)}
+              className="text-[10px] uppercase font-bold text-slate-500 hover:text-slate-800 tracking-wider flex items-center space-x-1 mr-1 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded-lg cursor-pointer transition-colors"
+              title="Minimize Layers Bar"
+            >
+              <Layers className="w-3.5 h-3.5 text-[#05389f]" />
+              <span>Layers</span>
+              <ChevronDown className="w-3 h-3 text-slate-400" />
+            </button>
+
+            {[
+              { label: "27 Brgy Polygons", state: showBarangayZones, toggle: () => setShowBarangayZones(!showBarangayZones) },
+              { label: "Names", state: showBarangayLabels, toggle: () => setShowBarangayLabels(!showBarangayLabels) },
+              { label: "River & Roads", state: showRiverAndRoads, toggle: () => setShowRiverAndRoads(!showRiverAndRoads) },
+              { label: "2D Hex Grid", state: showHexHotspots, toggle: () => setShowHexHotspots(!showHexHotspots) },
+              { label: "2D Footprints", state: show3DBuildings, toggle: () => setShow3DBuildings(!show3DBuildings) },
+              { label: "Flood Basin", state: showFloodHazard, toggle: () => setShowFloodHazard(!showFloodHazard) },
+              { label: "Facilities", state: showFacilities, toggle: () => setShowFacilities(!showFacilities) },
+            ].map((layer) => (
+              <button
+                key={layer.label}
+                onClick={layer.toggle}
+                className={`flex items-center space-x-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer border ${
+                  layer.state
+                    ? "bg-[#05389f] text-white border-[#05389f] shadow-xs"
+                    : "bg-slate-50 text-slate-500 border-slate-200 hover:text-slate-800"
+                }`}
+              >
+                <span>{layer.label}</span>
+                {layer.state ? <Eye className="w-3 h-3 text-white" /> : <EyeOff className="w-3 h-3" />}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center space-x-3 text-[10px] text-slate-500 font-mono">
+            <span className="text-slate-800 font-bold font-sans">
+              {NAGA_ADMIN_COLORS[selectedFeature.properties.id]?.name || selectedFeature.properties.name}
+            </span>
+            <button
+              onClick={() => setIsLayersMinimized(true)}
+              className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 font-sans font-bold cursor-pointer"
+              title="Minimize Layers Bar"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

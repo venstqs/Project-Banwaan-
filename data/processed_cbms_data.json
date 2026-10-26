@@ -112,7 +112,19 @@
         "SDG 8 Decent Work": 77.8,
         "SDG 11 Sustainable Cities": 50.4,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "Abella",
+      "display_name": "Abella (Barangay 1)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#72b0a8",
+      "district": "Naga River North Bank",
+      "center": [
+        123.17973,
+        13.62665
+      ]
     },
     {
       "id": 2,
@@ -191,7 +203,19 @@
         "SDG 8 Decent Work": 69.2,
         "SDG 11 Sustainable Cities": 58.9,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Bagumbayan Norte",
+      "display_name": "Bagumbayan Norte (Barangay 2)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#4a4e82",
+      "district": "North Urban Corridor",
+      "center": [
+        123.18594,
+        13.63712
+      ]
     },
     {
       "id": 3,
@@ -270,7 +294,19 @@
         "SDG 8 Decent Work": 77.3,
         "SDG 11 Sustainable Cities": 57.8,
         "SDG 13 Climate Action": 19.0
-      }
+      },
+      "real_name": "Bagumbayan Sur",
+      "display_name": "Bagumbayan Sur (Barangay 3)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#c97793",
+      "district": "Naga River Confluence (Lowland)",
+      "center": [
+        123.18479,
+        13.63026
+      ]
     },
     {
       "id": 4,
@@ -349,7 +385,19 @@
         "SDG 8 Decent Work": 68.7,
         "SDG 11 Sustainable Cities": 39.9,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "Balatas",
+      "display_name": "Balatas (Barangay 4)",
+      "category": "growth",
+      "category_name": "Suburban Growth & Institutional Corridor",
+      "category_short": "Growth Corridor",
+      "category_color": "#0284c7",
+      "admin_color": "#c4cf7e",
+      "district": "Magsaysay-Balatas Civic Zone",
+      "center": [
+        123.20467,
+        13.62953
+      ]
     },
     {
       "id": 5,
@@ -428,7 +476,19 @@
         "SDG 8 Decent Work": 75.7,
         "SDG 11 Sustainable Cities": 52.4,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "Calauag",
+      "display_name": "Calauag (Barangay 5)",
+      "category": "riverine",
+      "category_name": "Riverine & High Flood-Hazard Delta",
+      "category_short": "Riverine Flood Delta",
+      "category_color": "#ea580c",
+      "admin_color": "#24a549",
+      "district": "Northwest Residential Belt",
+      "center": [
+        123.19415,
+        13.64107
+      ]
     },
     {
       "id": 6,
@@ -507,7 +567,19 @@
         "SDG 8 Decent Work": 71.0,
         "SDG 11 Sustainable Cities": 40.4,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "Cararayan",
+      "display_name": "Cararayan (Barangay 6)",
+      "category": "upland",
+      "category_name": "Upland Watershed & Agro-Forestry",
+      "category_short": "Upland Watershed",
+      "category_color": "#b59410",
+      "admin_color": "#843b8c",
+      "district": "Mid-Valley Agro-Urban",
+      "center": [
+        123.21993,
+        13.64011
+      ]
     },
     {
       "id": 7,
@@ -586,7 +658,19 @@
         "SDG 8 Decent Work": 72.8,
         "SDG 11 Sustainable Cities": 30.4,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Carolina",
+      "display_name": "Carolina (Barangay 7)",
+      "category": "upland",
+      "category_name": "Upland Watershed & Agro-Forestry",
+      "category_short": "Upland Watershed",
+      "category_color": "#b59410",
+      "admin_color": "#8682b9",
+      "district": "Mt. Isarog Upland West",
+      "center": [
+        123.24527,
+        13.65472
+      ]
     },
     {
       "id": 8,
@@ -665,7 +749,19 @@
         "SDG 8 Decent Work": 72.0,
         "SDG 11 Sustainable Cities": 50.6,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Concepcion Grande",
+      "display_name": "Concepcion Grande (Barangay 8)",
+      "category": "growth",
+      "category_name": "Suburban Growth & Institutional Corridor",
+      "category_short": "Growth Corridor",
+      "category_color": "#0284c7",
+      "admin_color": "#43b593",
+      "district": "Eastern Growth Corridor",
+      "center": [
+        123.21493,
+        13.62259
+      ]
     },
     {
       "id": 9,
@@ -744,7 +840,19 @@
         "SDG 8 Decent Work": 77.7,
         "SDG 11 Sustainable Cities": 54.8,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "Concepcion Peque\u00f1a",
+      "display_name": "Concepcion Peque\u00f1a (Barangay 9)",
+      "category": "growth",
+      "category_name": "Suburban Growth & Institutional Corridor",
+      "category_short": "Growth Corridor",
+      "category_color": "#0284c7",
+      "admin_color": "#a19c43",
+      "district": "Panganiban-City Hall Hub",
+      "center": [
+        123.20298,
+        13.61604
+      ]
     },
     {
       "id": 10,
@@ -823,7 +931,19 @@
         "SDG 8 Decent Work": 82.0,
         "SDG 11 Sustainable Cities": 83.0,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Dayangdang",
+      "display_name": "Dayangdang (Barangay 10)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#9e8e76",
+      "district": "Central Inner Residential",
+      "center": [
+        123.19532,
+        13.62538
+      ]
     },
     {
       "id": 11,
@@ -902,7 +1022,19 @@
         "SDG 8 Decent Work": 73.3,
         "SDG 11 Sustainable Cities": 50.3,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "Del Rosario",
+      "display_name": "Del Rosario (Barangay 11)",
+      "category": "growth",
+      "category_name": "Suburban Growth & Institutional Corridor",
+      "category_short": "Growth Corridor",
+      "category_color": "#0284c7",
+      "admin_color": "#b3779e",
+      "district": "Southeast Highway Gateway",
+      "center": [
+        123.22202,
+        13.61063
+      ]
     },
     {
       "id": 12,
@@ -981,7 +1113,19 @@
         "SDG 8 Decent Work": 61.8,
         "SDG 11 Sustainable Cities": 44.7,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "Dinaga",
+      "display_name": "Dinaga (Barangay 12)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#5299b8",
+      "district": "Centro CBD Commercial Core",
+      "center": [
+        123.18649,
+        13.62039
+      ]
     },
     {
       "id": 13,
@@ -1060,7 +1204,19 @@
         "SDG 8 Decent Work": 76.2,
         "SDG 11 Sustainable Cities": 52.7,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Igualdad Interior",
+      "display_name": "Igualdad Interior (Barangay 13)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#43b087",
+      "district": "Downtown West Riverbank",
+      "center": [
+        123.1813,
+        13.62111
+      ]
     },
     {
       "id": 14,
@@ -1139,7 +1295,19 @@
         "SDG 8 Decent Work": 67.3,
         "SDG 11 Sustainable Cities": 50.4,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Lerma",
+      "display_name": "Lerma (Barangay 14)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#7b8c5e",
+      "district": "Panganiban Commercial West",
+      "center": [
+        123.1905,
+        13.61806
+      ]
     },
     {
       "id": 15,
@@ -1218,7 +1386,19 @@
         "SDG 8 Decent Work": 73.8,
         "SDG 11 Sustainable Cities": 50.1,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Liboton",
+      "display_name": "Liboton (Barangay 15)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#857f88",
+      "district": "North-Central Heritage",
+      "center": [
+        123.191,
+        13.63163
+      ]
     },
     {
       "id": 16,
@@ -1297,7 +1477,19 @@
         "SDG 8 Decent Work": 70.0,
         "SDG 11 Sustainable Cities": 19.2,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Mabolo",
+      "display_name": "Mabolo (Barangay 16)",
+      "category": "riverine",
+      "category_name": "Riverine & High Flood-Hazard Delta",
+      "category_short": "Riverine Flood Delta",
+      "category_color": "#ea580c",
+      "admin_color": "#4f78aa",
+      "district": "Southwest Bicol River Basin",
+      "center": [
+        123.17629,
+        13.61029
+      ]
     },
     {
       "id": 17,
@@ -1376,7 +1568,19 @@
         "SDG 8 Decent Work": 73.2,
         "SDG 11 Sustainable Cities": 54.2,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Pacol",
+      "display_name": "Pacol (Barangay 17)",
+      "category": "upland",
+      "category_name": "Upland Watershed & Agro-Forestry",
+      "category_short": "Upland Watershed",
+      "category_color": "#b59410",
+      "admin_color": "#99497e",
+      "district": "Northeast Upland Terrace",
+      "center": [
+        123.22693,
+        13.65653
+      ]
     },
     {
       "id": 18,
@@ -1455,7 +1659,19 @@
         "SDG 8 Decent Work": 69.0,
         "SDG 11 Sustainable Cities": 19.5,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Panicuason",
+      "display_name": "Panicuason (Barangay 18)",
+      "category": "upland",
+      "category_name": "Upland Watershed & Agro-Forestry",
+      "category_short": "Upland Watershed",
+      "category_color": "#b59410",
+      "admin_color": "#a99438",
+      "district": "Mt. Isarog Forest Park",
+      "center": [
+        123.261,
+        13.66832
+      ]
     },
     {
       "id": 19,
@@ -1534,7 +1750,19 @@
         "SDG 8 Decent Work": 74.7,
         "SDG 11 Sustainable Cities": 58.1,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Pe\u00f1afrancia",
+      "display_name": "Pe\u00f1afrancia (Barangay 19)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#b8865d",
+      "district": "Basilica & Pilgrim District",
+      "center": [
+        123.1971,
+        13.63207
+      ]
     },
     {
       "id": 20,
@@ -1613,7 +1841,19 @@
         "SDG 8 Decent Work": 72.0,
         "SDG 11 Sustainable Cities": 35.1,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "Sabang",
+      "display_name": "Sabang (Barangay 20)",
+      "category": "riverine",
+      "category_name": "Riverine & High Flood-Hazard Delta",
+      "category_short": "Riverine Flood Delta",
+      "category_color": "#ea580c",
+      "admin_color": "#a88bc4",
+      "district": "Western Riverside Market",
+      "center": [
+        123.17514,
+        13.61965
+      ]
     },
     {
       "id": 21,
@@ -1692,7 +1932,19 @@
         "SDG 8 Decent Work": 75.2,
         "SDG 11 Sustainable Cities": 65.8,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "San Felipe",
+      "display_name": "San Felipe (Barangay 21)",
+      "category": "riverine",
+      "category_name": "Riverine & High Flood-Hazard Delta",
+      "category_short": "Riverine Flood Delta",
+      "category_color": "#ea580c",
+      "admin_color": "#7860aa",
+      "district": "North-Central Expansion",
+      "center": [
+        123.2075,
+        13.64287
+      ]
     },
     {
       "id": 22,
@@ -1771,7 +2023,19 @@
         "SDG 8 Decent Work": 76.9,
         "SDG 11 Sustainable Cities": 69.1,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "San Francisco",
+      "display_name": "San Francisco (Barangay 22)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#a8453a",
+      "district": "Centro Cathedral Precinct",
+      "center": [
+        123.18876,
+        13.6252
+      ]
     },
     {
       "id": 23,
@@ -1850,7 +2114,19 @@
         "SDG 8 Decent Work": 74.8,
         "SDG 11 Sustainable Cities": 35.3,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "San Isidro",
+      "display_name": "San Isidro (Barangay 23)",
+      "category": "upland",
+      "category_name": "Upland Watershed & Agro-Forestry",
+      "category_short": "Upland Watershed",
+      "category_color": "#b59410",
+      "admin_color": "#80b741",
+      "district": "Eastern Agro-Residential",
+      "center": [
+        123.23712,
+        13.62925
+      ]
     },
     {
       "id": 24,
@@ -1929,7 +2205,19 @@
         "SDG 8 Decent Work": 77.8,
         "SDG 11 Sustainable Cities": 68.5,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "Santa Cruz",
+      "display_name": "Santa Cruz (Barangay 24)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#3ea6b0",
+      "district": "West-Central Urban",
+      "center": [
+        123.18492,
+        13.62397
+      ]
     },
     {
       "id": 25,
@@ -2008,7 +2296,19 @@
         "SDG 8 Decent Work": 73.0,
         "SDG 11 Sustainable Cities": 54.4,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "Tabuco",
+      "display_name": "Tabuco (Barangay 25)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#546c94",
+      "district": "South Riverbank Transport",
+      "center": [
+        123.18462,
+        13.61426
+      ]
     },
     {
       "id": 26,
@@ -2087,7 +2387,19 @@
         "SDG 8 Decent Work": 80.0,
         "SDG 11 Sustainable Cities": 70.6,
         "SDG 13 Climate Action": 100
-      }
+      },
+      "real_name": "Tinago",
+      "display_name": "Tinago (Barangay 26)",
+      "category": "poblacion",
+      "category_name": "Poblacion Urban & Heritage Core",
+      "category_short": "Poblacion Heritage",
+      "category_color": "#7c3aed",
+      "admin_color": "#356598",
+      "district": "Central East Residential",
+      "center": [
+        123.19363,
+        13.62095
+      ]
     },
     {
       "id": 27,
@@ -2166,7 +2478,19 @@
         "SDG 8 Decent Work": 73.8,
         "SDG 11 Sustainable Cities": 44.8,
         "SDG 13 Climate Action": 64.0
-      }
+      },
+      "real_name": "Triangulo",
+      "display_name": "Triangulo (Barangay 27)",
+      "category": "cbd",
+      "category_name": "Central Business District (CBD Core)",
+      "category_short": "CBD Commercial",
+      "category_color": "#05389f",
+      "admin_color": "#c9af88",
+      "district": "Diversion & Terminal Hub",
+      "center": [
+        123.19327,
+        13.61168
+      ]
     }
   ]
 }
