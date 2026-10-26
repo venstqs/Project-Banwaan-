@@ -1,97 +1,94 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { TYPHOON_ADVISORIES_MULTILINGUAL, NAGA_EMERGENCY_HOTLINES } from '../data/offlineData';
-import { useOffline } from '../context/OfflineContext';
 
 export const ResidentSafetyScreen: React.FC = () => {
-  const { isOnline } = useOffline();
   const [selectedLang, setSelectedLang] = useState<'bikol' | 'filipino' | 'english'>('bikol');
   const advisory = TYPHOON_ADVISORIES_MULTILINGUAL[0];
 
   const handleCallHotline = (service: string, number: string) => {
     const cleanNumber = number.split('/')[0].replace(/[^0-9]/g, '');
     Linking.openURL(`tel:${cleanNumber}`).catch(() => {
-      Alert.alert("Emergency Hotline", `Dialing: ${service}\nNumber: ${number}`);
+      Alert.alert('Emergency Hotline', `Dialing: ${service}\nNumber: ${number}`);
     });
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.badge}>RESIDENT SAFETY & RESILIENCE HUB</Text>
-        <Text style={styles.title}>Naga Emergency Desk</Text>
-        <Text style={styles.subtitle}>Offline-First Calamity Alerts & Barangay Directory</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <View style={styles.headerSection}>
+        <Text style={styles.eyebrow}>RESIDENT SAFETY & RESILIENCE HUB</Text>
+        <Text style={styles.screenTitle}>Naga Emergency Desk</Text>
+        <Text style={styles.screenSubtitle}>Offline-First Calamity Advisories & 1-Tap Hotlines</Text>
       </View>
 
-      {/* Typhoon Advisory Banner with PSA Gold & Deep Red */}
       <View style={styles.advisoryCard}>
-        <View style={styles.advisoryHeader}>
-          <View style={styles.alertIcon} />
-          <Text style={styles.advisoryLevel}>{advisory.level}</Text>
-        </View>
-        <Text style={styles.advisoryTime}>{advisory.time}</Text>
-
-        {/* Language Tabs */}
-        <View style={styles.langTabs}>
-          {(['bikol', 'filipino', 'english'] as const).map((lang) => (
-            <TouchableOpacity
-              key={lang}
-              style={[styles.langTab, selectedLang === lang && styles.langTabActive]}
-              onPress={() => setSelectedLang(lang)}
-            >
-              <Text style={[styles.langTabText, selectedLang === lang && styles.langTabTextActive]}>
-                {lang === 'bikol' ? 'Bikol' : lang === 'filipino' ? 'Filipino' : 'English'}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        <View style={styles.advisoryTopRow}>
+          <View style={styles.alertBadge}>
+            <Ionicons name="warning" size={14} color="#9F1239" />
+            <Text style={styles.alertBadgeText}>{advisory.level}</Text>
+          </View>
+          <Text style={styles.advisoryTime}>{advisory.time}</Text>
         </View>
 
-        {/* Message in Selected Language */}
-        <View style={styles.messageBox}>
-          <Text style={styles.advisoryBody}>{advisory[selectedLang]}</Text>
+        <View style={styles.langSegment}>
+          {(['bikol', 'filipino', 'english'] as const).map((lang) => {
+            const active = selectedLang === lang;
+            return (
+              <TouchableOpacity key={lang} style={[styles.langBtn, active && styles.langBtnActive]} onPress={() => setSelectedLang(lang)} activeOpacity={0.75}>
+                <Text style={[styles.langBtnText, active && styles.langBtnTextActive]}>{lang === 'bikol' ? 'Bikol' : lang === 'filipino' ? 'Filipino' : 'English'}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <View style={styles.advisoryMessageBox}>
+          <Text style={styles.advisoryBodyText}>{advisory[selectedLang]}</Text>
         </View>
       </View>
 
-      {/* Evacuation Centers */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Nearest Evacuation Shelters (Naga City)</Text>
+        <Text style={styles.sectionTitle}>Designated Evacuation Shelters</Text>
+        <Text style={styles.sectionDesc}>Verified Naga City LGU relief facilities</Text>
+
         <View style={styles.shelterCard}>
-          <Text style={styles.shelterName}>Naga City Civic Center Evacuation Complex</Text>
+          <View style={styles.shelterHeader}>
+            <Text style={styles.shelterName}>Naga City Civic Center Complex</Text>
+            <View style={[styles.statusBadge, styles.statusOpen]}>
+              <Text style={styles.statusOpenText}>OPEN</Text>
+            </View>
+          </View>
           <Text style={styles.shelterLocation}>J. Miranda Ave., Concepcion Pequeña</Text>
-          <View style={styles.shelterMeta}>
-            <Text style={styles.shelterStatus}>Status: OPEN & READY</Text>
-            <Text style={styles.shelterCap}>Capacity: 450 / 800</Text>
-          </View>
+          <Text style={styles.shelterCapacity}>Current Occupancy: 450 / 800 persons</Text>
         </View>
+
         <View style={styles.shelterCard}>
-          <Text style={styles.shelterName}>Camarines Sur National High School (East Wing)</Text>
-          <Text style={styles.shelterLocation}>Peñafrancia Ave., Naga City</Text>
-          <View style={styles.shelterMeta}>
-            <Text style={styles.shelterStatus}>Status: ON STANDBY</Text>
-            <Text style={styles.shelterCap}>Capacity: 0 / 1200</Text>
+          <View style={styles.shelterHeader}>
+            <Text style={styles.shelterName}>Camarines Sur National High School</Text>
+            <View style={[styles.statusBadge, styles.statusStandby]}>
+              <Text style={styles.statusStandbyText}>STANDBY</Text>
+            </View>
           </View>
+          <Text style={styles.shelterLocation}>Peñafrancia Ave., Naga City (East Wing)</Text>
+          <Text style={styles.shelterCapacity}>Current Occupancy: 0 / 1,200 persons</Text>
         </View>
       </View>
 
-      {/* Emergency Hotlines */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>1-Tap Offline Emergency Hotlines</Text>
-        <Text style={styles.sectionDesc}>Direct cellular dialing (works even without internet):</Text>
+        <Text style={styles.sectionTitle}>1-Tap Emergency Hotlines</Text>
+        <Text style={styles.sectionDesc}>Works via direct cellular network without internet</Text>
+
         {NAGA_EMERGENCY_HOTLINES.map((h, idx) => (
-          <TouchableOpacity
-            key={idx}
-            style={styles.hotlineCard}
-            onPress={() => handleCallHotline(h.service, h.number)}
-          >
+          <View key={idx} style={styles.hotlineCard}>
             <View style={styles.hotlineInfo}>
               <Text style={styles.hotlineService}>{h.service}</Text>
               <Text style={styles.hotlineNumber}>{h.number}</Text>
             </View>
-            <View style={styles.callButton}>
-              <Text style={styles.callButtonText}>CALL</Text>
-            </View>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.callButton} onPress={() => handleCallHotline(h.service, h.number)} activeOpacity={0.8}>
+              <Ionicons name="call" size={15} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.callButtonText}>Call</Text>
+            </TouchableOpacity>
+          </View>
         ))}
       </View>
     </ScrollView>
@@ -99,36 +96,41 @@ export const ResidentSafetyScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#060e1e' },
-  header: { padding: 20, backgroundColor: '#07152b', borderBottomWidth: 1, borderColor: '#0038a8' },
-  badge: { color: '#fdb813', fontSize: 11, fontWeight: '800', letterSpacing: 1, marginBottom: 4 },
-  title: { color: '#ffffff', fontSize: 22, fontWeight: '900' },
-  subtitle: { color: '#b8bac0', fontSize: 12, marginTop: 2 },
-  advisoryCard: { margin: 16, backgroundColor: '#7f1d1d', padding: 16, borderRadius: 14, borderWidth: 1, borderColor: '#ef4444' },
-  advisoryHeader: { flexDirection: 'row', alignItems: 'center' },
-  alertIcon: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#fdb813', marginRight: 8 },
-  advisoryLevel: { color: '#fecaca', fontSize: 14, fontWeight: '900' },
-  advisoryTime: { color: '#fca5a5', fontSize: 11, marginTop: 2, marginBottom: 12 },
-  langTabs: { flexDirection: 'row', backgroundColor: '#450a0a', padding: 4, borderRadius: 8, marginBottom: 10 },
-  langTab: { flex: 1, paddingVertical: 6, alignItems: 'center', borderRadius: 6 },
-  langTabActive: { backgroundColor: '#0038a8' },
-  langTabText: { color: '#fca5a5', fontSize: 12, fontWeight: '600' },
-  langTabTextActive: { color: '#ffffff', fontWeight: '900' },
-  messageBox: { backgroundColor: '#450a0a', padding: 12, borderRadius: 8 },
-  advisoryBody: { color: '#fff', fontSize: 14, lineHeight: 20 },
-  section: { paddingHorizontal: 16, marginBottom: 16 },
-  sectionTitle: { color: '#ffffff', fontSize: 16, fontWeight: '800', marginBottom: 4 },
-  sectionDesc: { color: '#b8bac0', fontSize: 12, marginBottom: 10 },
-  shelterCard: { backgroundColor: '#07152b', padding: 14, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: '#0038a8' },
-  shelterName: { color: '#ffffff', fontSize: 14, fontWeight: '800' },
-  shelterLocation: { color: '#b8bac0', fontSize: 12, marginTop: 2 },
-  shelterMeta: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
-  shelterStatus: { color: '#10b981', fontSize: 11, fontWeight: '800' },
-  shelterCap: { color: '#fdb813', fontSize: 11, fontWeight: '700' },
-  hotlineCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#07152b', padding: 14, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: '#0038a8' },
-  hotlineInfo: { flex: 1 },
-  hotlineService: { color: '#ffffff', fontSize: 13, fontWeight: '800' },
-  hotlineNumber: { color: '#fdb813', fontSize: 12, marginTop: 2, fontWeight: '700' },
-  callButton: { backgroundColor: '#0038a8', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8, borderWidth: 1, borderColor: '#fdb813' },
-  callButtonText: { color: '#ffffff', fontSize: 12, fontWeight: '900' }
+  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  contentContainer: { paddingBottom: 32 },
+  headerSection: { backgroundColor: '#FFFFFF', paddingHorizontal: 16, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#E2E8F0' },
+  eyebrow: { color: '#E11D48', fontSize: 10, fontWeight: '800', letterSpacing: 0.8, marginBottom: 4 },
+  screenTitle: { color: '#0F172A', fontSize: 22, fontWeight: '800', letterSpacing: -0.4 },
+  screenSubtitle: { color: '#475569', fontSize: 13, fontWeight: '500', marginTop: 2 },
+  advisoryCard: { margin: 16, padding: 16, backgroundColor: '#FFE4E6', borderRadius: 12, borderWidth: 1, borderColor: '#FECDD3' },
+  advisoryTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 6 },
+  alertBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, gap: 6, borderWidth: 1, borderColor: '#FECDD3' },
+  alertBadgeText: { color: '#9F1239', fontSize: 12, fontWeight: '800' },
+  advisoryTime: { color: '#9F1239', fontSize: 11, fontWeight: '700' },
+  langSegment: { flexDirection: 'row', backgroundColor: '#FECDD3', padding: 3, borderRadius: 8, marginBottom: 12 },
+  langBtn: { flex: 1, paddingVertical: 7, alignItems: 'center', borderRadius: 6 },
+  langBtnActive: { backgroundColor: '#FFFFFF' },
+  langBtnText: { color: '#9F1239', fontSize: 12, fontWeight: '600' },
+  langBtnTextActive: { color: '#E11D48', fontWeight: '800' },
+  advisoryMessageBox: { backgroundColor: '#FFFFFF', padding: 14, borderRadius: 8, borderWidth: 1, borderColor: '#FECDD3' },
+  advisoryBodyText: { color: '#1E293B', fontSize: 14, lineHeight: 21, fontWeight: '500' },
+  section: { paddingHorizontal: 16, marginBottom: 20 },
+  sectionTitle: { color: '#0F172A', fontSize: 16, fontWeight: '800' },
+  sectionDesc: { color: '#475569', fontSize: 13, fontWeight: '500', marginTop: 2, marginBottom: 12 },
+  shelterCard: { backgroundColor: '#FFFFFF', padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0', marginBottom: 10 },
+  shelterHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  shelterName: { color: '#0F172A', fontSize: 14, fontWeight: '700', flex: 1, marginRight: 8 },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1 },
+  statusOpen: { backgroundColor: '#D1FAE5', borderColor: '#A7F3D0' },
+  statusOpenText: { color: '#065F46', fontSize: 10, fontWeight: '800' },
+  statusStandby: { backgroundColor: '#FEF9E7', borderColor: '#FDE68A' },
+  statusStandbyText: { color: '#B45309', fontSize: 10, fontWeight: '800' },
+  shelterLocation: { color: '#64748B', fontSize: 12, marginBottom: 6 },
+  shelterCapacity: { color: '#334155', fontSize: 12, fontWeight: '700' },
+  hotlineCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', padding: 14, borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0', marginBottom: 8 },
+  hotlineInfo: { flex: 1, marginRight: 12 },
+  hotlineService: { color: '#0F172A', fontSize: 14, fontWeight: '700' },
+  hotlineNumber: { color: '#2563EB', fontSize: 13, fontWeight: '700', marginTop: 2 },
+  callButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#10B981', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8 },
+  callButtonText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
 });

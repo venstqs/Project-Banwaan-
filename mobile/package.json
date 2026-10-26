@@ -1,7 +1,7 @@
 {
+  "main": "node_modules/expo/AppEntry.js",
   "name": "project-banwaan-mobile",
   "version": "1.0.0",
-  "main": "App.tsx",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -9,8 +9,13 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
     "expo": "^58.0.19",
     "expo-asset": "~58.0.18",
+    "expo-blur": "~58.0.5",
+    "expo-camera": "~58.0.12",
+    "expo-location": "~58.0.19",
+    "expo-sqlite": "~58.0.14",
     "expo-status-bar": "~58.0.4",
     "react": "19.3.0",
     "react-native": "0.88.0"

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { SAMPLE_BARANGAYS_OFFLINE, OfflineBarangay } from '../data/offlineData';
+import { initDB, fetchAllReports, insertReport, markReportSynced } from '../database/schema';
 
 export interface QueuedReport {
   id: string;
@@ -27,26 +28,18 @@ interface OfflineContextType {
 const OfflineContext = createContext<OfflineContextType | undefined>(undefined);
 
 export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isOnline, setIsOnline] = useState<boolean>(false); // Default offline for disaster-first demonstration
+  const [isOnline, setIsOnline] = useState<boolean>(false);
   const [allBarangays] = useState<OfflineBarangay[]>(SAMPLE_BARANGAYS_OFFLINE);
-  const [selectedBarangay, setSelectedBarangay] = useState<OfflineBarangay>(SAMPLE_BARANGAYS_OFFLINE[1]); // Default Barangay 3
-  const [queuedReports, setQueuedReports] = useState<QueuedReport[]>([
-    {
-      id: "OFFLINE-RPT-001",
-      barangayId: 3,
-      barangayName: "Barangay 3",
-      reportType: "Shelter Inspection",
-      description: "Inspected secondary school evacuation facility. Roof flashing intact, generator fuel refilled.",
-      timestamp: "2026-10-26 14:30 PHT",
-      latitude: 13.6218,
-      longitude: 123.1948,
-      isSynced: false
-    }
-  ]);
+  const [selectedBarangay, setSelectedBarangay] = useState<OfflineBarangay>(SAMPLE_BARANGAYS_OFFLINE[1]);
+  const [queuedReports, setQueuedReports] = useState<QueuedReport[]>([]);
 
-  const toggleNetwork = () => {
-    setIsOnline((prev) => !prev);
-  };
+  useEffect(() => {
+    initDB();
+    const reports = fetchAllReports() as any[];
+    setQueuedReports(reports.map(r => ({ ...r, isSynced: r.isSynced === 1 })));
+  }, []);
+
+  const toggleNetwork = () => setIsOnline((prev) => !prev);
 
   const setSelectedBarangayId = (id: number) => {
     const found = allBarangays.find((b) => b.id === id);
@@ -58,29 +51,21 @@ export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...reportData,
       id: `OFFLINE-RPT-${Date.now().toString().slice(-4)}`,
       timestamp: new Date().toLocaleTimeString() + " PHT",
-      isSynced: isOnline // If already online, mark as synced immediately
+      isSynced: isOnline
     };
 
+    insertReport(newReport);
     setQueuedReports((prev) => [newReport, ...prev]);
 
-    // If online, send to server
     if (isOnline) {
       try {
         await fetch('http://localhost:8000/api/mobile/field-report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            barangay_id: newReport.barangayId,
-            barangay_name: newReport.barangayName,
-            report_type: newReport.reportType,
-            description: newReport.description,
-            latitude: newReport.latitude,
-            longitude: newReport.longitude,
-            offline_created_at: newReport.timestamp
-          })
+          body: JSON.stringify(newReport)
         });
       } catch (err) {
-        console.warn("Server unreachable, stored in local offline outbox");
+        console.warn("Server unreachable, kept in SQLite outbox");
       }
     }
   };
@@ -95,16 +80,9 @@ export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ child
             await fetch('http://localhost:8000/api/mobile/field-report', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                barangay_id: rpt.barangayId,
-                barangay_name: rpt.barangayName,
-                report_type: rpt.reportType,
-                description: rpt.description,
-                latitude: rpt.latitude,
-                longitude: rpt.longitude,
-                offline_created_at: rpt.timestamp
-              })
+              body: JSON.stringify(rpt)
             });
+            markReportSynced(rpt.id);
             syncedCount++;
             return { ...rpt, isSynced: true };
           } catch {
@@ -119,18 +97,7 @@ export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   return (
-    <OfflineContext.Provider
-      value={{
-        isOnline,
-        toggleNetwork,
-        queuedReports,
-        submitReport,
-        syncOutbox,
-        selectedBarangay,
-        setSelectedBarangayId,
-        allBarangays
-      }}
-    >
+    <OfflineContext.Provider value={{ isOnline, toggleNetwork, queuedReports, submitReport, syncOutbox, selectedBarangay, setSelectedBarangayId, allBarangays }}>
       {children}
     </OfflineContext.Provider>
   );
