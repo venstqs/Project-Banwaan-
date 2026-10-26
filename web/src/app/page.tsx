@@ -1493,70 +1493,167 @@ export default function ModernCategorizedCommandCenter() {
                               </div>
                             </div>
 
-                            {/* MODERN STATUTORY COPILOT LAUNCHER CARD (Clean & Elegant, replacing crammed AI panel) */}
-                            <div className="bg-[#fbfcfe] rounded-2xl p-3 border border-slate-200/90 shadow-2xs space-y-2.5">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-2.5">
-                                  <div className="w-8 h-8 rounded-xl bg-[#05389f] text-white flex items-center justify-center font-bold shadow-xs shrink-0">
-                                    <Sparkles className="w-4 h-4 text-[#facc15]" />
+                            {/* REVISED GROQ SDG & STATUTORY POLICY AI COPILOT FRAME */}
+                            <div className="bg-gradient-to-b from-[#f8faff] to-white rounded-2xl p-4 border border-[#05389f]/20 shadow-xs space-y-3">
+                              {/* Frame Header: Orb + Groq SDG Policy Badge + Primary Generate Button */}
+                              <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-200/70">
+                                <div className="flex items-center space-x-2.5 min-w-0">
+                                  <div className="w-9 h-9 rounded-2xl bg-[#05389f] text-white flex items-center justify-center shrink-0 shadow-sm border border-[#fccf17]">
+                                    <Sparkles className="w-4 h-4 text-[#fccf17]" />
                                   </div>
-                                  <div>
-                                    <h4 className="text-xs font-bold text-slate-900 leading-tight">
-                                      Statutory Decision Copilot
-                                    </h4>
-                                    <p className="text-[10px] text-slate-500 font-medium">
-                                      Evidence-based reasoning for {selectedBarangay.realName}
+                                  <div className="min-w-0">
+                                    <div className="flex items-center space-x-1.5">
+                                      <h3 className="text-xs font-extrabold text-[#0a1128] truncate">
+                                        Groq SDG &amp; Policy Copilot
+                                      </h3>
+                                      <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        LIVE
+                                      </span>
+                                    </div>
+                                    <p className="text-[10px] text-slate-500 font-medium truncate">
+                                      Grounded in 17 UN SDGs, RA Corpus &amp; POLICY_KNOWLEDGE.md
                                     </p>
                                   </div>
                                 </div>
-                                <span className="text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
-                                  RA 7160 Active
-                                </span>
-                              </div>
 
-                              {/* Quick Action Suggestion Pills */}
-                              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                                 <button
-                                  onClick={() => {
-                                    setIsAiOpen(true);
-                                    executeAiQuery(`Audit ${selectedBarangay.realName} infrastructure deficit against RA 7160`);
-                                  }}
-                                  className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-[10px] font-semibold hover:border-[#05389f] hover:text-[#05389f] transition-all cursor-pointer shadow-2xs"
+                                  onClick={() =>
+                                    executeAiQuery(
+                                      `Synthesize an SDG-aligned policy brief and statutory AIP intervention for ${selectedBarangay.displayName} (${selectedBarangay.category.name}) based on its CBMS indicators.`
+                                    )
+                                  }
+                                  disabled={isAiLoading}
+                                  className="px-3 py-1.5 rounded-xl bg-[#05389f] hover:bg-[#042d82] disabled:opacity-60 text-white text-[11px] font-bold flex items-center space-x-1.5 shadow-xs transition-all cursor-pointer shrink-0"
                                 >
-                                  🏷️ Audit Deficit
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setIsAiOpen(true);
-                                    executeAiQuery("Explain RA 7160 Section 287 statutory requirement for 20% development fund");
-                                  }}
-                                  className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-[10px] font-semibold hover:border-[#05389f] hover:text-[#05389f] transition-all cursor-pointer shadow-2xs"
-                                >
-                                  📄 Explain RA 7160
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setIsAiOpen(true);
-                                    executeAiQuery(`Audit ${selectedBarangay.realName} AIP Ceiling compliance against 20% LDF statutory baseline`);
-                                  }}
-                                  className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-[10px] font-semibold hover:border-[#05389f] hover:text-[#05389f] transition-all cursor-pointer shadow-2xs"
-                                >
-                                  ⚖️ Audit AIP Ceiling
+                                  <Sparkles className={`w-3.5 h-3.5 text-[#fccf17] ${isAiLoading ? "animate-spin" : ""}`} />
+                                  <span>{isAiLoading ? "Synthesizing..." : "Synthesize Policy"}</span>
                                 </button>
                               </div>
 
-                              {/* Prominent Button to Launch Slide-Out Copilot Drawer */}
-                              <button
-                                onClick={() => {
-                                  setIsAiOpen(true);
-                                  executeAiQuery(`Analyze statutory development priority and budget recommendation for ${selectedBarangay.realName}`);
-                                }}
-                                className="w-full py-2.5 rounded-xl bg-[#05389f] hover:bg-[#042d82] text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center space-x-2 shadow-xs group"
-                              >
-                                <Sparkles className="w-3.5 h-3.5 text-[#facc15] group-hover:rotate-12 transition-transform" />
-                                <span>Open Full Statutory Copilot Drawer</span>
-                                <ArrowUpRight className="w-3.5 h-3.5 text-white/80" />
-                              </button>
+                              {/* Quick SDG & Policy Prompt Buttons */}
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <button
+                                  onClick={() =>
+                                    executeAiQuery(
+                                      `Audit ${selectedBarangay.realName} CBMS deficits against the 17 UN SDGs and recommend top statutory priorities.`
+                                    )
+                                  }
+                                  className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs"
+                                >
+                                  🎯 SDG Gap Audit ({selectedBarangay.realName})
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    executeAiQuery(
+                                      `Cite exact RA 7160, RA 10121, and RA 11223 statutory mandates applicable to ${selectedBarangay.realName}'s highest household deficits.`
+                                    )
+                                  }
+                                  className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs"
+                                >
+                                  📜 Statutory Policy Basis
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    executeAiQuery(
+                                      `Draft a 2026 AIP 20% Local Development Fund project ordinance for ${selectedBarangay.realName} with budget and SDG targets.`
+                                    )
+                                  }
+                                  className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs"
+                                >
+                                  ⚖️ Draft AIP Proposal
+                                </button>
+                              </div>
+
+                              {/* Live Inline AI Synthesis Output Box */}
+                              {(() => {
+                                const latestAiMsg = [...chatMessages].reverse().find((m) => m.sender === "ai");
+                                if (!latestAiMsg) return null;
+                                return (
+                                  <div className="p-3 rounded-xl bg-white border border-slate-200/90 space-y-2 text-xs shadow-2xs">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#05389f]">
+                                        Latest Policy &amp; SDG Synthesis
+                                      </span>
+                                      <button
+                                        onClick={() => setIsAiOpen(true)}
+                                        className="text-[10px] font-bold text-slate-500 hover:text-[#05389f] flex items-center space-x-0.5 cursor-pointer"
+                                      >
+                                        <span>Open Full History</span>
+                                        <ArrowUpRight className="w-3 h-3" />
+                                      </button>
+                                    </div>
+
+                                    <p className="text-[11px] text-slate-700 leading-relaxed">
+                                      {latestAiMsg.text}
+                                    </p>
+
+                                    {/* Statutory Citation + SDG Pills */}
+                                    <div className="flex flex-wrap items-center gap-1 pt-1">
+                                      {latestAiMsg.citation && (
+                                        <span className="px-2 py-0.5 rounded-md bg-[#edf3fc] text-[#05389f] font-mono font-bold text-[10px] border border-[#05389f]/20">
+                                          ⚖️ {latestAiMsg.citation}
+                                        </span>
+                                      )}
+                                      {latestAiMsg.sdgs?.map((sdg, idx) => (
+                                        <span
+                                          key={idx}
+                                          className="px-2 py-0.5 rounded-md bg-[#fef9e7] text-[#92400e] font-bold text-[10px] border border-[#fccf17]/50"
+                                        >
+                                          {sdg}
+                                        </span>
+                                      ))}
+                                    </div>
+
+                                    {/* One-Click Queue Draft Proposal if present */}
+                                    {latestAiMsg.proposalDraft && (
+                                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                                        <div className="truncate text-[10px] font-semibold text-slate-600">
+                                          Draft: <strong className="text-slate-900">{latestAiMsg.proposalDraft.project_title}</strong> (₱{latestAiMsg.proposalDraft.estimated_budget_php?.toLocaleString()})
+                                        </div>
+                                        <button
+                                          onClick={() => handleQueueDraftProposal(latestAiMsg.proposalDraft)}
+                                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold shrink-0 cursor-pointer transition-colors"
+                                        >
+                                          + Queue to AIP
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+
+                              {/* Bottom Inset Input Bar */}
+                              <div className="pt-0.5">
+                                <div className="flex items-center bg-white border border-slate-200 rounded-xl pl-3 pr-1.5 py-1.5 focus-within:border-[#05389f] transition-all shadow-2xs">
+                                  <input
+                                    type="text"
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter" && chatInput.trim()) {
+                                        executeAiQuery(chatInput);
+                                      }
+                                    }}
+                                    placeholder={`Ask SDG or policy question for ${selectedBarangay.realName}...`}
+                                    className="flex-1 bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400"
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      if (chatInput.trim()) {
+                                        executeAiQuery(chatInput);
+                                      } else {
+                                        executeAiQuery(`Synthesize statutory priorities and SDG alignment for ${selectedBarangay.realName}`);
+                                      }
+                                    }}
+                                    disabled={isAiLoading}
+                                    className="px-2.5 py-1 rounded-lg bg-[#05389f] hover:bg-[#042d82] disabled:opacity-50 text-white flex items-center space-x-1 text-[11px] font-bold transition-all cursor-pointer shadow-xs shrink-0 ml-1.5"
+                                    title="Send Query to Groq Policy Copilot"
+                                  >
+                                    <span>Ask AI</span>
+                                    <Send className="w-3 h-3 text-[#fccf17]" />
+                                  </button>
+                                </div>
+                              </div>
                             </div>
 
                             {/* Rapid Emergency Hotline Quick-Link */}
