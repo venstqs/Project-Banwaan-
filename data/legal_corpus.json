@@ -1,0 +1,142 @@
+{
+  "statutes": [
+    {
+      "code": "RA 10121",
+      "title": "Philippine Disaster Risk Reduction and Management Act of 2010",
+      "key_sections": [
+        {
+          "section": "Section 12 (c) (6)",
+          "title": "Barangay Disaster Risk Reduction and Management Plan (BDRRMP)",
+          "summary": "Mandates the formulation and implementation of a comprehensive Barangay Disaster Risk Reduction and Management Plan (BDRRMP) integrated into the Barangay Development Plan.",
+          "applicable_offices": ["DRRMO", "CPDO"]
+        },
+        {
+          "section": "Section 21",
+          "title": "Local Disaster Risk Reduction and Management Fund (LDRRMF)",
+          "summary": "Mandates not less than five percent (5%) of estimated revenue from regular sources to support disaster risk management activities, with 30% allocated for Quick Response Fund (QRF).",
+          "applicable_offices": ["DRRMO", "Super Admin"]
+        },
+        {
+          "section": "Section 12 (c) (16)",
+          "title": "Early Warning Systems and Emergency Operations",
+          "summary": "Mandates the establishment of an operating facility to be known as the Barangay Emergency Operations Center (EOC) with functional early warning and hotline capabilities.",
+          "applicable_offices": ["DRRMO"]
+        }
+      ]
+    },
+    {
+      "code": "RA 7160",
+      "title": "Local Government Code of 1991",
+      "key_sections": [
+        {
+          "section": "Section 17",
+          "title": "Basic Services and Facilities",
+          "summary": "Mandates LGUs and barangays to deliver basic services including health, social welfare, infrastructure, solid waste disposal, and disaster response.",
+          "applicable_offices": ["CPDO", "CEO", "CHO", "SWO", "DRRMO", "Super Admin"]
+        },
+        {
+          "section": "Section 287",
+          "title": "Local Development Fund",
+          "summary": "Mandates every LGU to appropriate in its annual budget no less than twenty percent (20%) of its annual Internal Revenue Allotment for development projects (AIP/CDP).",
+          "applicable_offices": ["CPDO", "Super Admin"]
+        },
+        {
+          "section": "Section 389",
+          "title": "Powers and Duties of the Punong Barangay",
+          "summary": "Empowers the Punong Barangay to enforce laws, maintain public order, administer barangay affairs, and coordinate basic service delivery with city departments.",
+          "applicable_offices": ["Barangay Captain", "Super Admin"]
+        }
+      ]
+    },
+    {
+      "code": "RA 9003",
+      "title": "Ecological Solid Waste Management Act of 2000",
+      "key_sections": [
+        {
+          "section": "Section 10",
+          "title": "Role of LGUs in Solid Waste Management",
+          "summary": "Designates segregation and collection of biodegradable, compostable and reusable wastes to the barangay level, while collection of non-recyclable materials is city responsibility.",
+          "applicable_offices": ["CEO", "CPDO"]
+        },
+        {
+          "section": "Section 32",
+          "title": "Establishment of Materials Recovery Facility (MRF)",
+          "summary": "Mandates the establishment of an MRF in every barangay or cluster of barangays for ecological processing of solid waste.",
+          "applicable_offices": ["CEO", "CPDO", "Barangay Captain"]
+        }
+      ]
+    },
+    {
+      "code": "RA 11223",
+      "title": "Universal Health Care Act of 2019",
+      "key_sections": [
+        {
+          "section": "Section 19",
+          "title": "Local Health Systems and Primary Care Networks",
+          "summary": "Directs provinces and highly urbanized cities to integrate health systems into Province-Wide and City-Wide Health Systems, prioritizing primary care and disease surveillance.",
+          "applicable_offices": ["CHO"]
+        },
+        {
+          "section": "Section 22",
+          "title": "Health Human Resources & Community Health Workers",
+          "summary": "Ensures adequate deployment of Barangay Health Workers (BHWs) and sanitary inspectors to monitor WASH compliance and maternal-child health.",
+          "applicable_offices": ["CHO"]
+        }
+      ]
+    },
+    {
+      "code": "PD 1096",
+      "title": "National Building Code of the Philippines",
+      "key_sections": [
+        {
+          "section": "Section 214",
+          "title": "Dangerous and Ruinous Buildings and Structures",
+          "summary": "Empowers the City Engineer/Building Official to inspect, declare, and order repair or condemnation of structures posing structural, fire, or seismic hazards.",
+          "applicable_offices": ["CEO"]
+        },
+        {
+          "section": "Section 301",
+          "title": "Building Permits and Structural Integrity Standards",
+          "summary": "Mandates adherence to minimum structural design standards for walls, roofs, and foundations to withstand extreme weather events.",
+          "applicable_offices": ["CEO", "CPDO"]
+        }
+      ]
+    },
+    {
+      "code": "RA 11310",
+      "title": "Pantawid Pamilyang Pilipino Program (4Ps) Act",
+      "key_sections": [
+        {
+          "section": "Section 4",
+          "title": "Selection of Qualified Household Beneficiaries",
+          "summary": "Establishes standardized targeting systems utilizing CBMS poverty and vulnerability criteria to identify eligible households for education and health cash grants.",
+          "applicable_offices": ["SWO"]
+        },
+        {
+          "section": "Section 13",
+          "title": "Convergence of Social Welfare Programs",
+          "summary": "Directs national agencies and LGUs to coordinate social assistance, livelihood (AICS/SLP), and skills training to ensure long-term self-sufficiency.",
+          "applicable_offices": ["SWO"]
+        }
+      ]
+    },
+    {
+      "code": "RA 10173",
+      "title": "Data Privacy Act of 2012",
+      "key_sections": [
+        {
+          "section": "Section 12",
+          "title": "Criteria for Lawful Processing of Personal Information",
+          "summary": "Requires strict safeguards, anonymization, and aggregation when processing statistical data for public governance to prevent identification of individual households.",
+          "applicable_offices": ["Super Admin", "CPDO", "PSA"]
+        },
+        {
+          "section": "Section 20",
+          "title": "Security of Personal Information",
+          "summary": "Mandates organizational, physical, and technical measures to protect sensitive data, enforcing row-level access control across municipal departments.",
+          "applicable_offices": ["Super Admin", "All Offices"]
+        }
+      ]
+    }
+  ]
+}

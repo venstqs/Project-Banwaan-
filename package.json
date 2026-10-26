@@ -1,0 +1,23 @@
+{
+  "name": "innolab-hackathon-banwaan",
+  "version": "1.0.0",
+  "main": "App.tsx",
+  "description": "Project Banwaan - Dual Platform Architecture (Next.js Web Command Center + React Native Expo Mobile App)",
+  "scripts": {
+    "start": "expo start",
+    "mobile": "expo start -c",
+    "web": "npm --prefix web run dev",
+    "server": "python -m uvicorn server.main:app --host 127.0.0.1 --port 8000 --reload"
+  },
+  "dependencies": {
+    "expo": "^58.0.19",
+    "expo-asset": "~58.0.18",
+    "expo-status-bar": "~58.0.4",
+    "react": "19.3.1",
+    "react-native": "0.88.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.3.0",
+    "typescript": "~6.0.3"
+  }
+}

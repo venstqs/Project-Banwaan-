@@ -1,0 +1,169 @@
+{
+  "sdgs": [
+    {
+      "code": "SDG 1",
+      "title": "No Poverty",
+      "description": "End poverty in all its forms everywhere.",
+      "targets": [
+        { "code": "1.1", "description": "Eradicate extreme poverty for all people everywhere." },
+        { "code": "1.2", "description": "Reduce at least by half the proportion of people living in poverty." },
+        { "code": "1.3", "description": "Implement nationally appropriate social protection systems and measures (4Ps, social pensions)." },
+        { "code": "1.4", "description": "Ensure all men and women have equal rights to economic resources, basic services, and ownership of property." }
+      ],
+      "primary_offices": ["SWO", "CPDO"],
+      "cbms_indicators": ["Informal employment", "Food insecurity experience", "Residence tenure status", "Financial account"]
+    },
+    {
+      "code": "SDG 2",
+      "title": "Zero Hunger",
+      "description": "End hunger, achieve food security and improved nutrition, and promote sustainable agriculture.",
+      "targets": [
+        { "code": "2.1", "description": "End hunger and ensure access by all people to safe, nutritious and sufficient food all year round." },
+        { "code": "2.2", "description": "End all forms of malnutrition, including addressing the nutritional needs of adolescent girls and children." }
+      ],
+      "primary_offices": ["CHO", "SWO"],
+      "cbms_indicators": ["Food insecurity experience", "Farmers and farm workers", "Fisherfolk and fish workers"]
+    },
+    {
+      "code": "SDG 3",
+      "title": "Good Health and Well-Being",
+      "description": "Ensure healthy lives and promote well-being for all at all ages.",
+      "targets": [
+        { "code": "3.8", "description": "Achieve universal health coverage, including financial risk protection and access to quality healthcare services." },
+        { "code": "3.9", "description": "Substantially reduce the number of deaths and illnesses from hazardous chemicals and air, water and soil pollution." }
+      ],
+      "primary_offices": ["CHO"],
+      "cbms_indicators": ["Medical treatment nonavailment", "Senior citizen ID", "Reliance on clean fuel", "Handwashing facility", "Drinking water service level"]
+    },
+    {
+      "code": "SDG 4",
+      "title": "Quality Education",
+      "description": "Ensure inclusive and equitable quality education and promote lifelong learning opportunities for all.",
+      "targets": [
+        { "code": "4.1", "description": "Ensure that all girls and boys complete free, equitable and quality primary and secondary education." },
+        { "code": "4.3", "description": "Ensure equal access for all women and men to affordable and quality technical, vocational and tertiary education." }
+      ],
+      "primary_offices": ["SWO", "CPDO"],
+      "cbms_indicators": ["Schooling status of 3-24yo", "Not schooling reason of 16-21yo", "SHS graduate not in school", "Child labor"]
+    },
+    {
+      "code": "SDG 5",
+      "title": "Gender Equality",
+      "description": "Achieve gender equality and empower all women and girls.",
+      "targets": [
+        { "code": "5.5", "description": "Ensure women's full and effective participation and equal opportunities for leadership at all levels of decision-making." }
+      ],
+      "primary_offices": ["SWO", "CPDO"],
+      "cbms_indicators": ["Employed managers", "Key employment statistics", "Population by sex", "SDG 5.5.2"]
+    },
+    {
+      "code": "SDG 6",
+      "title": "Clean Water and Sanitation",
+      "description": "Ensure availability and sustainable management of water and sanitation for all.",
+      "targets": [
+        { "code": "6.1", "description": "Achieve universal and equitable access to safe and affordable drinking water for all." },
+        { "code": "6.2", "description": "Achieve access to adequate and equitable sanitation and hygiene for all and end open defecation." }
+      ],
+      "primary_offices": ["CEO", "CHO"],
+      "cbms_indicators": ["Main source of drinking water", "Drinking water service level", "Toilet facility", "Toilet facility service level", "Handwashing facility"]
+    },
+    {
+      "code": "SDG 7",
+      "title": "Affordable and Clean Energy",
+      "description": "Ensure access to affordable, reliable, sustainable and modern energy for all.",
+      "targets": [
+        { "code": "7.1", "description": "Ensure universal access to affordable, reliable and modern energy services." }
+      ],
+      "primary_offices": ["CEO"],
+      "cbms_indicators": ["Access to electricity", "Reliance on clean fuel", "Fuel for cooking"]
+    },
+    {
+      "code": "SDG 8",
+      "title": "Decent Work and Economic Growth",
+      "description": "Promote sustained, inclusive and sustainable economic growth, full and productive employment and decent work.",
+      "targets": [
+        { "code": "8.5", "description": "Achieve full and productive employment and decent work for all women and men." },
+        { "code": "8.6", "description": "Substantially reduce the proportion of youth not in employment, education or training (NEET)." },
+        { "code": "8.7", "description": "Take immediate and effective measures to eradicate forced labour and child labor." }
+      ],
+      "primary_offices": ["SWO", "CPDO"],
+      "cbms_indicators": ["Labor force participation (LFP)", "Key employment statistics", "Youth engagement", "Child labor", "Informal employment"]
+    },
+    {
+      "code": "SDG 9",
+      "title": "Industry, Innovation and Infrastructure",
+      "description": "Build resilient infrastructure, promote inclusive and sustainable industrialization and foster innovation.",
+      "targets": [
+        { "code": "9.1", "description": "Develop quality, reliable, sustainable and resilient infrastructure." },
+        { "code": "9.c", "description": "Significantly increase access to information and communications technology." }
+      ],
+      "primary_offices": ["CEO", "CPDO"],
+      "cbms_indicators": ["Building type", "Access to internet", "Network signal", "Manufacturing Industry"]
+    },
+    {
+      "code": "SDG 10",
+      "title": "Reduced Inequalities",
+      "description": "Reduce inequality within and among countries and sub-national territories.",
+      "targets": [
+        { "code": "10.2", "description": "Empower and promote the social, economic and political inclusion of all, irrespective of age, sex, disability." }
+      ],
+      "primary_offices": ["SWO", "CPDO"],
+      "cbms_indicators": ["Financial account", "Population by ethnicity", "Senior citizen ID"]
+    },
+    {
+      "code": "SDG 11",
+      "title": "Sustainable Cities and Communities",
+      "description": "Make cities and human settlements inclusive, safe, resilient and sustainable.",
+      "targets": [
+        { "code": "11.1", "description": "Ensure access for all to adequate, safe and affordable housing and basic services and upgrade slums." },
+        { "code": "11.2", "description": "Provide access to safe, affordable, accessible and sustainable transport systems for all." },
+        { "code": "11.5", "description": "Significantly reduce the number of deaths and the number of people affected by disasters." },
+        { "code": "11.6", "description": "Reduce the adverse per capita environmental impact of cities, including municipal waste management." }
+      ],
+      "primary_offices": ["CPDO", "DRRMO", "CEO"],
+      "cbms_indicators": ["Roof material strength", "Outer wall material strength", "Overcrowding status", "Public transportation", "Waste collection", "DRRM"]
+    },
+    {
+      "code": "SDG 12",
+      "title": "Responsible Consumption and Production",
+      "description": "Ensure sustainable consumption and production patterns.",
+      "targets": [
+        { "code": "12.5", "description": "Substantially reduce waste generation through prevention, reduction, recycling and reuse." }
+      ],
+      "primary_offices": ["CEO", "CPDO"],
+      "cbms_indicators": ["Waste collection"]
+    },
+    {
+      "code": "SDG 13",
+      "title": "Climate Action",
+      "description": "Take urgent action to combat climate change and its impacts.",
+      "targets": [
+        { "code": "13.1", "description": "Strengthen resilience and adaptive capacity to climate-related hazards and natural disasters." },
+        { "code": "13.3", "description": "Improve education, awareness-raising and human and institutional capacity on climate change mitigation and adaptation." }
+      ],
+      "primary_offices": ["DRRMO"],
+      "cbms_indicators": ["DRRM", "Network signal", "Building type"]
+    },
+    {
+      "code": "SDG 16",
+      "title": "Peace, Justice and Strong Institutions",
+      "description": "Promote peaceful and inclusive societies, provide access to justice and build effective, accountable institutions.",
+      "targets": [
+        { "code": "16.1", "description": "Significantly reduce all forms of violence and related death rates everywhere." },
+        { "code": "16.6", "description": "Develop effective, accountable and transparent institutions at all levels." }
+      ],
+      "primary_offices": ["CPDO", "DRRMO"],
+      "cbms_indicators": ["Perception on safety", "DRRM", "SDG 16.1.4.p1"]
+    },
+    {
+      "code": "SDG 17",
+      "title": "Partnerships for the Goals",
+      "description": "Strengthen the means of implementation and revitalize the Global Partnership for Sustainable Development.",
+      "targets": [
+        { "code": "17.8", "description": "Fully operationalize the technology bank and science, technology and innovation capacity-building mechanism." }
+      ],
+      "primary_offices": ["CPDO"],
+      "cbms_indicators": ["Access to internet", "SDG 17.8.1.p1"]
+    }
+  ]
+}

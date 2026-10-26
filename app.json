@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Project Banwaan",
+    "slug": "project-banwaan",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": false,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#07152b"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.banwaan.naga"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#07152b"
+      },
+      "package": "com.banwaan.naga"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}

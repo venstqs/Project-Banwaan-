@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Naga City 3D Cesium Geospatial Engine</title>
+  <!-- CesiumJS CSS -->
+  <link rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.120/Build/Cesium/Widgets/widgets.css" />
+  <!-- Three.js Fallback library in case WebGL or offline -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #060e1a;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #threeCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+    }
+    .hud-overlay {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 100;
+      background: rgba(11, 18, 32, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      border-radius: 12px;
+      padding: 10px 16px;
+      color: #f8fafc;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      pointer-events: auto;
+    }
+    .hud-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hud-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 2px;
+      font-family: monospace;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+      box-shadow: 0 0 10px #10b981;
+    }
+    .tooltip-card {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 100;
+      background: rgba(11, 18, 32, 0.94);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      border-radius: 14px;
+      padding: 14px 18px;
+      color: #fff;
+      min-width: 260px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+      transition: all 0.3s ease;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <canvas id="threeCanvas"></canvas>
+
+  <div class="hud-overlay">
+    <div class="hud-title">
+      <span class="status-dot"></span>
+      <span>Cesium 3D Digital Twin • Naga City</span>
+    </div>
+    <div class="hud-sub">
+      27 Administrative Barangays • Mt. Isarog Elevation Model
+    </div>
+  </div>
+
+  <div id="tooltipCard" class="tooltip-card">
+    <div id="tooltipBrgy" style="font-size: 14px; font-weight: 800; color: #38bdf8;">Barangay</div>
+    <div id="tooltipType" style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Zone Type</div>
+    <div style="margin-top: 10px; display: flex; justify-content: space-between; border-top: 1px solid rgba(51, 65, 85, 0.6); padding-top: 8px;">
+      <span style="font-size: 11px; color: #cbd5e1;">PCA Vulnerability:</span>
+      <span id="tooltipMvi" style="font-size: 13px; font-weight: 800; color: #f43f5e;">62.4 / 100</span>
+    </div>
+    <div style="margin-top: 4px; display: flex; justify-content: space-between;">
+      <span style="font-size: 11px; color: #cbd5e1;">Households:</span>
+      <span id="tooltipHH" style="font-size: 12px; font-weight: 700; color: #f8fafc;">1,508</span>
+    </div>
+  </div>
+
+  <!-- Load Cesium script -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.120/Build/Cesium/Cesium.js"></script>
+  <script>
+    let viewer = null;
+    let barangayEntities = [];
+    let floodEntity = null;
+    let facilityEntities = [];
+    let geoData = null;
+    let selectedId = 3;
+
+    // Load Naga GeoJSON data
+    fetch('/cesium/naga_geospatial.json')
+      .then(res => res.json())
+      .then(data => {
+        geoData = data;
+        initCesium();
+      })
+      .catch(err => {
+        console.warn("Using inline geospatial payload fallback...", err);
+        initThreeFallback();
+      });
+
+    function initCesium() {
+      if (typeof Cesium === 'undefined') {
+        console.warn("Cesium script not available, activating high-performance 3D WebGL fallback.");
+        initThreeFallback();
+        return;
+      }
+
+      try {
+        // Initialize Cesium Viewer with Carto Dark Matter / OpenStreetMap tiles
+        viewer = new Cesium.Viewer('cesiumContainer', {
+          imageryProvider: new Cesium.UrlTemplateImageryProvider({
+            url: 'https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
+            subdomains: ['a', 'b', 'c', 'd'],
+            maximumLevel: 19
+          }),
+          baseLayerPicker: false,
+          geocoder: false,
+          homeButton: false,
+          infoBox: false,
+          selectionIndicator: false,
+          timeline: false,
+          animation: false,
+          sceneModePicker: true,
+          navigationHelpButton: false,
+          fullscreenButton: false
+        });
+
+        viewer.scene.globe.depthTestAgainstTerrain = false;
+        viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#060e1a');
+
+        // Set camera over Naga City (13.6218 N, 123.1948 E) with isometric tilt looking east towards Mt. Isarog
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(123.165, 13.580, 14000),
+          orientation: {
+            heading: Cesium.Math.toRadians(35),
+            pitch: Cesium.Math.toRadians(-42),
+            roll: 0.0
+          }
+        });
+
+        // 1. Add 27 3D Extruded Barangays
+        if (geoData && geoData.barangays_geojson) {
+          geoData.barangays_geojson.features.forEach(feat => {
+            const p = feat.properties;
+            const coords = feat.geometry.coordinates[0];
+            const flatHierarchy = [];
+            coords.forEach(pt => {
+              flatHierarchy.push(pt[0], pt[1]);
+            });
+
+            const mvi = p.vulnerability_index;
+            let fillColor = Cesium.Color.fromCssColorString('#0f766e').withAlpha(0.75); // Teal
+            if (mvi > 70) {
+              fillColor = Cesium.Color.fromCssColorString('#e11d48').withAlpha(0.85); // Alert Coral/Crimson
+            } else if (mvi > 55) {
+              fillColor = Cesium.Color.fromCssColorString('#d97706').withAlpha(0.8); // Amber
+            }
+
+            const entity = viewer.entities.add({
+              name: p.name,
+              id: 'brgy_' + p.id,
+              polygon: {
+                hierarchy: Cesium.Cartesian3.fromDegreesArray(flatHierarchy),
+                extrudedHeight: p.extrusion_height_m * 10.0, // Extruded prism
+                material: fillColor,
+                outline: true,
+                outlineColor: Cesium.Color.WHITE.withAlpha(0.6),
+                outlineWidth: 2
+              },
+              properties: p
+            });
+            barangayEntities.push(entity);
+          });
+        }
+
+        // 2. Add Naga River Flood Corridor
+        if (geoData && geoData.flood_hazard_zone) {
+          const floodCoords = geoData.flood_hazard_zone.geometry.coordinates[0];
+          const flatFlood = [];
+          floodCoords.forEach(pt => flatFlood.push(pt[0], pt[1]));
+
+          floodEntity = viewer.entities.add({
+            name: "Naga River Lowland Inundation Basin",
+            polygon: {
+              hierarchy: Cesium.Cartesian3.fromDegreesArray(flatFlood),
+              extrudedHeight: 80.0,
+              material: Cesium.Color.fromCssColorString('#0284c7').withAlpha(0.4),
+              outline: true,
+              outlineColor: Cesium.Color.fromCssColorString('#38bdf8').withAlpha(0.8)
+            }
+          });
+        }
+
+        // 3. Add Critical Facilities 3D Billboards
+        if (geoData && geoData.facilities) {
+          geoData.facilities.forEach(fac => {
+            const facEntity = viewer.entities.add({
+              name: fac.name,
+              position: Cesium.Cartesian3.fromDegrees(fac.lng, fac.lat, fac.elevation_m + 30),
+              point: {
+                pixelSize: 12,
+                color: Cesium.Color.fromCssColorString('#38bdf8'),
+                outlineColor: Cesium.Color.WHITE,
+                outlineWidth: 3
+              },
+              label: {
+                text: fac.name.split(' ')[0] + ' ' + (fac.name.split(' ')[1] || ''),
+                font: '10px monospace',
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                fillColor: Cesium.Color.WHITE,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 2,
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                pixelOffset: new Cesium.Cartesian2(0, -12)
+              }
+            });
+            facilityEntities.push(facEntity);
+          });
+        }
+
+        // Handle Click Selection
+        const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+        handler.setInputAction(movement => {
+          const picked = viewer.scene.pick(movement.position);
+          if (Cesium.defined(picked) && picked.id && picked.id.id && picked.id.id.startsWith('brgy_')) {
+            const brgyId = parseInt(picked.id.id.replace('brgy_', ''));
+            selectBarangay(brgyId);
+            // Notify parent Next.js
+            window.parent.postMessage({ type: 'BARANGAY_SELECTED', id: brgyId }, '*');
+          }
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+      } catch (e) {
+        console.warn("Cesium initialization error, falling back to Three.js:", e);
+        initThreeFallback();
+      }
+    }
+
+    function selectBarangay(id) {
+      selectedId = id;
+      if (!geoData) return;
+      const feat = geoData.barangays_geojson.features.find(f => f.properties.id === id);
+      if (!feat) return;
+
+      const p = feat.properties;
+      const card = document.getElementById('tooltipCard');
+      card.style.display = 'block';
+      document.getElementById('tooltipBrgy').innerText = p.name + ' (B' + p.id + ')';
+      document.getElementById('tooltipType').innerText = p.type + ' • Naga City';
+      document.getElementById('tooltipMvi').innerText = p.vulnerability_index + ' / 100';
+      document.getElementById('tooltipHH').innerText = p.households.toLocaleString() + ' HHs';
+
+      if (viewer) {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(p.center[0], p.center[1] - 0.02, 3500),
+          orientation: {
+            heading: Cesium.Math.toRadians(0),
+            pitch: Cesium.Math.toRadians(-50),
+            roll: 0.0
+          },
+          duration: 1.5
+        });
+      }
+    }
+
+    // High performance Three.js 3D Fallback
+    function initThreeFallback() {
+      const container = document.getElementById('cesiumContainer');
+      container.style.display = 'none';
+      const canvas = document.getElementById('threeCanvas');
+      canvas.style.display = 'block';
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x060e1a);
+
+      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+      camera.position.set(0, -220, 260);
+      camera.lookAt(0, 0, 0);
+
+      const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
+      dirLight.position.set(100, -100, 200);
+      scene.add(dirLight);
+
+      // Grid helper
+      const grid = new THREE.GridHelper(400, 30, 0x1e293b, 0x0f172a);
+      grid.rotation.x = Math.PI / 2;
+      scene.add(grid);
+
+      // Render 27 3D Barangay blocks
+      const meshes = [];
+      const dataToUse = geoData ? geoData.barangays_geojson.features : [];
+
+      dataToUse.forEach(f => {
+        const p = f.properties;
+        const x = (p.center[0] - 123.21) * 3500;
+        const y = (p.center[1] - 13.63) * 3500;
+        const h = Math.max(15, p.vulnerability_index * 1.2);
+
+        let color = 0x0f766e;
+        if (p.vulnerability_index > 70) color = 0xe11d48;
+        else if (p.vulnerability_index > 55) color = 0xd97706;
+
+        const geom = new THREE.BoxGeometry(16, 16, h);
+        const mat = new THREE.MeshPhongMaterial({ color: color, transparent: true, opacity: 0.85 });
+        const mesh = new THREE.Mesh(geom, mat);
+        mesh.position.set(x, y, h / 2);
+        mesh.userData = p;
+        scene.add(mesh);
+        meshes.push(mesh);
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        scene.rotation.z += 0.001;
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+
+    // Listen for events from Next.js parent
+    window.addEventListener('message', event => {
+      const msg = event.data;
+      if (!msg) return;
+
+      if (msg.type === 'SET_BARANGAY') {
+        selectBarangay(msg.id);
+      } else if (msg.type === 'SET_CAMERA') {
+        if (viewer) {
+          if (msg.preset === 'river') {
+            viewer.camera.flyTo({
+              destination: Cesium.Cartesian3.fromDegrees(123.185, 13.605, 4000),
+              orientation: { pitch: Cesium.Math.toRadians(-45) }
+            });
+          } else if (msg.preset === 'isarog') {
+            viewer.camera.flyTo({
+              destination: Cesium.Cartesian3.fromDegrees(123.265, 13.645, 6000),
+              orientation: { pitch: Cesium.Math.toRadians(-35) }
+            });
+          } else {
+            viewer.camera.flyTo({
+              destination: Cesium.Cartesian3.fromDegrees(123.165, 13.580, 14000),
+              orientation: { pitch: Cesium.Math.toRadians(-42) }
+            });
+          }
+        }
+      } else if (msg.type === 'TOGGLE_LAYER') {
+        if (msg.layer === 'flood' && floodEntity) {
+          floodEntity.show = msg.visible;
+        } else if (msg.layer === 'facilities') {
+          facilityEntities.forEach(e => e.show = msg.visible);
+        } else if (msg.layer === 'vulnerability') {
+          barangayEntities.forEach(e => e.show = msg.visible);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

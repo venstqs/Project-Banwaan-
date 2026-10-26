@@ -1,0 +1,2487 @@
+{
+  "city": "Naga City",
+  "crs": "EPSG:4326 (WGS 84) / UTM Zone 51N",
+  "bounding_box": {
+    "west": 123.165,
+    "south": 13.585,
+    "east": 123.265,
+    "north": 13.68
+  },
+  "center": [
+    123.1948,
+    13.6218
+  ],
+  "barangays_geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "id": 1,
+        "properties": {
+          "id": 1,
+          "name": "Barangay 1",
+          "district": "Naga River North Bank",
+          "city": "Naga City",
+          "elevation_m": 12,
+          "vulnerability_index": 58.4,
+          "population": 4478,
+          "households": 1065,
+          "males": 2165,
+          "females": 2313,
+          "weak_roof_pct": 2.0,
+          "weak_wall_pct": 33.7,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 29.7,
+          "households_needing_sanitation": 316,
+          "without_electricity_pct": 1.6,
+          "refilling_dependency": 43.4,
+          "food_insecurity_pct": 30.2,
+          "wash_risk_score": 29.7,
+          "unbanked_pct": 33.4,
+          "neet_youth_pct": 14.8,
+          "sector_scores": {
+            "cpdo_planning_gap": 55.5,
+            "drrmo_disaster_risk": 1.6,
+            "ceo_infrastructure_deficit": 47.8,
+            "cho_health_risk": 39.0,
+            "swo_social_vulnerability": 37.8
+          },
+          "center": [
+            123.1845,
+            13.6262
+          ],
+          "extrusion_height_m": 496
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.18728,
+                13.62649
+              ],
+              [
+                123.18581,
+                13.62762
+              ],
+              [
+                123.1842,
+                13.6283
+              ],
+              [
+                123.18225,
+                13.6277
+              ],
+              [
+                123.18233,
+                13.62598
+              ],
+              [
+                123.18303,
+                13.62461
+              ],
+              [
+                123.18485,
+                13.62376
+              ],
+              [
+                123.18629,
+                13.625
+              ],
+              [
+                123.18728,
+                13.62649
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 2,
+        "properties": {
+          "id": 2,
+          "name": "Barangay 2",
+          "district": "Centro Heritage Core",
+          "city": "Naga City",
+          "elevation_m": 14,
+          "vulnerability_index": 48.4,
+          "population": 1946,
+          "households": 532,
+          "males": 963,
+          "females": 983,
+          "weak_roof_pct": 2.8,
+          "weak_wall_pct": 18.6,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 8.6,
+          "households_needing_sanitation": 46,
+          "without_electricity_pct": 3.0,
+          "refilling_dependency": 78.8,
+          "food_insecurity_pct": 31.0,
+          "wash_risk_score": 8.6,
+          "unbanked_pct": 17.3,
+          "neet_youth_pct": 20.5,
+          "sector_scores": {
+            "cpdo_planning_gap": 46.0,
+            "drrmo_disaster_risk": 22.2,
+            "ceo_infrastructure_deficit": 18.9,
+            "cho_health_risk": 26.9,
+            "swo_social_vulnerability": 35.0
+          },
+          "center": [
+            123.1898,
+            13.6235
+          ],
+          "extrusion_height_m": 411
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.19203,
+                13.62396
+              ],
+              [
+                123.19078,
+                13.62487
+              ],
+              [
+                123.18921,
+                13.62554
+              ],
+              [
+                123.18775,
+                13.62456
+              ],
+              [
+                123.18798,
+                13.62312
+              ],
+              [
+                123.18857,
+                13.62177
+              ],
+              [
+                123.19039,
+                13.62145
+              ],
+              [
+                123.19142,
+                13.62267
+              ],
+              [
+                123.19203,
+                13.62396
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 3,
+        "properties": {
+          "id": 3,
+          "name": "Barangay 3",
+          "district": "Naga River Confluence (Lowland)",
+          "city": "Naga City",
+          "elevation_m": 6,
+          "vulnerability_index": 49.6,
+          "population": 5916,
+          "households": 1508,
+          "males": 2891,
+          "females": 3025,
+          "weak_roof_pct": 8.8,
+          "weak_wall_pct": 18.3,
+          "has_hotline": false,
+          "has_written_plan": false,
+          "unimproved_toilet_pct": 18.1,
+          "households_needing_sanitation": 273,
+          "without_electricity_pct": 1.7,
+          "refilling_dependency": 58.2,
+          "food_insecurity_pct": 25.5,
+          "wash_risk_score": 18.1,
+          "unbanked_pct": 24.9,
+          "neet_youth_pct": 15.1,
+          "sector_scores": {
+            "cpdo_planning_gap": 47.1,
+            "drrmo_disaster_risk": 52.0,
+            "ceo_infrastructure_deficit": 30.6,
+            "cho_health_risk": 28.7,
+            "swo_social_vulnerability": 33.1
+          },
+          "center": [
+            123.1812,
+            13.6202
+          ],
+          "extrusion_height_m": 422
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.18349,
+                13.62093
+              ],
+              [
+                123.1822,
+                13.62207
+              ],
+              [
+                123.18011,
+                13.62266
+              ],
+              [
+                123.17887,
+                13.6211
+              ],
+              [
+                123.17902,
+                13.6195
+              ],
+              [
+                123.17994,
+                13.61784
+              ],
+              [
+                123.18214,
+                13.61807
+              ],
+              [
+                123.18326,
+                13.61941
+              ],
+              [
+                123.18349,
+                13.62093
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 4,
+        "properties": {
+          "id": 4,
+          "name": "Barangay 4",
+          "district": "Central Commercial West",
+          "city": "Naga City",
+          "elevation_m": 11,
+          "vulnerability_index": 70.7,
+          "population": 9850,
+          "households": 2305,
+          "males": 4869,
+          "females": 4981,
+          "weak_roof_pct": 6.2,
+          "weak_wall_pct": 21.9,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 39.1,
+          "households_needing_sanitation": 902,
+          "without_electricity_pct": 3.2,
+          "refilling_dependency": 29.9,
+          "food_insecurity_pct": 40.4,
+          "wash_risk_score": 39.1,
+          "unbanked_pct": 25.9,
+          "neet_youth_pct": 20.9,
+          "sector_scores": {
+            "cpdo_planning_gap": 67.2,
+            "drrmo_disaster_risk": 5.0,
+            "ceo_infrastructure_deficit": 65.1,
+            "cho_health_risk": 51.7,
+            "swo_social_vulnerability": 40.6
+          },
+          "center": [
+            123.1915,
+            13.6178
+          ],
+          "extrusion_height_m": 601
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.19368,
+                13.6178
+              ],
+              [
+                123.19335,
+                13.61937
+              ],
+              [
+                123.1915,
+                13.6203
+              ],
+              [
+                123.18992,
+                13.61915
+              ],
+              [
+                123.189,
+                13.6178
+              ],
+              [
+                123.18939,
+                13.616
+              ],
+              [
+                123.1915,
+                13.61583
+              ],
+              [
+                123.19319,
+                13.61637
+              ],
+              [
+                123.19368,
+                13.6178
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 5,
+        "properties": {
+          "id": 5,
+          "name": "Barangay 5",
+          "district": "Panganiban Corridor",
+          "city": "Naga City",
+          "elevation_m": 15,
+          "vulnerability_index": 56.0,
+          "population": 9151,
+          "households": 2214,
+          "males": 4475,
+          "females": 4676,
+          "weak_roof_pct": 1.8,
+          "weak_wall_pct": 22.0,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 19.4,
+          "households_needing_sanitation": 429,
+          "without_electricity_pct": 2.4,
+          "refilling_dependency": 83.6,
+          "food_insecurity_pct": 37.0,
+          "wash_risk_score": 19.4,
+          "unbanked_pct": 25.5,
+          "neet_youth_pct": 16.2,
+          "sector_scores": {
+            "cpdo_planning_gap": 53.2,
+            "drrmo_disaster_risk": 1.4,
+            "ceo_infrastructure_deficit": 33.9,
+            "cho_health_risk": 37.5,
+            "swo_social_vulnerability": 34.7
+          },
+          "center": [
+            123.1975,
+            13.6152
+          ],
+          "extrusion_height_m": 476
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.19982,
+                13.61544
+              ],
+              [
+                123.1994,
+                13.61725
+              ],
+              [
+                123.19715,
+                13.61765
+              ],
+              [
+                123.19569,
+                13.61641
+              ],
+              [
+                123.19455,
+                13.6149
+              ],
+              [
+                123.19564,
+                13.61318
+              ],
+              [
+                123.19778,
+                13.61325
+              ],
+              [
+                123.19974,
+                13.6137
+              ],
+              [
+                123.19982,
+                13.61544
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 6,
+        "properties": {
+          "id": 6,
+          "name": "Barangay 6",
+          "district": "Pe\u00f1afrancia South",
+          "city": "Naga City",
+          "elevation_m": 18,
+          "vulnerability_index": 70.1,
+          "population": 14393,
+          "households": 3237,
+          "males": 7338,
+          "females": 7055,
+          "weak_roof_pct": 6.7,
+          "weak_wall_pct": 29.0,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 20.7,
+          "households_needing_sanitation": 669,
+          "without_electricity_pct": 5.4,
+          "refilling_dependency": 32.7,
+          "food_insecurity_pct": 41.1,
+          "wash_risk_score": 20.7,
+          "unbanked_pct": 29.6,
+          "neet_youth_pct": 19.3,
+          "sector_scores": {
+            "cpdo_planning_gap": 66.6,
+            "drrmo_disaster_risk": 5.4,
+            "ceo_infrastructure_deficit": 41.8,
+            "cho_health_risk": 41.2,
+            "swo_social_vulnerability": 40.9
+          },
+          "center": [
+            123.2002,
+            13.6228
+          ],
+          "extrusion_height_m": 596
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.20289,
+                13.62336
+              ],
+              [
+                123.20201,
+                13.62534
+              ],
+              [
+                123.19952,
+                13.62515
+              ],
+              [
+                123.19793,
+                13.62397
+              ],
+              [
+                123.19683,
+                13.6221
+              ],
+              [
+                123.19865,
+                13.62064
+              ],
+              [
+                123.20081,
+                13.62067
+              ],
+              [
+                123.20311,
+                13.6213
+              ],
+              [
+                123.20289,
+                13.62336
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 7,
+        "properties": {
+          "id": 7,
+          "name": "Barangay 7",
+          "district": "Pe\u00f1afrancia North",
+          "city": "Naga City",
+          "elevation_m": 24,
+          "vulnerability_index": 81.9,
+          "population": 7491,
+          "households": 1845,
+          "males": 3833,
+          "females": 3658,
+          "weak_roof_pct": 13.3,
+          "weak_wall_pct": 31.4,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 34.9,
+          "households_needing_sanitation": 643,
+          "without_electricity_pct": 5.7,
+          "refilling_dependency": 24.7,
+          "food_insecurity_pct": 49.3,
+          "wash_risk_score": 34.9,
+          "unbanked_pct": 37.8,
+          "neet_youth_pct": 18.1,
+          "sector_scores": {
+            "cpdo_planning_gap": 77.8,
+            "drrmo_disaster_risk": 30.6,
+            "ceo_infrastructure_deficit": 63.7,
+            "cho_health_risk": 55.4,
+            "swo_social_vulnerability": 44.4
+          },
+          "center": [
+            123.2062,
+            13.6295
+          ],
+          "extrusion_height_m": 696
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.20919,
+                13.63046
+              ],
+              [
+                123.20765,
+                13.63222
+              ],
+              [
+                123.20526,
+                13.63162
+              ],
+              [
+                123.20342,
+                13.63057
+              ],
+              [
+                123.20286,
+                13.62843
+              ],
+              [
+                123.20507,
+                13.62737
+              ],
+              [
+                123.20722,
+                13.62719
+              ],
+              [
+                123.20948,
+                13.62824
+              ],
+              [
+                123.20919,
+                13.63046
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 8,
+        "properties": {
+          "id": 8,
+          "name": "Barangay 8",
+          "district": "Mid-Valley Residential",
+          "city": "Naga City",
+          "elevation_m": 38,
+          "vulnerability_index": 58.1,
+          "population": 10245,
+          "households": 2667,
+          "males": 4869,
+          "females": 5376,
+          "weak_roof_pct": 4.0,
+          "weak_wall_pct": 19.7,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 43.6,
+          "households_needing_sanitation": 1164,
+          "without_electricity_pct": 2.4,
+          "refilling_dependency": 42.9,
+          "food_insecurity_pct": 31.6,
+          "wash_risk_score": 43.6,
+          "unbanked_pct": 22.8,
+          "neet_youth_pct": 18.7,
+          "sector_scores": {
+            "cpdo_planning_gap": 55.2,
+            "drrmo_disaster_risk": 23.2,
+            "ceo_infrastructure_deficit": 70.2,
+            "cho_health_risk": 48.3,
+            "swo_social_vulnerability": 36.1
+          },
+          "center": [
+            123.2138,
+            13.6342
+          ],
+          "extrusion_height_m": 494
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.21767,
+                13.6342
+              ],
+              [
+                123.21633,
+                13.63635
+              ],
+              [
+                123.2138,
+                13.63666
+              ],
+              [
+                123.21114,
+                13.63646
+              ],
+              [
+                123.21007,
+                13.6342
+              ],
+              [
+                123.21176,
+                13.63247
+              ],
+              [
+                123.2138,
+                13.63113
+              ],
+              [
+                123.21652,
+                13.63189
+              ],
+              [
+                123.21767,
+                13.6342
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 9,
+        "properties": {
+          "id": 9,
+          "name": "Barangay 9",
+          "district": "Upper Valley Growth Hub",
+          "city": "Naga City",
+          "elevation_m": 62,
+          "vulnerability_index": 53.2,
+          "population": 23171,
+          "households": 5706,
+          "males": 11348,
+          "females": 11823,
+          "weak_roof_pct": 2.2,
+          "weak_wall_pct": 24.0,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 33.3,
+          "households_needing_sanitation": 1900,
+          "without_electricity_pct": 2.2,
+          "refilling_dependency": 33.9,
+          "food_insecurity_pct": 40.9,
+          "wash_risk_score": 33.3,
+          "unbanked_pct": 23.0,
+          "neet_youth_pct": 14.9,
+          "sector_scores": {
+            "cpdo_planning_gap": 50.5,
+            "drrmo_disaster_risk": 1.8,
+            "ceo_infrastructure_deficit": 54.3,
+            "cho_health_risk": 48.6,
+            "swo_social_vulnerability": 31.7
+          },
+          "center": [
+            123.2225,
+            13.6408
+          ],
+          "extrusion_height_m": 452
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.22707,
+                13.64127
+              ],
+              [
+                123.22477,
+                13.64326
+              ],
+              [
+                123.22208,
+                13.64379
+              ],
+              [
+                123.2189,
+                13.6432
+              ],
+              [
+                123.21868,
+                13.64041
+              ],
+              [
+                123.22039,
+                13.63851
+              ],
+              [
+                123.22304,
+                13.637
+              ],
+              [
+                123.22567,
+                13.63868
+              ],
+              [
+                123.22707,
+                13.64127
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 10,
+        "properties": {
+          "id": 10,
+          "name": "Barangay 10",
+          "district": "Southwest Riverbend",
+          "city": "Naga City",
+          "elevation_m": 8,
+          "vulnerability_index": 20.0,
+          "population": 2983,
+          "households": 803,
+          "males": 1425,
+          "females": 1558,
+          "weak_roof_pct": 0.1,
+          "weak_wall_pct": 30.3,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 19.1,
+          "households_needing_sanitation": 153,
+          "without_electricity_pct": 0.1,
+          "refilling_dependency": 55.7,
+          "food_insecurity_pct": 8.3,
+          "wash_risk_score": 19.1,
+          "unbanked_pct": 8.6,
+          "neet_youth_pct": 12.0,
+          "sector_scores": {
+            "cpdo_planning_gap": 19.0,
+            "drrmo_disaster_risk": 20.1,
+            "ceo_infrastructure_deficit": 28.9,
+            "cho_health_risk": 17.3,
+            "swo_social_vulnerability": 19.6
+          },
+          "center": [
+            123.1745,
+            13.6152
+          ],
+          "extrusion_height_m": 170
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.17722,
+                13.61577
+              ],
+              [
+                123.1756,
+                13.61674
+              ],
+              [
+                123.17391,
+                13.61726
+              ],
+              [
+                123.17205,
+                13.61646
+              ],
+              [
+                123.17238,
+                13.61476
+              ],
+              [
+                123.17326,
+                13.61347
+              ],
+              [
+                123.17519,
+                13.61281
+              ],
+              [
+                123.17644,
+                13.6142
+              ],
+              [
+                123.17722,
+                13.61577
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 11,
+        "properties": {
+          "id": 11,
+          "name": "Barangay 11",
+          "district": "Magsaysay Southwest",
+          "city": "Naga City",
+          "elevation_m": 10,
+          "vulnerability_index": 58.5,
+          "population": 7337,
+          "households": 1914,
+          "males": 3605,
+          "females": 3732,
+          "weak_roof_pct": 0.8,
+          "weak_wall_pct": 14.8,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 9.6,
+          "households_needing_sanitation": 183,
+          "without_electricity_pct": 2.0,
+          "refilling_dependency": 24.8,
+          "food_insecurity_pct": 36.1,
+          "wash_risk_score": 9.6,
+          "unbanked_pct": 32.2,
+          "neet_youth_pct": 17.8,
+          "sector_scores": {
+            "cpdo_planning_gap": 55.6,
+            "drrmo_disaster_risk": 0.6,
+            "ceo_infrastructure_deficit": 18.4,
+            "cho_health_risk": 31.0,
+            "swo_social_vulnerability": 40.7
+          },
+          "center": [
+            123.1798,
+            13.6112
+          ],
+          "extrusion_height_m": 497
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.18236,
+                13.61202
+              ],
+              [
+                123.18073,
+                13.61294
+              ],
+              [
+                123.17876,
+                13.61354
+              ],
+              [
+                123.1772,
+                13.6122
+              ],
+              [
+                123.17771,
+                13.61053
+              ],
+              [
+                123.17863,
+                13.609
+              ],
+              [
+                123.18084,
+                13.60885
+              ],
+              [
+                123.18185,
+                13.61041
+              ],
+              [
+                123.18236,
+                13.61202
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 12,
+        "properties": {
+          "id": 12,
+          "name": "Barangay 12",
+          "district": "Bicol River Floodplain",
+          "city": "Naga City",
+          "elevation_m": 5,
+          "vulnerability_index": 65.1,
+          "population": 248,
+          "households": 82,
+          "males": 117,
+          "females": 131,
+          "weak_roof_pct": 4.6,
+          "weak_wall_pct": 51.8,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 19.5,
+          "households_needing_sanitation": 16,
+          "without_electricity_pct": 2.4,
+          "refilling_dependency": 56.1,
+          "food_insecurity_pct": 7.4,
+          "wash_risk_score": 19.5,
+          "unbanked_pct": 19.5,
+          "neet_youth_pct": 25.5,
+          "sector_scores": {
+            "cpdo_planning_gap": 61.8,
+            "drrmo_disaster_risk": 3.7,
+            "ceo_infrastructure_deficit": 34.0,
+            "cho_health_risk": 16.9,
+            "swo_social_vulnerability": 42.3
+          },
+          "center": [
+            123.1712,
+            13.6082
+          ],
+          "extrusion_height_m": 553
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.17325,
+                13.6082
+              ],
+              [
+                123.17264,
+                13.60942
+              ],
+              [
+                123.1712,
+                13.61041
+              ],
+              [
+                123.16969,
+                13.60949
+              ],
+              [
+                123.16924,
+                13.6082
+              ],
+              [
+                123.16939,
+                13.60666
+              ],
+              [
+                123.1712,
+                13.60629
+              ],
+              [
+                123.17254,
+                13.60706
+              ],
+              [
+                123.17325,
+                13.6082
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 13,
+        "properties": {
+          "id": 13,
+          "name": "Barangay 13",
+          "district": "Southern Transport Hub",
+          "city": "Naga City",
+          "elevation_m": 9,
+          "vulnerability_index": 55.7,
+          "population": 2307,
+          "households": 574,
+          "males": 1216,
+          "females": 1091,
+          "weak_roof_pct": 3.3,
+          "weak_wall_pct": 45.1,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 19.5,
+          "households_needing_sanitation": 112,
+          "without_electricity_pct": 1.9,
+          "refilling_dependency": 33.6,
+          "food_insecurity_pct": 33.1,
+          "wash_risk_score": 19.5,
+          "unbanked_pct": 23.3,
+          "neet_youth_pct": 15.9,
+          "sector_scores": {
+            "cpdo_planning_gap": 52.9,
+            "drrmo_disaster_risk": 22.6,
+            "ceo_infrastructure_deficit": 33.0,
+            "cho_health_risk": 34.9,
+            "swo_social_vulnerability": 33.1
+          },
+          "center": [
+            123.1828,
+            13.6048
+          ],
+          "extrusion_height_m": 473
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.18511,
+                13.60504
+              ],
+              [
+                123.18453,
+                13.60667
+              ],
+              [
+                123.18242,
+                13.60745
+              ],
+              [
+                123.18092,
+                13.60605
+              ],
+              [
+                123.18015,
+                13.60453
+              ],
+              [
+                123.18083,
+                13.60267
+              ],
+              [
+                123.1831,
+                13.60272
+              ],
+              [
+                123.18481,
+                13.60346
+              ],
+              [
+                123.18511,
+                13.60504
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 14,
+        "properties": {
+          "id": 14,
+          "name": "Barangay 14",
+          "district": "Diversion South",
+          "city": "Naga City",
+          "elevation_m": 11,
+          "vulnerability_index": 58.3,
+          "population": 1280,
+          "households": 308,
+          "males": 627,
+          "females": 653,
+          "weak_roof_pct": 1.0,
+          "weak_wall_pct": 46.4,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 23.7,
+          "households_needing_sanitation": 73,
+          "without_electricity_pct": 2.6,
+          "refilling_dependency": 34.4,
+          "food_insecurity_pct": 82.5,
+          "wash_risk_score": 23.7,
+          "unbanked_pct": 14.9,
+          "neet_youth_pct": 21.8,
+          "sector_scores": {
+            "cpdo_planning_gap": 55.4,
+            "drrmo_disaster_risk": 20.8,
+            "ceo_infrastructure_deficit": 40.8,
+            "cho_health_risk": 72.0,
+            "swo_social_vulnerability": 35.1
+          },
+          "center": [
+            123.1885,
+            13.6012
+          ],
+          "extrusion_height_m": 496
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.19063,
+                13.60164
+              ],
+              [
+                123.19,
+                13.60329
+              ],
+              [
+                123.18785,
+                13.60344
+              ],
+              [
+                123.18665,
+                13.60215
+              ],
+              [
+                123.18579,
+                13.60064
+              ],
+              [
+                123.18703,
+                13.59915
+              ],
+              [
+                123.18902,
+                13.59941
+              ],
+              [
+                123.19079,
+                13.60002
+              ],
+              [
+                123.19063,
+                13.60164
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 15,
+        "properties": {
+          "id": 15,
+          "name": "Barangay 15",
+          "district": "Southern Gateway",
+          "city": "Naga City",
+          "elevation_m": 13,
+          "vulnerability_index": 58.7,
+          "population": 2392,
+          "households": 598,
+          "males": 1114,
+          "females": 1278,
+          "weak_roof_pct": 0.8,
+          "weak_wall_pct": 6.4,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 94.6,
+          "households_needing_sanitation": 566,
+          "without_electricity_pct": 0.0,
+          "refilling_dependency": 78.1,
+          "food_insecurity_pct": 7.7,
+          "wash_risk_score": 94.6,
+          "unbanked_pct": 9.4,
+          "neet_youth_pct": 17.5,
+          "sector_scores": {
+            "cpdo_planning_gap": 55.8,
+            "drrmo_disaster_risk": 20.6,
+            "ceo_infrastructure_deficit": 100.0,
+            "cho_health_risk": 62.1,
+            "swo_social_vulnerability": 26.6
+          },
+          "center": [
+            123.1945,
+            13.5975
+          ],
+          "extrusion_height_m": 499
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.19695,
+                13.59828
+              ],
+              [
+                123.19586,
+                13.60005
+              ],
+              [
+                123.19356,
+                13.59963
+              ],
+              [
+                123.19221,
+                13.59838
+              ],
+              [
+                123.19144,
+                13.59652
+              ],
+              [
+                123.19334,
+                13.59533
+              ],
+              [
+                123.19536,
+                13.59556
+              ],
+              [
+                123.19742,
+                13.59637
+              ],
+              [
+                123.19695,
+                13.59828
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 16,
+        "properties": {
+          "id": 16,
+          "name": "Barangay 16",
+          "district": "Northwest Peri-Urban",
+          "city": "Naga City",
+          "elevation_m": 14,
+          "vulnerability_index": 95.0,
+          "population": 7958,
+          "households": 1779,
+          "males": 4041,
+          "females": 3917,
+          "weak_roof_pct": 1.8,
+          "weak_wall_pct": 41.7,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 35.4,
+          "households_needing_sanitation": 629,
+          "without_electricity_pct": 4.2,
+          "refilling_dependency": 29.1,
+          "food_insecurity_pct": 82.0,
+          "wash_risk_score": 35.4,
+          "unbanked_pct": 47.9,
+          "neet_youth_pct": 20.0,
+          "sector_scores": {
+            "cpdo_planning_gap": 90.2,
+            "drrmo_disaster_risk": 21.4,
+            "ceo_infrastructure_deficit": 61.5,
+            "cho_health_risk": 78.6,
+            "swo_social_vulnerability": 52.7
+          },
+          "center": [
+            123.1778,
+            13.6305
+          ],
+          "extrusion_height_m": 808
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.181,
+                13.6305
+              ],
+              [
+                123.18028,
+                13.6326
+              ],
+              [
+                123.1778,
+                13.63276
+              ],
+              [
+                123.17564,
+                13.63234
+              ],
+              [
+                123.17423,
+                13.6305
+              ],
+              [
+                123.17586,
+                13.62885
+              ],
+              [
+                123.1778,
+                13.62802
+              ],
+              [
+                123.18034,
+                13.62834
+              ],
+              [
+                123.181,
+                13.6305
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 17,
+        "properties": {
+          "id": 17,
+          "name": "Barangay 17",
+          "district": "Northern Agro-Residential",
+          "city": "Naga City",
+          "elevation_m": 22,
+          "vulnerability_index": 53.9,
+          "population": 15636,
+          "households": 4072,
+          "males": 7758,
+          "females": 7878,
+          "weak_roof_pct": 4.3,
+          "weak_wall_pct": 14.1,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 5.0,
+          "households_needing_sanitation": 204,
+          "without_electricity_pct": 2.4,
+          "refilling_dependency": 50.9,
+          "food_insecurity_pct": 31.5,
+          "wash_risk_score": 5.0,
+          "unbanked_pct": 24.1,
+          "neet_youth_pct": 17.9,
+          "sector_scores": {
+            "cpdo_planning_gap": 51.2,
+            "drrmo_disaster_risk": 23.4,
+            "ceo_infrastructure_deficit": 12.3,
+            "cho_health_risk": 25.0,
+            "swo_social_vulnerability": 35.9
+          },
+          "center": [
+            123.1848,
+            13.6358
+          ],
+          "extrusion_height_m": 458
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.18846,
+                13.63618
+              ],
+              [
+                123.18689,
+                13.63807
+              ],
+              [
+                123.18447,
+                13.63812
+              ],
+              [
+                123.18199,
+                13.63768
+              ],
+              [
+                123.18129,
+                13.63544
+              ],
+              [
+                123.18311,
+                13.63397
+              ],
+              [
+                123.18521,
+                13.63289
+              ],
+              [
+                123.18767,
+                13.63388
+              ],
+              [
+                123.18846,
+                13.63618
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 18,
+        "properties": {
+          "id": 18,
+          "name": "Barangay 18",
+          "district": "Upland Foothills West",
+          "city": "Naga City",
+          "elevation_m": 145,
+          "vulnerability_index": 94.7,
+          "population": 3092,
+          "households": 724,
+          "males": 1574,
+          "females": 1518,
+          "weak_roof_pct": 13.3,
+          "weak_wall_pct": 43.2,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 30.4,
+          "households_needing_sanitation": 220,
+          "without_electricity_pct": 9.3,
+          "refilling_dependency": 0.4,
+          "food_insecurity_pct": 63.3,
+          "wash_risk_score": 30.4,
+          "unbanked_pct": 48.9,
+          "neet_youth_pct": 20.7,
+          "sector_scores": {
+            "cpdo_planning_gap": 90.0,
+            "drrmo_disaster_risk": 30.6,
+            "ceo_infrastructure_deficit": 64.2,
+            "cho_health_risk": 62.5,
+            "swo_social_vulnerability": 54.2
+          },
+          "center": [
+            123.2365,
+            13.6552
+          ],
+          "extrusion_height_m": 805
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.24155,
+                13.65625
+              ],
+              [
+                123.23865,
+                13.65821
+              ],
+              [
+                123.23555,
+                13.65851
+              ],
+              [
+                123.23207,
+                13.65748
+              ],
+              [
+                123.23228,
+                13.65432
+              ],
+              [
+                123.23449,
+                13.65238
+              ],
+              [
+                123.23771,
+                13.65099
+              ],
+              [
+                123.24039,
+                13.65319
+              ],
+              [
+                123.24155,
+                13.65625
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 19,
+        "properties": {
+          "id": 19,
+          "name": "Barangay 19",
+          "district": "Mt. Isarog Slopes (East)",
+          "city": "Naga City",
+          "elevation_m": 285,
+          "vulnerability_index": 49.3,
+          "population": 3777,
+          "households": 964,
+          "males": 1824,
+          "females": 1953,
+          "weak_roof_pct": 0.6,
+          "weak_wall_pct": 23.5,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 11.8,
+          "households_needing_sanitation": 114,
+          "without_electricity_pct": 3.7,
+          "refilling_dependency": 59.4,
+          "food_insecurity_pct": 30.0,
+          "wash_risk_score": 11.8,
+          "unbanked_pct": 18.3,
+          "neet_youth_pct": 16.9,
+          "sector_scores": {
+            "cpdo_planning_gap": 46.8,
+            "drrmo_disaster_risk": 20.5,
+            "ceo_infrastructure_deficit": 25.1,
+            "cho_health_risk": 28.1,
+            "swo_social_vulnerability": 31.3
+          },
+          "center": [
+            123.2495,
+            13.6685
+          ],
+          "extrusion_height_m": 419
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.25473,
+                13.67017
+              ],
+              [
+                123.25125,
+                13.67178
+              ],
+              [
+                123.24774,
+                13.67248
+              ],
+              [
+                123.24429,
+                13.67051
+              ],
+              [
+                123.24542,
+                13.66719
+              ],
+              [
+                123.24753,
+                13.6648
+              ],
+              [
+                123.25154,
+                13.6639
+              ],
+              [
+                123.25363,
+                13.66691
+              ],
+              [
+                123.25473,
+                13.67017
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 20,
+        "properties": {
+          "id": 20,
+          "name": "Barangay 20",
+          "district": "Mid-Upland Terrace",
+          "city": "Naga City",
+          "elevation_m": 96,
+          "vulnerability_index": 76.3,
+          "population": 5363,
+          "households": 1220,
+          "males": 2711,
+          "females": 2652,
+          "weak_roof_pct": 1.1,
+          "weak_wall_pct": 32.0,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 26.6,
+          "households_needing_sanitation": 325,
+          "without_electricity_pct": 3.9,
+          "refilling_dependency": 47.2,
+          "food_insecurity_pct": 58.8,
+          "wash_risk_score": 26.6,
+          "unbanked_pct": 30.7,
+          "neet_youth_pct": 18.7,
+          "sector_scores": {
+            "cpdo_planning_gap": 72.5,
+            "drrmo_disaster_risk": 0.9,
+            "ceo_infrastructure_deficit": 47.7,
+            "cho_health_risk": 57.1,
+            "swo_social_vulnerability": 40.9
+          },
+          "center": [
+            123.2292,
+            13.6472
+          ],
+          "extrusion_height_m": 649
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.23307,
+                13.6472
+              ],
+              [
+                123.23146,
+                13.64912
+              ],
+              [
+                123.2292,
+                13.65076
+              ],
+              [
+                123.22635,
+                13.64963
+              ],
+              [
+                123.22603,
+                13.6472
+              ],
+              [
+                123.22634,
+                13.64477
+              ],
+              [
+                123.2292,
+                13.64364
+              ],
+              [
+                123.23146,
+                13.64528
+              ],
+              [
+                123.23307,
+                13.6472
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 21,
+        "properties": {
+          "id": 21,
+          "name": "Barangay 21",
+          "district": "Concepcion East Corridor",
+          "city": "Naga City",
+          "elevation_m": 17,
+          "vulnerability_index": 40.2,
+          "population": 20609,
+          "households": 5394,
+          "males": 9860,
+          "females": 10749,
+          "weak_roof_pct": 3.1,
+          "weak_wall_pct": 9.5,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 15.8,
+          "households_needing_sanitation": 851,
+          "without_electricity_pct": 1.4,
+          "refilling_dependency": 71.8,
+          "food_insecurity_pct": 23.3,
+          "wash_risk_score": 15.8,
+          "unbanked_pct": 14.8,
+          "neet_youth_pct": 16.5,
+          "sector_scores": {
+            "cpdo_planning_gap": 38.2,
+            "drrmo_disaster_risk": 22.5,
+            "ceo_infrastructure_deficit": 26.5,
+            "cho_health_risk": 25.8,
+            "swo_social_vulnerability": 28.7
+          },
+          "center": [
+            123.2035,
+            13.6102
+          ],
+          "extrusion_height_m": 342
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.20646,
+                13.6105
+              ],
+              [
+                123.20534,
+                13.61219
+              ],
+              [
+                123.20305,
+                13.6134
+              ],
+              [
+                123.20104,
+                13.61184
+              ],
+              [
+                123.20066,
+                13.60991
+              ],
+              [
+                123.20118,
+                13.60769
+              ],
+              [
+                123.20389,
+                13.60744
+              ],
+              [
+                123.20569,
+                13.60874
+              ],
+              [
+                123.20646,
+                13.6105
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 22,
+        "properties": {
+          "id": 22,
+          "name": "Barangay 22",
+          "district": "Southeast Agro-Industrial",
+          "city": "Naga City",
+          "elevation_m": 21,
+          "vulnerability_index": 36.4,
+          "population": 541,
+          "households": 149,
+          "males": 258,
+          "females": 283,
+          "weak_roof_pct": 0.7,
+          "weak_wall_pct": 39.6,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 18.1,
+          "households_needing_sanitation": 27,
+          "without_electricity_pct": 0.7,
+          "refilling_dependency": 57.0,
+          "food_insecurity_pct": 25.5,
+          "wash_risk_score": 18.1,
+          "unbanked_pct": 18.8,
+          "neet_youth_pct": 15.4,
+          "sector_scores": {
+            "cpdo_planning_gap": 34.6,
+            "drrmo_disaster_risk": 0.6,
+            "ceo_infrastructure_deficit": 28.6,
+            "cho_health_risk": 28.7,
+            "swo_social_vulnerability": 29.8
+          },
+          "center": [
+            123.2108,
+            13.6048
+          ],
+          "extrusion_height_m": 309
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.21348,
+                13.60536
+              ],
+              [
+                123.21253,
+                13.60722
+              ],
+              [
+                123.20992,
+                13.60787
+              ],
+              [
+                123.20838,
+                13.60605
+              ],
+              [
+                123.20771,
+                13.60416
+              ],
+              [
+                123.20884,
+                13.60205
+              ],
+              [
+                123.2115,
+                13.60238
+              ],
+              [
+                123.2134,
+                13.60346
+              ],
+              [
+                123.21348,
+                13.60536
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 23,
+        "properties": {
+          "id": 23,
+          "name": "Barangay 23",
+          "district": "Southern Upland Transition",
+          "city": "Naga City",
+          "elevation_m": 32,
+          "vulnerability_index": 76.1,
+          "population": 3697,
+          "households": 902,
+          "males": 1889,
+          "females": 1808,
+          "weak_roof_pct": 13.0,
+          "weak_wall_pct": 26.2,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 21.1,
+          "households_needing_sanitation": 190,
+          "without_electricity_pct": 6.7,
+          "refilling_dependency": 14.6,
+          "food_insecurity_pct": 43.7,
+          "wash_risk_score": 21.1,
+          "unbanked_pct": 30.4,
+          "neet_youth_pct": 16.8,
+          "sector_scores": {
+            "cpdo_planning_gap": 72.3,
+            "drrmo_disaster_risk": 30.4,
+            "ceo_infrastructure_deficit": 45.1,
+            "cho_health_risk": 43.2,
+            "swo_social_vulnerability": 38.4
+          },
+          "center": [
+            123.2178,
+            13.5962
+          ],
+          "extrusion_height_m": 647
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.22067,
+                13.59712
+              ],
+              [
+                123.21947,
+                13.59933
+              ],
+              [
+                123.21646,
+                13.59922
+              ],
+              [
+                123.21504,
+                13.59726
+              ],
+              [
+                123.21414,
+                13.59503
+              ],
+              [
+                123.21617,
+                13.59315
+              ],
+              [
+                123.21887,
+                13.59379
+              ],
+              [
+                123.22123,
+                13.59488
+              ],
+              [
+                123.22067,
+                13.59712
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 24,
+        "properties": {
+          "id": 24,
+          "name": "Barangay 24",
+          "district": "North-Central Residential",
+          "city": "Naga City",
+          "elevation_m": 20,
+          "vulnerability_index": 37.0,
+          "population": 4880,
+          "households": 1265,
+          "males": 2349,
+          "females": 2531,
+          "weak_roof_pct": 4.5,
+          "weak_wall_pct": 20.3,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 24.2,
+          "households_needing_sanitation": 306,
+          "without_electricity_pct": 0.7,
+          "refilling_dependency": 60.7,
+          "food_insecurity_pct": 21.8,
+          "wash_risk_score": 24.2,
+          "unbanked_pct": 14.2,
+          "neet_youth_pct": 14.8,
+          "sector_scores": {
+            "cpdo_planning_gap": 35.1,
+            "drrmo_disaster_risk": 3.6,
+            "ceo_infrastructure_deficit": 37.7,
+            "cho_health_risk": 29.8,
+            "swo_social_vulnerability": 26.3
+          },
+          "center": [
+            123.1965,
+            13.6322
+          ],
+          "extrusion_height_m": 314
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.1992,
+                13.6322
+              ],
+              [
+                123.1989,
+                13.63424
+              ],
+              [
+                123.1965,
+                13.63454
+              ],
+              [
+                123.19466,
+                13.63376
+              ],
+              [
+                123.19313,
+                13.6322
+              ],
+              [
+                123.19446,
+                13.63047
+              ],
+              [
+                123.1965,
+                13.63006
+              ],
+              [
+                123.19884,
+                13.63021
+              ],
+              [
+                123.1992,
+                13.6322
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 25,
+        "properties": {
+          "id": 25,
+          "name": "Barangay 25",
+          "district": "Northern Highland Edge",
+          "city": "Naga City",
+          "elevation_m": 28,
+          "vulnerability_index": 53.6,
+          "population": 3387,
+          "households": 797,
+          "males": 1671,
+          "females": 1716,
+          "weak_roof_pct": 0.0,
+          "weak_wall_pct": 44.5,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 33.0,
+          "households_needing_sanitation": 263,
+          "without_electricity_pct": 3.1,
+          "refilling_dependency": 19.8,
+          "food_insecurity_pct": 38.0,
+          "wash_risk_score": 33.0,
+          "unbanked_pct": 29.4,
+          "neet_youth_pct": 18.0,
+          "sector_scores": {
+            "cpdo_planning_gap": 50.9,
+            "drrmo_disaster_risk": 0.0,
+            "ceo_infrastructure_deficit": 55.7,
+            "cho_health_risk": 46.4,
+            "swo_social_vulnerability": 39.2
+          },
+          "center": [
+            123.1902,
+            13.6395
+          ],
+          "extrusion_height_m": 456
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.19338,
+                13.63983
+              ],
+              [
+                123.19236,
+                13.64184
+              ],
+              [
+                123.18988,
+                13.64174
+              ],
+              [
+                123.18779,
+                13.64111
+              ],
+              [
+                123.18666,
+                13.63914
+              ],
+              [
+                123.18851,
+                13.63767
+              ],
+              [
+                123.19055,
+                13.63703
+              ],
+              [
+                123.19303,
+                13.63761
+              ],
+              [
+                123.19338,
+                13.63983
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 26,
+        "properties": {
+          "id": 26,
+          "name": "Barangay 26",
+          "district": "Western Riverside",
+          "city": "Naga City",
+          "elevation_m": 7,
+          "vulnerability_index": 34.6,
+          "population": 2049,
+          "households": 620,
+          "males": 945,
+          "females": 1104,
+          "weak_roof_pct": 1.0,
+          "weak_wall_pct": 12.1,
+          "has_hotline": true,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 32.6,
+          "households_needing_sanitation": 202,
+          "without_electricity_pct": 0.6,
+          "refilling_dependency": 70.6,
+          "food_insecurity_pct": 17.9,
+          "wash_risk_score": 32.6,
+          "unbanked_pct": 6.3,
+          "neet_youth_pct": 13.3,
+          "sector_scores": {
+            "cpdo_planning_gap": 32.9,
+            "drrmo_disaster_risk": 0.8,
+            "ceo_infrastructure_deficit": 50.1,
+            "cho_health_risk": 32.1,
+            "swo_social_vulnerability": 19.7
+          },
+          "center": [
+            123.1755,
+            13.6232
+          ],
+          "extrusion_height_m": 294
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.17824,
+                13.62377
+              ],
+              [
+                123.17684,
+                13.62508
+              ],
+              [
+                123.175,
+                13.62493
+              ],
+              [
+                123.17316,
+                13.62441
+              ],
+              [
+                123.17289,
+                13.62266
+              ],
+              [
+                123.17442,
+                13.62168
+              ],
+              [
+                123.17613,
+                13.62102
+              ],
+              [
+                123.17788,
+                13.62197
+              ],
+              [
+                123.17824,
+                13.62377
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "id": 27,
+        "properties": {
+          "id": 27,
+          "name": "Barangay 27",
+          "district": "Midtown Riverbank",
+          "city": "Naga City",
+          "elevation_m": 9,
+          "vulnerability_index": 65.0,
+          "population": 7020,
+          "households": 1648,
+          "males": 3526,
+          "females": 3494,
+          "weak_roof_pct": 1.4,
+          "weak_wall_pct": 36.2,
+          "has_hotline": false,
+          "has_written_plan": true,
+          "unimproved_toilet_pct": 34.5,
+          "households_needing_sanitation": 568,
+          "without_electricity_pct": 3.3,
+          "refilling_dependency": 25.8,
+          "food_insecurity_pct": 29.1,
+          "wash_risk_score": 34.5,
+          "unbanked_pct": 22.1,
+          "neet_youth_pct": 17.5,
+          "sector_scores": {
+            "cpdo_planning_gap": 61.8,
+            "drrmo_disaster_risk": 21.1,
+            "ceo_infrastructure_deficit": 58.4,
+            "cho_health_risk": 41.1,
+            "swo_social_vulnerability": 34.3
+          },
+          "center": [
+            123.1848,
+            13.6155
+          ],
+          "extrusion_height_m": 552
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                123.18751,
+                13.61637
+              ],
+              [
+                123.18575,
+                13.61729
+              ],
+              [
+                123.18401,
+                13.61729
+              ],
+              [
+                123.18217,
+                13.61651
+              ],
+              [
+                123.18254,
+                13.61478
+              ],
+              [
+                123.18391,
+                13.61382
+              ],
+              [
+                123.1858,
+                13.61324
+              ],
+              [
+                123.1871,
+                13.61461
+              ],
+              [
+                123.18751,
+                13.61637
+              ]
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "naga_river_path": [
+    [
+      123.255,
+      13.668
+    ],
+    [
+      123.241,
+      13.656
+    ],
+    [
+      123.226,
+      13.6435
+    ],
+    [
+      123.214,
+      13.635
+    ],
+    [
+      123.2035,
+      13.628
+    ],
+    [
+      123.1945,
+      13.6235
+    ],
+    [
+      123.1875,
+      13.6225
+    ],
+    [
+      123.181,
+      13.62
+    ],
+    [
+      123.1755,
+      13.6155
+    ],
+    [
+      123.171,
+      13.608
+    ],
+    [
+      123.167,
+      13.601
+    ]
+  ],
+  "road_network": [
+    {
+      "name": "Pan-Philippine Highway (Maharlika)",
+      "type": "National Primary",
+      "coordinates": [
+        [
+          123.181,
+          13.645
+        ],
+        [
+          123.186,
+          13.632
+        ],
+        [
+          123.191,
+          13.618
+        ],
+        [
+          123.195,
+          13.606
+        ],
+        [
+          123.202,
+          13.591
+        ]
+      ]
+    },
+    {
+      "name": "Panganiban Drive \u2014 Mt. Isarog Arterial",
+      "type": "City Arterial",
+      "coordinates": [
+        [
+          123.189,
+          13.621
+        ],
+        [
+          123.197,
+          13.6155
+        ],
+        [
+          123.209,
+          13.612
+        ],
+        [
+          123.225,
+          13.639
+        ],
+        [
+          123.249,
+          13.667
+        ]
+      ]
+    },
+    {
+      "name": "Magsaysay Avenue \u2014 Pe\u00f1afrancia Loop",
+      "type": "Urban Collector",
+      "coordinates": [
+        [
+          123.179,
+          13.612
+        ],
+        [
+          123.1885,
+          13.6185
+        ],
+        [
+          123.1995,
+          13.623
+        ],
+        [
+          123.2055,
+          13.6295
+        ],
+        [
+          123.196,
+          13.633
+        ]
+      ]
+    }
+  ],
+  "flood_hazard_zone": {
+    "type": "Feature",
+    "properties": {
+      "name": "Naga River Lowland Inundation Corridor",
+      "hazard_type": "Flood & Storm Surge Level 3",
+      "depth_m": 1.8
+    },
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            123.169,
+            13.624
+          ],
+          [
+            123.179,
+            13.627
+          ],
+          [
+            123.1895,
+            13.6255
+          ],
+          [
+            123.2015,
+            13.6215
+          ],
+          [
+            123.2095,
+            13.613
+          ],
+          [
+            123.2045,
+            13.605
+          ],
+          [
+            123.192,
+            13.6105
+          ],
+          [
+            123.182,
+            13.6135
+          ],
+          [
+            123.174,
+            13.605
+          ],
+          [
+            123.1675,
+            13.6095
+          ],
+          [
+            123.169,
+            13.624
+          ]
+        ]
+      ]
+    }
+  },
+  "facilities": [
+    {
+      "id": "FAC-01",
+      "name": "Naga City Hall & Emergency Operations Center",
+      "category": "Command Center",
+      "lng": 123.1948,
+      "lat": 13.6218,
+      "description": "Central DRRMO dispatch and Mayoral crisis headquarters"
+    },
+    {
+      "id": "FAC-02",
+      "name": "Naga City Civic Center Evacuation Complex",
+      "category": "Evacuation Shelter",
+      "lng": 123.2015,
+      "lat": 13.6142,
+      "description": "Primary multi-purpose disaster shelter (Capacity: 800 persons)"
+    },
+    {
+      "id": "FAC-03",
+      "name": "Camarines Sur National High School Shelter (East Wing)",
+      "category": "Evacuation Shelter",
+      "lng": 123.1895,
+      "lat": 13.6275,
+      "description": "Secondary storm evacuation shelter (Capacity: 1,200 persons)"
+    },
+    {
+      "id": "FAC-04",
+      "name": "Naga City Hospital / CHO Clinic",
+      "category": "Healthcare",
+      "lng": 123.2085,
+      "lat": 13.608,
+      "description": "Level 1 community hospital and primary disease surveillance center"
+    },
+    {
+      "id": "FAC-05",
+      "name": "BFP Naga Central Fire Station",
+      "category": "Emergency Responders",
+      "lng": 123.1865,
+      "lat": 13.6235,
+      "description": "Urban rescue, flood water evacuation, and fire engine fleet"
+    }
+  ]
+}
