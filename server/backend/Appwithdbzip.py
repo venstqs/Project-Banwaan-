@@ -3,13 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import json
 import os
+import zipfile
 from langchain_groq import ChatGroq
 from langchain_community.vectorstores import Chroma
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 app = FastAPI(title="Project Banwaan AI Backend", version="1.0")
 
-# Enable CORS so your frontend map (running on React, Flutter, or localhost) can talk to this API
+# Enable CORS so your frontend map (React, Flutter, or localhost) can talk to this API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -30,7 +31,14 @@ if os.path.exists(DATA_FILE):
 else:
     print(f"⚠️ Warning: {DATA_FILE} not found. Place your CSV in a 'data/' folder.")
 
-# 3. Load the RAG Vector Database (Legal Brain)
+# 3. Automatically Unpack ChromaDB Backup if not already extracted
+if not os.path.exists("./chroma_db") and os.path.exists("chroma_db_backup.zip"):
+    print("📦 Unpacking chroma_db_backup.zip for the RAG engine...")
+    with zipfile.ZipFile("chroma_db_backup.zip", "r") as zip_ref:
+        zip_ref.extractall(".")
+    print("✅ ChromaDB unpacked successfully!")
+
+# 4. Load the RAG Vector Database (Legal Brain)
 try:
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     vector_db = Chroma(persist_directory="./chroma_db", embedding_function=embeddings)
@@ -90,7 +98,7 @@ def scan_barangay_api(barangay_name: str):
         except Exception:
             pass
 
-    # Prompt enforcing your exact structure constraints
+    # Prompt enforcing structure constraints
     prompt = f"""
     You are the Proactive Policy Engine for Project Banwaan, acting for the {role_info['name']} ({triggered_office}) in Naga City.
     
