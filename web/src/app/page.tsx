@@ -48,7 +48,12 @@ import {
   Store,
   Landmark,
   Hospital,
-  Waves
+  Waves,
+  Phone,
+  PhoneCall,
+  Copy,
+  ExternalLink,
+  Command
 } from "lucide-react";
 
 import cbmsDataRaw from "../data/processed_cbms_data.json";
@@ -109,6 +114,146 @@ export const BARANGAY_CATEGORIES: Record<number, BarangayCategoryMeta> = {
   5:  { id: "riverine", name: "Riverine & High Flood-Hazard Delta", short: "Riverine Flood Delta", color: "#ea580c", icon: "🌊", description: "Northwest riverine floodway, agricultural-urban interface, drainage catchment" },
   21: { id: "riverine", name: "Riverine & High Flood-Hazard Delta", short: "Riverine Flood Delta", color: "#ea580c", icon: "🌊", description: "Naga River upper tributary, riverbank flood hazard, expanding residential zones" }
 };
+
+// Official Emergency Hotlines for Naga City, Camarines Sur (Verified DOH/PNP/LGU/BFP)
+export interface EmergencyHotline {
+  id: string;
+  agency: string;
+  subtext: string;
+  category: "rescue" | "police" | "medical" | "fire";
+  icon: string;
+  color: string;
+  primaryPhone: string;
+  altPhone: string;
+  landline: string;
+  location: string;
+}
+
+export const NAGA_EMERGENCY_HOTLINES: EmergencyHotline[] = [
+  {
+    id: "cdrrmo",
+    agency: "CDRRMO NAGA CENTRAL 911",
+    subtext: "City Disaster Risk Reduction & Management Office (ComCen)",
+    category: "rescue",
+    icon: "🚨",
+    color: "#dc2626",
+    primaryPhone: "911",
+    altPhone: "0908-525-3000 / 0963-220-9700 / 0985-253-3000",
+    landline: "(054) 472-3000 / (054) 205-2980",
+    location: "City Hall Complex, J. Miranda Ave., Naga City"
+  },
+  {
+    id: "pnp",
+    agency: "PNP NAGA CITY POLICE",
+    subtext: "Philippine National Police - NCPO Headquarters",
+    category: "police",
+    icon: "👮",
+    color: "#1d4ed8",
+    primaryPhone: "0908-325-4787",
+    altPhone: "0908-737-4228 | Station 1: 0918-464-4371",
+    landline: "(054) 881-0112",
+    location: "Barlin St., Naga City"
+  },
+  {
+    id: "bmc",
+    agency: "BICOL MEDICAL CENTER",
+    subtext: "DOH Tertiary Regional Training & Medical Center (ER Complex)",
+    category: "medical",
+    icon: "🏥",
+    color: "#059669",
+    primaryPhone: "0968-291-1125",
+    altPhone: "0927-357-9967 (HEMS Disaster) / 0967-087-0155 (OB-ER)",
+    landline: "(054) 472-6125 to 31",
+    location: "J. Miranda Ave., Concepcion Pequeña, Naga City"
+  },
+  {
+    id: "bfp",
+    agency: "BFP FIRE OPERATIONS",
+    subtext: "Bureau of Fire Protection - Naga City Central Fire Station",
+    category: "fire",
+    icon: "🚒",
+    color: "#ea580c",
+    primaryPhone: "0923-083-9429",
+    altPhone: "(054) 473-8472 / (054) 473-2633",
+    landline: "(054) 871-6454",
+    location: "City Hall Compound, Naga City"
+  }
+];
+
+export interface SearchableIndicator {
+  id: string;
+  name: string;
+  dept: string;
+  metric: string;
+  summary: string;
+  icon: string;
+  category: "infrastructure" | "drrm" | "health" | "social";
+  prompt: string;
+}
+
+export const SEARCHABLE_INDICATORS: SearchableIndicator[] = [
+  {
+    id: "sanitation",
+    name: "Unimproved Sanitation & Toilet Deficit",
+    dept: "City Engineer's Office (CEO)",
+    metric: "15,920 HHs",
+    summary: "Households without access to sanitary toilets or septic tanks",
+    icon: "🚽",
+    category: "infrastructure",
+    prompt: "Audit unimproved sanitation deficit across all 27 Naga City barangays and synthesize CEO capital expenditure"
+  },
+  {
+    id: "water_refilling",
+    name: "Refilling Station Drinking Water Dependency",
+    dept: "CEO / CPDO",
+    metric: "12,850 HHs",
+    summary: "Households dependent on commercial refilling stations rather than piped potable supply",
+    icon: "💧",
+    category: "infrastructure",
+    prompt: "Analyze water dependency on commercial refilling stations and pipe network expansion needs"
+  },
+  {
+    id: "weak_roof",
+    name: "Weak Roof Structure & Typhoon Vulnerability",
+    dept: "DRRMO",
+    metric: "1,842 HHs",
+    summary: "Houses with light or makeshift roofing vulnerable to severe wind damage",
+    icon: "🏚️",
+    category: "drrm",
+    prompt: "Synthesize DRRMO typhoon vulnerability index for weak roof structures and evacuation staging"
+  },
+  {
+    id: "food_insecurity",
+    name: "Moderate-to-Severe Food Insecurity",
+    dept: "City Health Office (CHO)",
+    metric: "6,412 HHs",
+    summary: "Households experiencing moderate to severe food rationing or dietary deficit",
+    icon: "🍲",
+    category: "health",
+    prompt: "Audit food insecurity and childhood malnutrition clusters in Naga City for targeted CHO intervention"
+  },
+  {
+    id: "informal_settlers",
+    name: "Informal Riverbank Settlers & Flood Exposure",
+    dept: "CPDO / DRRMO",
+    metric: "3,120 HHs",
+    summary: "Informal settlers along Bicol and Naga rivers subject to flash surge inundation",
+    icon: "🌊",
+    category: "drrm",
+    prompt: "Evaluate informal riverbank settler vulnerability and calculate safe housing resettlement requirements"
+  },
+  {
+    id: "unpaved_roads",
+    name: "Unpaved Access Roads & Upland Isolation",
+    dept: "CEO",
+    metric: "42.5 km",
+    summary: "Unpaved and dirt roads in upland agricultural zones restricting farm-to-market logistics",
+    icon: "🚜",
+    category: "infrastructure",
+    prompt: "Review CEO road concreting backlog for upland watershed barangays"
+  }
+];
+
 
 type UserRole =
   | "super_admin"
@@ -206,7 +351,37 @@ export default function ModernCategorizedCommandCenter() {
   const [privacyCellThreshold, setPrivacyCellThreshold] = useState<number>(5);
   const [aipBudgetCeiling, setAipBudgetCeiling] = useState<number>(45000000);
   const [calamitySimActive, setCalamitySimActive] = useState<boolean>(false);
-  const [sidePanelPage, setSidePanelPage] = useState<number>(1);
+  const [sidePanelTab, setSidePanelTab] = useState<"intel" | "controls">("intel");
+  const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchCategory, setSearchCategory] = useState<string>("all");
+  const [copiedHotline, setCopiedHotline] = useState<string | null>(null);
+  const [intelSubTab, setIntelSubTab] = useState<"overview" | "next_steps" | "detected">("overview");
+
+  const copyToClipboard = (text: string, id: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+    }
+    setCopiedHotline(id);
+    setTimeout(() => setCopiedHotline(null), 2000);
+  };
+
+  // Keyboard shortcut listener for Omnisearch (Cmd+K / Ctrl+K / Esc)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+      if (e.key === "Escape") {
+        if (isSearchOpen) setIsSearchOpen(false);
+        if (isProfileOpen) setIsProfileOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchOpen, isProfileOpen]);
 
   // Backend & Mobile Sync States
   const [backendConnected, setBackendConnected] = useState<boolean>(true);
@@ -709,16 +884,17 @@ export default function ModernCategorizedCommandCenter() {
               <ChevronDown className="w-3 h-3 text-slate-400 ml-0.5" />
             </div>
 
-            {/* Search Circular Button */}
+            {/* Header Omnisearch Pill (Opens Dedicated Spotlight Modal) */}
             <button
-              onClick={() => {
-                const el = document.getElementById("diagnostic-matrix-table");
-                if (el) el.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-colors cursor-pointer"
-              title="Search 27 Barangays"
+              onClick={() => setIsSearchOpen(true)}
+              className="flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-[#05389f]/40 rounded-full px-3.5 py-1.5 text-xs text-slate-500 transition-all cursor-pointer shadow-2xs group"
+              title="Search indicators, hotlines, barangays & commands (⌘K)"
             >
-              <Search className="w-3.5 h-3.5" />
+              <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#05389f] transition-colors" />
+              <span className="hidden sm:inline-block text-slate-600 font-medium">Search indicators, hotlines, barangays...</span>
+              <kbd className="hidden md:inline-block text-[9px] font-mono text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200 shadow-2xs">
+                ⌘K
+              </kbd>
             </button>
 
             {/* Notifications Circular Button */}
@@ -731,30 +907,157 @@ export default function ModernCategorizedCommandCenter() {
               <span className="w-1.5 h-1.5 rounded-full bg-rose-500 absolute top-1.5 right-1.5" />
             </button>
 
-            {/* Mayor Avatar Pill */}
-            <div className="flex items-center space-x-2 pl-1 pr-3 py-1 rounded-full bg-slate-50 border border-slate-200 select-none">
-              <div className="w-7 h-7 rounded-full bg-[#f87171] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
-                NM
-              </div>
-              <div className="hidden lg:block text-left">
-                <div className="text-[11px] font-bold text-slate-900 leading-tight">Hon. Mayor</div>
-                <div className="text-[9px] text-slate-400 leading-tight">Naga City • LGU</div>
-              </div>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+            {/* Mayor Avatar Pill (Pure Executive Status & Department Switcher Popover) */}
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className={`flex items-center space-x-2 pl-1 pr-3 py-1 rounded-full border transition-all cursor-pointer select-none ${
+                  isProfileOpen ? "bg-blue-50 border-[#05389f]" : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                }`}
+                title="Executive Mayor Profile & System Status"
+              >
+                <div className="w-7 h-7 rounded-full bg-[#f87171] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                  NM
+                </div>
+                <div className="hidden lg:block text-left">
+                  <div className="text-[11px] font-bold text-slate-900 leading-tight">Hon. Mayor</div>
+                  <div className="text-[9px] text-slate-400 leading-tight">Executive Status</div>
+                </div>
+                <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${isProfileOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {/* Backdrop to close modal when clicking outside */}
+              {isProfileOpen && (
+                <div
+                  className="fixed inset-0 z-40 bg-black/10 backdrop-blur-2xs"
+                  onClick={() => setIsProfileOpen(false)}
+                />
+              )}
+
+              {/* Profile Dropdown Modal (Executive Status, Roles & Verified Hotlines - NO barangay list) */}
+              {isProfileOpen && (
+                <div className="absolute right-0 top-12 z-50 w-88 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 space-y-3.5 animate-in fade-in zoom-in-95 duration-150 text-left">
+                  {/* Executive Header */}
+                  <div className="flex items-center space-x-3 pb-3 border-b border-slate-100">
+                    <div className="w-10 h-10 rounded-2xl bg-[#f87171] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                      NM
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-extrabold text-sm text-slate-900 leading-tight truncate">Hon. Mayor Nelson Legacion</h4>
+                        <span className="text-[9px] font-mono font-bold bg-blue-50 text-[#05389f] px-2 py-0.5 rounded-full border border-blue-200">
+                          RA 7160
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 font-medium mt-0.5 truncate">City Mayor • Naga City LGU (Camarines Sur)</p>
+                      <div className="flex items-center space-x-1.5 mt-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                        <span className="text-[9px] font-bold text-emerald-700">Executive Master Authority Active</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Switch Department Domain Role */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      <span>Switch Department Role</span>
+                      <span className="text-[9px] font-mono text-slate-400">Current: {role}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+                      {[
+                        { id: "super_admin", label: "Executive Mayor" },
+                        { id: "ceo", label: "CEO Engineering" },
+                        { id: "cpdo", label: "CPDO Planning" },
+                        { id: "drrmo", label: "DRRMO Disaster" },
+                        { id: "cho", label: "CHO Health" },
+                        { id: "swo", label: "CSWDO Social" },
+                      ].map((r) => (
+                        <button
+                          key={r.id}
+                          onClick={() => {
+                            setRole(r.id as any);
+                            setIsProfileOpen(false);
+                          }}
+                          className={`p-2 rounded-xl text-left font-bold transition-all cursor-pointer ${
+                            role === r.id
+                              ? "bg-[#05389f] text-white shadow-2xs"
+                              : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-100"
+                          }`}
+                        >
+                          {r.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Verified Naga City Emergency Hotlines (Research Verified) */}
+                  <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                    <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      <span>Naga City Emergency Hotlines</span>
+                      <span className="text-[9px] font-semibold text-rose-600">24/7 ComCen</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {NAGA_EMERGENCY_HOTLINES.map((hotline) => (
+                        <div
+                          key={hotline.id}
+                          className="bg-slate-50 p-2 rounded-xl border border-slate-200/80 flex items-center justify-between text-xs"
+                        >
+                          <div className="flex items-center space-x-2 min-w-0">
+                            <span className="text-base shrink-0">{hotline.icon}</span>
+                            <div className="min-w-0">
+                              <div className="font-bold text-slate-900 text-[11px] truncate">{hotline.agency}</div>
+                              <div className="font-mono text-[#05389f] text-[10px] font-bold truncate">
+                                {hotline.primaryPhone} <span className="text-slate-400 font-normal">| {hotline.landline}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-1 shrink-0 ml-2">
+                            <a
+                              href={`tel:${hotline.primaryPhone.replace(/[^0-9]/g, "")}`}
+                              className="px-2 py-1 bg-white hover:bg-[#edf3fc] border border-slate-200 rounded-lg text-[10px] font-bold text-[#05389f] transition-all cursor-pointer flex items-center space-x-1"
+                              title={`Call ${hotline.agency}`}
+                            >
+                              <PhoneCall className="w-2.5 h-2.5" />
+                              <span>Call</span>
+                            </a>
+                            <button
+                              onClick={() => copyToClipboard(hotline.primaryPhone, hotline.id)}
+                              className="p-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 cursor-pointer transition-all"
+                              title="Copy number"
+                            >
+                              {copiedHotline === hotline.id ? (
+                                <Check className="w-3 h-3 text-emerald-600" />
+                              ) : (
+                                <Copy className="w-3 h-3 text-slate-400" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* System Telemetry & Data Verification */}
+                  <div className="pt-2 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between">
+                    <span>PSA CBMS 2024–2026 • 44,892 HHs</span>
+                    <span className="font-mono text-emerald-700 font-bold">✓ Synced</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
 
         {/* Body Split: Left Vertical Icon Rail + Main Content Area */}
         <div className="flex flex-1 min-h-[820px] overflow-hidden">
-          {/* Left Icon Rail */}
-          <aside className="w-16 lg:w-18 bg-[#fbfcfe] border-r border-[#eef0f6] flex flex-col items-center justify-between py-6 px-2 shrink-0 select-none">
+          {/* Left Icon Rail (Upper Positioned Alignment) */}
+          <aside className="w-16 lg:w-18 bg-[#fbfcfe] border-r border-[#eef0f6] flex flex-col items-center py-6 px-2 shrink-0 select-none gap-5">
             {/* Top Brand Mark */}
             <div className="w-9 h-9 rounded-2xl bg-[#05389f]/10 border border-[#05389f]/20 flex items-center justify-center text-[#05389f]">
               <Globe className="w-4 h-4" />
             </div>
 
-            {/* Middle Icon Dock */}
+            {/* Upper Icon Dock */}
             <div className="flex flex-col items-center space-y-3">
               <button
                 onClick={() => {
@@ -825,8 +1128,8 @@ export default function ModernCategorizedCommandCenter() {
               </button>
             </div>
 
-            {/* Bottom: Help */}
-            <div className="flex flex-col items-center space-y-2">
+            {/* Bottom: Help pinned to bottom with mt-auto */}
+            <div className="mt-auto flex flex-col items-center space-y-2">
               <button
                 onClick={() => setIsAiOpen(true)}
                 className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer text-xs font-bold"
@@ -898,39 +1201,22 @@ export default function ModernCategorizedCommandCenter() {
               4. 3D GEOSPATIAL ENGINE VIEWPORT (CESIUMJS 3D GLOBE ONLY)
              ───────────────────────────────────────────────────────────── */}
           <div id="cesium-3d-viewport" className="coolors-card p-2 overflow-hidden shadow-sm">
-            <div className="p-3 bg-white rounded-t-xl flex flex-wrap items-center justify-between gap-3 border-b border-[#f2f2f2]">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#05389f] text-white flex items-center justify-center font-bold text-xs border border-[#fccf17]">
-                  2D
-                </div>
-                <div>
-                  <h3 className="text-xs font-black text-[#0a1128] font-heading flex items-center space-x-2">
-                    <span>Naga City Digital Twin • Esri World Imagery (2D Satellite Map)</span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#edf3fc] text-[#05389f] border border-[#05389f]/20 font-mono">
-                      All 27 Categorized Barangays
-                    </span>
-                  </h3>
-                  <p className="text-[10px] text-[#6b7280]">
-                    Esri World Imagery Satellite • Flat 2D Contiguous CLUP Zoning & Synchronized Centroid Labels
-                  </p>
-                </div>
-              </div>
-
-              {/* Quick Preset Buttons (All 5 Categories + All 27) & Minimize Toggle */}
+            {/* Simple Top Filter Bar (Title Removed - Minimalist) */}
+            <div className="px-4 py-2 bg-white rounded-t-xl flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 select-none">
               <div className="flex flex-wrap items-center gap-1.5">
                 <button
                   onClick={() => handleSelectCategory("all")}
-                  className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                     selectedCategoryFilter === "all"
                       ? "bg-[#05389f] text-white shadow-xs"
-                      : "bg-[#f2f2f2] text-[#4b5563] hover:text-[#0a1128]"
+                      : "bg-[#f2f2f2] text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   🌐 All 27
                 </button>
                 <button
                   onClick={() => handleSelectCategory("upland")}
-                  className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                     selectedCategoryFilter === "upland"
                       ? "bg-[#b59410] text-white shadow-xs"
                       : "bg-[#fef9e7] text-[#b59410] hover:bg-[#fee573]"
@@ -940,7 +1226,7 @@ export default function ModernCategorizedCommandCenter() {
                 </button>
                 <button
                   onClick={() => handleSelectCategory("cbd")}
-                  className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                     selectedCategoryFilter === "cbd"
                       ? "bg-[#05389f] text-white shadow-xs"
                       : "bg-[#edf3fc] text-[#05389f] hover:bg-[#dbeafe]"
@@ -950,7 +1236,7 @@ export default function ModernCategorizedCommandCenter() {
                 </button>
                 <button
                   onClick={() => handleSelectCategory("poblacion")}
-                  className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                     selectedCategoryFilter === "poblacion"
                       ? "bg-[#7c3aed] text-white shadow-xs"
                       : "bg-purple-50 text-[#7c3aed] hover:bg-purple-100"
@@ -960,7 +1246,7 @@ export default function ModernCategorizedCommandCenter() {
                 </button>
                 <button
                   onClick={() => handleSelectCategory("riverine")}
-                  className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                     selectedCategoryFilter === "riverine"
                       ? "bg-[#ea580c] text-white shadow-xs"
                       : "bg-[#fff1f2] text-[#ea580c] hover:bg-[#fee2e2]"
@@ -970,7 +1256,7 @@ export default function ModernCategorizedCommandCenter() {
                 </button>
                 <button
                   onClick={() => handleSelectCategory("growth")}
-                  className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                     selectedCategoryFilter === "growth"
                       ? "bg-[#0d9488] text-white shadow-xs"
                       : "bg-teal-50 text-[#0d9488] hover:bg-teal-100"
@@ -978,24 +1264,25 @@ export default function ModernCategorizedCommandCenter() {
                 >
                   🏥 Growth (4)
                 </button>
-                <button
-                  onClick={() => setIsDigitalTwinSectionMinimized(!isDigitalTwinSectionMinimized)}
-                  className="flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-bold bg-[#f2f2f2] text-[#0a1128] hover:bg-slate-200 transition-all cursor-pointer border border-[#e5e7eb]"
-                  title={isDigitalTwinSectionMinimized ? "Expand 3D Digital Twin" : "Minimize 3D Digital Twin"}
-                >
-                  {isDigitalTwinSectionMinimized ? (
-                    <>
-                      <ChevronDown className="w-3.5 h-3.5 text-[#05389f]" />
-                      <span>Expand 3D Twin</span>
-                    </>
-                  ) : (
-                    <>
-                      <ChevronUp className="w-3.5 h-3.5 text-[#05389f]" />
-                      <span>Minimize</span>
-                    </>
-                  )}
-                </button>
               </div>
+
+              <button
+                onClick={() => setIsDigitalTwinSectionMinimized(!isDigitalTwinSectionMinimized)}
+                className="flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+                title={isDigitalTwinSectionMinimized ? "Expand Map View" : "Minimize Map View"}
+              >
+                {isDigitalTwinSectionMinimized ? (
+                  <>
+                    <ChevronDown className="w-3.5 h-3.5 text-[#05389f]" />
+                    <span>Expand Map</span>
+                  </>
+                ) : (
+                  <>
+                    <ChevronUp className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Minimize</span>
+                  </>
+                )}
+              </button>
             </div>
 
             {!isDigitalTwinSectionMinimized && (
@@ -1013,10 +1300,10 @@ export default function ModernCategorizedCommandCenter() {
                   />
                 </div>
 
-                {/* Right Side: Paginated Barangay Diagnostic & Intelligence Deck (5 Cols on Desktop) */}
-                <div className="xl:col-span-5 bg-white rounded-2xl p-4.5 border border-[#e5e7eb] shadow-sm flex flex-col justify-between space-y-3.5">
-                  {/* Top Row: Barangay Cycler & Page Segmented Pill Switcher */}
-                  <div className="space-y-2.5 pb-2 border-b border-slate-100">
+                {/* Right Side: Barangay Diagnostic & Executive Intelligence Deck (5 Cols on Desktop) */}
+                <div className="xl:col-span-5 bg-white rounded-2xl p-4 border border-[#e5e7eb] shadow-sm flex flex-col h-[590px]">
+                  {/* Top Row: Barangay Cycler & Tab Switcher (Intel vs Controls) */}
+                  <div className="space-y-2 pb-2 border-b border-slate-100 shrink-0">
                     {/* Barangay Cycler Header */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center space-x-2.5 min-w-0">
@@ -1059,286 +1346,475 @@ export default function ModernCategorizedCommandCenter() {
                       </div>
                     </div>
 
-                    {/* Information Pagination Segmented Pills */}
+                    {/* Segmented Switcher: Barangay Intel & AI vs Merged Executive Master Controls */}
                     <div className="flex items-center bg-[#f1f3f9] p-0.5 rounded-xl border border-slate-200/60 text-xs font-bold">
-                      {[
-                        { id: 1, label: "1. Intel", title: "Barangay Profile & Indicators" },
-                        { id: 2, label: "2. Next Steps", title: "Actionable Priorities" },
-                        { id: 3, label: "3. Detected", title: "Detected Signals & Metrics" },
-                        { id: 4, label: "4. Controls", title: "Mayor Master Controls" }
-                      ].map((tab) => (
-                        <button
-                          key={tab.id}
-                          onClick={() => setSidePanelPage(tab.id)}
-                          className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer text-[11px] ${
-                            sidePanelPage === tab.id
-                              ? "bg-[#05389f] text-white shadow-xs font-extrabold"
-                              : "text-slate-600 hover:text-slate-900"
-                          }`}
-                          title={tab.title}
-                        >
-                          {tab.label}
-                        </button>
-                      ))}
+                      <button
+                        onClick={() => setSidePanelTab("intel")}
+                        className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer text-[11px] ${
+                          sidePanelTab === "intel"
+                            ? "bg-[#05389f] text-white shadow-xs font-extrabold"
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        📍 Barangay Intel & AI
+                      </button>
+                      <button
+                        onClick={() => setSidePanelTab("controls")}
+                        className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer text-[11px] ${
+                          sidePanelTab === "controls"
+                            ? "bg-[#05389f] text-white shadow-xs font-extrabold"
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        ⚙️ Master Controls
+                      </button>
                     </div>
                   </div>
 
-                  {/* PAGE 1: BARANGAY INTEL & AI POLICY */}
-                  {sidePanelPage === 1 && (
-                    <div className="space-y-3 animate-in fade-in duration-150">
-                      {/* Risk Badge & MVI Row */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          {(() => {
-                            const mvi = selectedBarangay.vulnerability_index || 50;
-                            if (mvi >= 70) {
-                              return (
-                                <span className="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold flex items-center space-x-1">
-                                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse inline-block" />
-                                  <span>🔴 High Risk Level</span>
-                                </span>
-                              );
-                            }
-                            if (mvi >= 50) {
-                              return (
-                                <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center space-x-1">
-                                  <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-                                  <span>🟡 Medium Risk Level</span>
-                                </span>
-                              );
-                            }
-                            return (
-                              <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center space-x-1">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                                <span>🟢 Low Risk Level</span>
+                  {/* Scrollable Container with Smooth Scrollbar */}
+                  <div className="flex-1 overflow-y-auto pr-1 space-y-3 min-h-0 pt-2">
+                    {/* TAB 1: BARANGAY INTEL (OVERVIEW, NEXT STEPS, DETECTED) */}
+                    {sidePanelTab === "intel" && (
+                      <div className="space-y-3 animate-in fade-in duration-150">
+                        {/* Sub-tab segmented pill bar (Overview, Next Steps, Detected - NO 'ALL' BUTTON, NO MOVING DOTS) */}
+                        <div className="flex items-center space-x-1 bg-[#f3f5f9] p-1 rounded-xl border border-slate-200/70 text-[11px] font-bold shrink-0">
+                          <button
+                            onClick={() => setIntelSubTab("overview")}
+                            className={`flex-1 py-1.5 rounded-lg transition-all text-center cursor-pointer ${
+                              intelSubTab === "overview"
+                                ? "bg-white text-[#05389f] shadow-xs font-black"
+                                : "text-slate-600 hover:text-slate-900"
+                            }`}
+                          >
+                            📍 Overview
+                          </button>
+                          <button
+                            onClick={() => setIntelSubTab("next_steps")}
+                            className={`flex-1 py-1.5 rounded-lg transition-all text-center cursor-pointer ${
+                              intelSubTab === "next_steps"
+                                ? "bg-white text-[#05389f] shadow-xs font-black"
+                                : "text-slate-600 hover:text-slate-900"
+                            }`}
+                          >
+                            ⚡ Next Steps
+                          </button>
+                          <button
+                            onClick={() => setIntelSubTab("detected")}
+                            className={`flex-1 py-1.5 rounded-lg transition-all text-center cursor-pointer ${
+                              intelSubTab === "detected"
+                                ? "bg-white text-[#05389f] shadow-xs font-black"
+                                : "text-slate-600 hover:text-slate-900"
+                            }`}
+                          >
+                            🔍 Detected
+                          </button>
+                        </div>
+
+                        {/* ── SUB-SECTION: OVERVIEW (CLEAN DIAGNOSTICS + COPILOT LAUNCHER) ── */}
+                        {intelSubTab === "overview" && (
+                          <div className="space-y-3 animate-in fade-in duration-150">
+                            {/* Risk Badge & MVI Row */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                {(() => {
+                                  const mvi = selectedBarangay.vulnerability_index || 50;
+                                  if (mvi >= 70) {
+                                    return (
+                                      <span className="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold flex items-center space-x-1">
+                                        <span className="w-2 h-2 rounded-full bg-rose-500 inline-block" />
+                                        <span>🔴 High Risk Level</span>
+                                      </span>
+                                    );
+                                  }
+                                  if (mvi >= 50) {
+                                    return (
+                                      <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center space-x-1">
+                                        <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                                        <span>🟡 Medium Risk Level</span>
+                                      </span>
+                                    );
+                                  }
+                                  return (
+                                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center space-x-1">
+                                      <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                                      <span>🟢 Low Risk Level</span>
+                                    </span>
+                                  );
+                                })()}
+                              </div>
+                              <span className="px-3 py-0.5 rounded-full text-xs font-mono font-extrabold bg-[#edf3fc] text-[#05389f] border border-[#05389f]/25 shadow-2xs">
+                                Empirical MVI: {selectedBarangay.vulnerability_index}
                               </span>
-                            );
-                          })()}
-                        </div>
-                        <span className="px-3 py-0.5 rounded-full text-xs font-mono font-extrabold bg-[#edf3fc] text-[#05389f] border border-[#05389f]/25 shadow-2xs">
-                          Empirical MVI: {selectedBarangay.vulnerability_index}
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                        {selectedBarangay.category.description}
-                      </p>
-
-                      {/* Twin Rounded Stats: Households & Population */}
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <div className="bg-[#f7f8fa] p-3 rounded-xl border border-slate-200">
-                          <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">
-                            HOUSEHOLDS
-                          </span>
-                          <div className="font-extrabold text-slate-900 text-base mt-0.5 font-mono">
-                            {selectedBarangay.total_households?.toLocaleString()} HHs
-                          </div>
-                        </div>
-                        <div className="bg-[#f7f8fa] p-3 rounded-xl border border-slate-200">
-                          <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">
-                            POPULATION
-                          </span>
-                          <div className="font-extrabold text-slate-900 text-base mt-0.5 font-mono">
-                            {selectedBarangay.total_population?.toLocaleString()} Pop
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* 3 Hotspot Indicators */}
-                      <div className="space-y-2 text-xs bg-[#f7f8fa] p-3 rounded-xl border border-slate-200">
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-600 font-medium">Weak Roof Structure:</span>
-                          <span className="font-bold text-rose-700 font-mono text-xs">
-                            {selectedBarangay.drrm?.weak_roof_pct}%
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-600 font-medium">Refilling Station Dependency:</span>
-                          <span className="font-bold text-[#05389f] font-mono text-xs">
-                            {selectedBarangay.infrastructure_ceo?.drinking_refilling_pct}%
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-slate-600 font-medium">Sanitation Deficit (Unimproved):</span>
-                          <span className="font-bold text-amber-700 font-mono text-xs">
-                            {selectedBarangay.infrastructure_ceo?.unimproved_toilet_pct}%
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Framed AI Analysis & Policy Generation */}
-                      <div className="p-3 bg-[#edf3fc] border border-[#05389f]/20 rounded-xl flex items-center justify-between gap-3 shadow-2xs">
-                        <div className="flex items-center space-x-2.5 min-w-0">
-                          <div className="w-8 h-8 rounded-xl bg-[#05389f] text-white flex items-center justify-center shrink-0 shadow-xs">
-                            <Sparkles className="w-4 h-4 text-[#facc15]" />
-                          </div>
-                          <div className="truncate">
-                            <div className="text-xs font-bold text-[#05389f] leading-tight truncate">
-                              AI Analysis & Policy Generation
                             </div>
-                            <div className="text-[10px] text-slate-500 leading-tight truncate">
-                              Synthesize {selectedBarangay.realName} intervention
+
+                            <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                              {selectedBarangay.category.description}
+                            </p>
+
+                            {/* Twin Rounded Stats: Households & Population */}
+                            <div className="grid grid-cols-2 gap-2.5">
+                              <div className="bg-[#f7f8fa] p-2.5 rounded-xl border border-slate-200">
+                                <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">
+                                  HOUSEHOLDS
+                                </span>
+                                <div className="font-extrabold text-slate-900 text-sm sm:text-base mt-0.5 font-mono">
+                                  {selectedBarangay.total_households?.toLocaleString()} HHs
+                                </div>
+                              </div>
+                              <div className="bg-[#f7f8fa] p-2.5 rounded-xl border border-slate-200">
+                                <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">
+                                  POPULATION
+                                </span>
+                                <div className="font-extrabold text-slate-900 text-sm sm:text-base mt-0.5 font-mono">
+                                  {selectedBarangay.total_population?.toLocaleString()} Pop
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* 3 Hotspot Indicators */}
+                            <div className="space-y-1.5 text-xs bg-[#f7f8fa] p-2.5 rounded-xl border border-slate-200">
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-600 font-medium">Weak Roof Structure:</span>
+                                <span className="font-bold text-rose-700 font-mono text-xs">
+                                  {selectedBarangay.drrm?.weak_roof_pct}%
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-600 font-medium">Refilling Station Dependency:</span>
+                                <span className="font-bold text-[#05389f] font-mono text-xs">
+                                  {selectedBarangay.infrastructure_ceo?.drinking_refilling_pct}%
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-600 font-medium">Sanitation Deficit (Unimproved):</span>
+                                <span className="font-bold text-amber-700 font-mono text-xs">
+                                  {selectedBarangay.infrastructure_ceo?.unimproved_toilet_pct}%
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* MODERN STATUTORY COPILOT LAUNCHER CARD (Clean & Elegant, replacing crammed AI panel) */}
+                            <div className="bg-[#fbfcfe] rounded-2xl p-3 border border-slate-200/90 shadow-2xs space-y-2.5">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2.5">
+                                  <div className="w-8 h-8 rounded-xl bg-[#05389f] text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+                                    <Sparkles className="w-4 h-4 text-[#facc15]" />
+                                  </div>
+                                  <div>
+                                    <h4 className="text-xs font-bold text-slate-900 leading-tight">
+                                      Statutory Decision Copilot
+                                    </h4>
+                                    <p className="text-[10px] text-slate-500 font-medium">
+                                      Evidence-based reasoning for {selectedBarangay.realName}
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                                  RA 7160 Active
+                                </span>
+                              </div>
+
+                              {/* Quick Action Suggestion Pills */}
+                              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                <button
+                                  onClick={() => {
+                                    setIsAiOpen(true);
+                                    executeAiQuery(`Audit ${selectedBarangay.realName} infrastructure deficit against RA 7160`);
+                                  }}
+                                  className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-[10px] font-semibold hover:border-[#05389f] hover:text-[#05389f] transition-all cursor-pointer shadow-2xs"
+                                >
+                                  🏷️ Audit Deficit
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setIsAiOpen(true);
+                                    executeAiQuery("Explain RA 7160 Section 287 statutory requirement for 20% development fund");
+                                  }}
+                                  className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-[10px] font-semibold hover:border-[#05389f] hover:text-[#05389f] transition-all cursor-pointer shadow-2xs"
+                                >
+                                  📄 Explain RA 7160
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setIsAiOpen(true);
+                                    executeAiQuery(`Audit ${selectedBarangay.realName} AIP Ceiling compliance against 20% LDF statutory baseline`);
+                                  }}
+                                  className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-[10px] font-semibold hover:border-[#05389f] hover:text-[#05389f] transition-all cursor-pointer shadow-2xs"
+                                >
+                                  ⚖️ Audit AIP Ceiling
+                                </button>
+                              </div>
+
+                              {/* Prominent Button to Launch Slide-Out Copilot Drawer */}
+                              <button
+                                onClick={() => {
+                                  setIsAiOpen(true);
+                                  executeAiQuery(`Analyze statutory development priority and budget recommendation for ${selectedBarangay.realName}`);
+                                }}
+                                className="w-full py-2.5 rounded-xl bg-[#05389f] hover:bg-[#042d82] text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center space-x-2 shadow-xs group"
+                              >
+                                <Sparkles className="w-3.5 h-3.5 text-[#facc15] group-hover:rotate-12 transition-transform" />
+                                <span>Open Full Statutory Copilot Drawer</span>
+                                <ArrowUpRight className="w-3.5 h-3.5 text-white/80" />
+                              </button>
+                            </div>
+
+                            {/* Rapid Emergency Hotline Quick-Link */}
+                            <div className="bg-rose-50/70 border border-rose-200/80 rounded-xl p-2.5 flex items-center justify-between text-xs">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-base shrink-0">🚨</span>
+                                <div>
+                                  <div className="font-bold text-rose-900 text-[11px] leading-tight">Naga 911 / CDRRMO Central</div>
+                                  <div className="text-[10px] text-rose-700 font-mono font-semibold">0908-525-3000 • 24/7 ComCen</div>
+                                </div>
+                              </div>
+                              <a
+                                href="tel:09085253000"
+                                className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold transition-all flex items-center space-x-1 cursor-pointer"
+                              >
+                                <PhoneCall className="w-2.5 h-2.5" />
+                                <span>Call 911</span>
+                              </a>
                             </div>
                           </div>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setIsAiOpen(true);
-                            executeAiQuery(`Synthesize priority statutory policy and AIP capital intervention for ${selectedBarangay.displayName} (${selectedBarangay.category.name})`);
-                          }}
-                          className="px-3 py-1.5 rounded-full bg-[#05389f] hover:bg-[#1e40af] text-white text-[11px] font-bold transition-all shadow-xs cursor-pointer shrink-0"
-                        >
-                          Generate →
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                        )}
 
-                  {/* PAGE 2: NEXT STEPS (ACTIONABLE PRIORITIES - MATCHES USER SCREENSHOT 1) */}
-                  {sidePanelPage === 2 && (
+                        {/* ── SUB-SECTION: NEXT STEPS (STABLE, ROCK-SOLID) ── */}
+                        {intelSubTab === "next_steps" && (
+                          <div className="space-y-3 animate-in fade-in duration-150">
+                            <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+                              <div className="flex items-center space-x-1.5">
+                                <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+                                  Next steps
+                                </h4>
+                                <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                  1 priority
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setIsAiOpen(true);
+                                  executeAiQuery(`Synthesize all immediate statutory next steps for ${selectedBarangay.realName}`);
+                                }}
+                                className="text-[10px] text-[#05389f] font-bold hover:underline flex items-center space-x-0.5 cursor-pointer"
+                              >
+                                <span>Audit All</span>
+                                <span>↗</span>
+                              </button>
+                            </div>
+
+                            {/* Sunshine Yellow Hero Card (OrchestrateIQ Style - Rock Solid, No translateY jump) */}
+                            <div className="yellow-feature-card p-4 relative overflow-hidden flex flex-col justify-between rounded-2xl shadow-sm">
+                              <div>
+                                <div className="flex items-center justify-between">
+                                  <h4 className="font-extrabold text-sm text-[#0f172a]">
+                                    Prioritize {selectedBarangay.realName} Dredging
+                                  </h4>
+                                  <span className="bg-white/95 text-[#0f172a] font-black px-2 py-0.5 rounded-full text-[10px] shadow-2xs">
+                                    • Do first
+                                  </span>
+                                </div>
+                                <p className="text-xs text-[#0f172a]/85 mt-1 font-medium leading-relaxed">
+                                  CBMS flood vulnerability {selectedBarangay.vulnerability_index}% with {selectedBarangay.infrastructure_ceo?.unimproved_toilet_pct || 14.2}% deficit in drainage sanitation.
+                                </p>
+                              </div>
+
+                              <div className="mt-3 pt-2.5 border-t border-black/10 flex items-center justify-between">
+                                <div className="flex items-center space-x-1.5">
+                                  <span className="px-2 py-0.5 rounded-full bg-white/90 text-[#0f172a] text-[10px] font-bold shadow-2xs">
+                                    🌊 2 projects
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded-full bg-white/90 text-[#0f172a] text-[10px] font-bold shadow-2xs">
+                                    ⏱️ ~2 min
+                                  </span>
+                                </div>
+                                <div className="flex -space-x-1">
+                                  <span className="w-5 h-5 rounded-full bg-[#05389f] text-white text-[9px] font-bold flex items-center justify-center border border-white">
+                                    B
+                                  </span>
+                                  <span className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[9px] font-bold flex items-center justify-center border border-white">
+                                    {selectedBarangayId}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => {
+                                  setIsAiOpen(true);
+                                  executeAiQuery(`Draft comprehensive capital investment proposal for ${selectedBarangay.realName} drainage dredging under RA 7160`);
+                                }}
+                                className="mt-3 w-full py-2 rounded-xl bg-[#0f172a] hover:bg-[#1e293b] text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center space-x-1.5 shadow-2xs"
+                              >
+                                <Sparkles className="w-3.5 h-3.5 text-[#facc15]" />
+                                <span>Synthesize {selectedBarangay.realName} Proposal</span>
+                              </button>
+                            </div>
+
+                            {/* Sub-card 1: Set LDF Statutory Ceiling */}
+                            <div className="bg-[#f7f8fa] p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                              <div>
+                                <div className="text-xs font-bold text-slate-900">Set LDF Statutory Ceiling</div>
+                                <div className="text-[10px] text-slate-500 mt-0.5">RA 7160 Sec. 287 minimum 20% dev fund baseline</div>
+                                <div className="flex items-center space-x-2.5 mt-1.5 text-[10px] text-slate-600 font-medium">
+                                  <span>💰 ₱{(aipBudgetCeiling / 1000000).toFixed(1)}M Ceiling</span>
+                                  <span>📅 2026 Cycle</span>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => setSidePanelTab("controls")}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-200 transition-colors cursor-pointer"
+                                title="Go to Master Controls"
+                              >
+                                <ChevronRight className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            {/* Sub-card 2: Field Inspection Telemetry */}
+                            <div className="bg-[#f7f8fa] p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                              <div>
+                                <div className="text-xs font-bold text-slate-900">Field Inspection Telemetry</div>
+                                <div className="text-[10px] text-slate-500 mt-0.5">{fieldReports.length} live reports synced from mobile officers</div>
+                              </div>
+                              <button
+                                onClick={() => setActiveNavTab("executive_command")}
+                                className="px-2.5 py-1 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-800 text-[10px] font-bold transition-colors cursor-pointer"
+                              >
+                                Verify →
+                              </button>
+                            </div>
+
+                            {/* Sub-card 3: Emergency Command Telemetry */}
+                            <div className="bg-rose-50/50 p-3 rounded-xl border border-rose-200/80 flex items-center justify-between">
+                              <div>
+                                <div className="text-xs font-bold text-rose-950 flex items-center space-x-1.5">
+                                  <span>🚨 CDRRMO Disaster Dispatch</span>
+                                </div>
+                                <div className="text-[10px] text-rose-700 mt-0.5">Emergency Command Center (0908-525-3000)</div>
+                              </div>
+                              <a
+                                href="tel:09085253000"
+                                className="px-2.5 py-1 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold transition-colors cursor-pointer"
+                              >
+                                Call 911
+                              </a>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* ── SUB-SECTION: DETECTED SIGNALS ── */}
+                        {intelSubTab === "detected" && (
+                          <div className="space-y-3 animate-in fade-in duration-150">
+                            <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+                              <div className="flex items-center space-x-1.5">
+                                <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+                                  Detected
+                                </h4>
+                                <span className="px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-blue-50 text-[#05389f] border border-blue-200">
+                                  Citywide & Brgy
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setIsAiOpen(true);
+                                  executeAiQuery("Audit all detected anomaly clusters across Naga City 27 barangays");
+                                }}
+                                className="text-[10px] text-[#05389f] font-bold hover:underline flex items-center space-x-0.5 cursor-pointer"
+                              >
+                                <span>Audit All</span>
+                                <span>↗</span>
+                              </button>
+                            </div>
+
+                            {/* 2x2 Grid of Cards (Matching OrchestrateIQ) */}
+                            <div className="grid grid-cols-2 gap-2.5">
+                              <div className="bg-[#f7f8fa] p-3 rounded-2xl border border-slate-200 flex flex-col justify-between min-h-[92px]">
+                                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                  <Globe className="w-3.5 h-3.5" />
+                                </div>
+                                <div className="mt-2">
+                                  <div className="text-base font-extrabold text-slate-900 font-mono">27</div>
+                                  <div className="text-[11px] font-bold text-slate-700">Barangays</div>
+                                  <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ 100% CBMS mapped</div>
+                                </div>
+                              </div>
+
+                              <div className="bg-[#f7f8fa] p-3 rounded-2xl border border-slate-200 flex flex-col justify-between min-h-[92px]">
+                                <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                                  <Layers className="w-3.5 h-3.5" />
+                                </div>
+                                <div className="mt-2">
+                                  <div className="text-base font-extrabold text-slate-900 font-mono">5</div>
+                                  <div className="text-[11px] font-bold text-slate-700">Planning Sectors</div>
+                                  <div className="text-[10px] text-purple-600 font-semibold mt-0.5">✓ 92% statutory audit</div>
+                                </div>
+                              </div>
+
+                              <div className="bg-[#f7f8fa] p-3 rounded-2xl border border-slate-200 flex flex-col justify-between min-h-[92px]">
+                                <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#05389f] flex items-center justify-center">
+                                  <Users className="w-3.5 h-3.5" />
+                                </div>
+                                <div className="mt-2">
+                                  <div className="text-base font-extrabold text-slate-900 font-mono">44,892</div>
+                                  <div className="text-[11px] font-bold text-slate-700">Households</div>
+                                  <div className="text-[10px] text-blue-600 font-semibold mt-0.5">✓ PSA validated</div>
+                                </div>
+                              </div>
+
+                              <div className="bg-[#f7f8fa] p-3 rounded-2xl border border-slate-200 flex flex-col justify-between min-h-[92px]">
+                                <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                                  <Zap className="w-3.5 h-3.5" />
+                                </div>
+                                <div className="mt-2">
+                                  <div className="text-base font-extrabold text-slate-900 font-mono">₱112.5M</div>
+                                  <div className="text-[11px] font-bold text-slate-700">Hotspot Deficit</div>
+                                  <div className="text-[10px] text-amber-600 font-semibold mt-0.5">⚡ 4 high priority</div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Barangay-Specific Detected Metrics */}
+                            <div className="bg-[#f7f8fa] p-3 rounded-xl border border-slate-200 space-y-1.5 text-xs">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                                Detected for {selectedBarangay.realName}
+                              </span>
+                              <div className="grid grid-cols-2 gap-2 text-slate-700">
+                                <div className="bg-white p-2 rounded-lg border border-slate-200">
+                                  <span className="text-[10px] text-slate-400 block font-medium">Unimproved Sanitation</span>
+                                  <span className="font-mono font-bold text-amber-700 text-xs">
+                                    {selectedBarangay.infrastructure_ceo?.households_needing_sanitation || 0} HHs
+                                  </span>
+                                </div>
+                                <div className="bg-white p-2 rounded-lg border border-slate-200">
+                                  <span className="text-[10px] text-slate-400 block font-medium">Food Insecurity</span>
+                                  <span className="font-mono font-bold text-rose-700 text-xs">
+                                    {selectedBarangay.health_cho?.food_insecurity_count || 0} HHs
+                                  </span>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setIsAiOpen(true);
+                                  executeAiQuery(`Analyze detected risk anomalies for ${selectedBarangay.realName}`);
+                                }}
+                                className="w-full mt-1.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-[#05389f] text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center space-x-1"
+                              >
+                                <Bot className="w-3.5 h-3.5" />
+                                <span>Audit Detected Anomalies with Copilot</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                  {/* TAB 2: MERGED EXECUTIVE MASTER CONTROLS */}
+                  {sidePanelTab === "controls" && (
                     <div className="space-y-3 animate-in fade-in duration-150">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Next steps</h4>
-                        <span className="text-[10px] text-slate-400 font-mono">1 priority action</span>
-                      </div>
-
-                      {/* Sunshine Yellow Hero Card */}
-                      <div className="yellow-feature-card p-4 relative overflow-hidden flex flex-col justify-between rounded-2xl shadow-sm">
-                        <div>
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-extrabold text-sm text-[#0f172a]">
-                              Prioritize {selectedBarangay.realName} Dredging
-                            </h4>
-                            <span className="bg-white/95 text-[#0f172a] font-black px-2 py-0.5 rounded-full text-[10px] shadow-2xs">
-                              • Do first
-                            </span>
-                          </div>
-                          <p className="text-xs text-[#0f172a]/85 mt-1 font-medium leading-relaxed">
-                            CBMS flood vulnerability {selectedBarangay.vulnerability_index}% with {selectedBarangay.infrastructure_ceo?.unimproved_toilet_pct || 14.2}% deficit in drainage sanitation.
-                          </p>
-                        </div>
-
-                        <div className="mt-3 pt-2.5 border-t border-black/10 flex items-center justify-between">
-                          <div className="flex items-center space-x-1.5">
-                            <span className="px-2 py-0.5 rounded-full bg-white/90 text-[#0f172a] text-[10px] font-bold shadow-2xs">
-                              🌊 2 projects
-                            </span>
-                            <span className="px-2 py-0.5 rounded-full bg-white/90 text-[#0f172a] text-[10px] font-bold shadow-2xs">
-                              ⏱️ ~2 min
-                            </span>
-                          </div>
-                          <div className="flex -space-x-1">
-                            <span className="w-5 h-5 rounded-full bg-[#05389f] text-white text-[9px] font-bold flex items-center justify-center border border-white">B</span>
-                            <span className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[9px] font-bold flex items-center justify-center border border-white">{selectedBarangayId}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Sub-card A: Set LDF Statutory Ceiling */}
-                      <div className="bg-[#f7f8fa] p-3 rounded-xl border border-slate-200 flex items-center justify-between">
-                        <div>
-                          <div className="text-xs font-bold text-slate-900">Set LDF Statutory Ceiling</div>
-                          <div className="text-[10px] text-slate-500 mt-0.5">RA 7160 Sec. 287 minimum 20% dev fund baseline</div>
-                          <div className="flex items-center space-x-2.5 mt-1.5 text-[10px] text-slate-600 font-medium">
-                            <span>💰 ₱{(aipBudgetCeiling / 1000000).toFixed(1)}M Ceiling</span>
-                            <span>📅 2026 Cycle</span>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => setActiveNavTab("proposals")}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-200 transition-colors cursor-pointer"
-                        >
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      {/* Sub-card B: Field Inspection Telemetry */}
-                      <div className="bg-[#f7f8fa] p-3 rounded-xl border border-slate-200 flex items-center justify-between">
-                        <div>
-                          <div className="text-xs font-bold text-slate-900">Field Inspection Telemetry</div>
-                          <div className="text-[10px] text-slate-500 mt-0.5">{fieldReports.length} live reports synced from mobile officers</div>
-                        </div>
-                        <button
-                          onClick={() => setActiveNavTab("executive_command")}
-                          className="px-2.5 py-1 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-800 text-[10px] font-bold transition-colors cursor-pointer"
-                        >
-                          Verify →
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* PAGE 3: DETECTED SIGNALS & METRICS (MATCHES USER SCREENSHOT 1) */}
-                  {sidePanelPage === 3 && (
-                    <div className="space-y-3 animate-in fade-in duration-150">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Detected Signals</h4>
-                        <span className="text-[10px] text-slate-400 font-mono">Citywide & Brgy</span>
-                      </div>
-
-                      {/* 2x2 Grid of Cards */}
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <div className="bg-[#f7f8fa] p-3 rounded-2xl border border-slate-200 flex flex-col justify-between min-h-[92px]">
-                          <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                            <Globe className="w-3.5 h-3.5" />
-                          </div>
-                          <div className="mt-2">
-                            <div className="text-base font-extrabold text-slate-900 font-mono">27</div>
-                            <div className="text-[11px] font-bold text-slate-700">Barangays</div>
-                            <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ 100% CBMS mapped</div>
-                          </div>
-                        </div>
-
-                        <div className="bg-[#f7f8fa] p-3 rounded-2xl border border-slate-200 flex flex-col justify-between min-h-[92px]">
-                          <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-                            <Layers className="w-3.5 h-3.5" />
-                          </div>
-                          <div className="mt-2">
-                            <div className="text-base font-extrabold text-slate-900 font-mono">5</div>
-                            <div className="text-[11px] font-bold text-slate-700">Planning Sectors</div>
-                            <div className="text-[10px] text-purple-600 font-semibold mt-0.5">✓ 92% statutory audit</div>
-                          </div>
-                        </div>
-
-                        <div className="bg-[#f7f8fa] p-3 rounded-2xl border border-slate-200 flex flex-col justify-between min-h-[92px]">
-                          <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#05389f] flex items-center justify-center">
-                            <Users className="w-3.5 h-3.5" />
-                          </div>
-                          <div className="mt-2">
-                            <div className="text-base font-extrabold text-slate-900 font-mono">44,892</div>
-                            <div className="text-[11px] font-bold text-slate-700">Households</div>
-                            <div className="text-[10px] text-blue-600 font-semibold mt-0.5">✓ PSA validated</div>
-                          </div>
-                        </div>
-
-                        <div className="bg-[#f7f8fa] p-3 rounded-2xl border border-slate-200 flex flex-col justify-between min-h-[92px]">
-                          <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                            <Zap className="w-3.5 h-3.5" />
-                          </div>
-                          <div className="mt-2">
-                            <div className="text-base font-extrabold text-slate-900 font-mono">₱112.5M</div>
-                            <div className="text-[11px] font-bold text-slate-700">Hotspot Deficit</div>
-                            <div className="text-[10px] text-amber-600 font-semibold mt-0.5">🔥 4 high priority</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Selected Barangay Quick Context */}
-                      <div className="bg-[#edf3fc] p-3 rounded-xl border border-[#05389f]/20 text-xs">
-                        <span className="text-[10px] uppercase font-bold text-[#05389f]">Local Barangay Footprint</span>
-                        <div className="font-bold text-slate-800 mt-1">
-                          {selectedBarangay.realName} has {selectedBarangay.total_households?.toLocaleString()} HHs • {((selectedBarangay.total_population / 181197) * 100).toFixed(1)}% of Naga City population
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* PAGE 4: EXECUTIVE MASTER CONTROLS (MATCHES USER SCREENSHOT 2) */}
-                  {sidePanelPage === 4 && (
-                    <div className="space-y-3 animate-in fade-in duration-150">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Executive Master Controls</h4>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#05389f] border border-blue-200">
+                      <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+                        <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+                          Executive Master Controls
+                        </h4>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#05389f] border border-blue-200 font-mono">
                           Mayor Authority
                         </span>
                       </div>
@@ -1358,7 +1834,7 @@ export default function ModernCategorizedCommandCenter() {
                                 : "bg-slate-200 text-slate-600"
                             }`}
                           >
-                            {crossOfficeSharing ? "ENABLED" : "DISABLED"}
+                            {crossOfficeSharing ? "ENABLED" : "LOCKED"}
                           </button>
                         </div>
 
@@ -1371,11 +1847,11 @@ export default function ModernCategorizedCommandCenter() {
                           <input
                             type="range"
                             min="20000000"
-                            max="100000000"
-                            step="1000000"
+                            max="80000000"
+                            step="5000000"
                             value={aipBudgetCeiling}
                             onChange={(e) => setAipBudgetCeiling(Number(e.target.value))}
-                            className="w-full accent-[#05389f] cursor-pointer"
+                            className="w-full accent-[#05389f] cursor-pointer h-1.5"
                           />
                         </div>
 
@@ -1383,38 +1859,61 @@ export default function ModernCategorizedCommandCenter() {
                         <div className="bg-[#f7f8fa] p-2.5 rounded-xl border border-slate-200 space-y-1.5">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-slate-900 text-xs">3. Executive Sign-Off Queue</span>
-                            <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800">
-                              {proposals.filter(p => p.status === "PENDING").length} Pending
+                            <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-[#fccf17] text-[#0a1128] font-mono">
+                              {proposals.filter((p) => p.status === "PENDING").length} Pending
                             </span>
                           </div>
-                          {proposals.slice(0, 2).map((prop) => (
-                            <div key={prop.id} className="p-2 bg-white rounded-lg border border-slate-200 flex items-center justify-between gap-2">
-                              <div className="truncate">
-                                <div className="font-bold text-[11px] text-slate-900 truncate">{prop.title}</div>
-                                <div className="text-[10px] text-slate-500 font-mono">₱{prop.budget.toLocaleString()} • {prop.office}</div>
-                              </div>
-                              <div className="flex items-center space-x-1 shrink-0">
-                                {prop.status === "APPROVED" ? (
-                                  <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">Approved</span>
-                                ) : (
-                                  <>
+                          <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                            {proposals.map((prop) => (
+                              <div key={prop.id} className="p-2 bg-white rounded-lg border border-slate-200 space-y-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-bold text-[#05389f]">{prop.office} • {prop.barangay}</span>
+                                  <span className="font-mono text-[10px] font-bold text-slate-900">₱{prop.budget.toLocaleString()}</span>
+                                </div>
+                                <div className="text-[11px] font-bold text-slate-900 leading-tight">{prop.title}</div>
+                                <div className="text-[9px] text-slate-400 font-mono">{prop.statute} ({prop.section})</div>
+                                <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                                  <span
+                                    className={`text-[9px] font-bold px-2 py-0.2 rounded-full ${
+                                      prop.status === "APPROVED"
+                                        ? "bg-emerald-100 text-emerald-800"
+                                        : prop.status === "FUNDED"
+                                        ? "bg-blue-100 text-blue-800"
+                                        : prop.status === "REJECTED"
+                                        ? "bg-rose-100 text-rose-800"
+                                        : "bg-amber-100 text-amber-800"
+                                    }`}
+                                  >
+                                    {prop.status}
+                                  </span>
+                                  {prop.status === "PENDING" && (
+                                    <div className="flex space-x-1">
+                                      <button
+                                        onClick={() => handleProposalAction(prop.id, "approve")}
+                                        className="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-[9px] font-bold cursor-pointer"
+                                      >
+                                        Approve
+                                      </button>
+                                      <button
+                                        onClick={() => handleProposalAction(prop.id, "reject")}
+                                        className="px-2 py-0.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-[9px] font-bold cursor-pointer"
+                                      >
+                                        Reject
+                                      </button>
+                                    </div>
+                                  )}
+                                  {prop.status === "APPROVED" && (
                                     <button
-                                      onClick={() => handleProposalAction(prop.id, "approve")}
-                                      className="px-2 py-0.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold cursor-pointer"
+                                      onClick={() => handleProposalAction(prop.id, "fund")}
+                                      className="px-2 py-0.5 bg-[#05389f] text-white rounded-full text-[9px] font-bold cursor-pointer"
                                     >
-                                      Approve
+                                      Allot Budget
                                     </button>
-                                    <button
-                                      onClick={() => handleProposalAction(prop.id, "reject")}
-                                      className="px-2 py-0.5 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold cursor-pointer"
-                                    >
-                                      Reject
-                                    </button>
-                                  </>
-                                )}
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
 
                         {/* Control 4: RA 10173 Privacy Shield */}
@@ -1454,472 +1953,190 @@ export default function ModernCategorizedCommandCenter() {
                                 : "bg-rose-100 text-rose-700 hover:bg-rose-200"
                             }`}
                           >
-                            {calamitySimActive ? "Active" : "Simulate"}
+                            {calamitySimActive ? "Surge Active" : "Simulate"}
                           </button>
                         </div>
                       </div>
                     </div>
                   )}
-
-                  {/* Pagination Footer Controls */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                    <button
-                      onClick={() => setSidePanelPage((p) => Math.max(1, p - 1))}
-                      disabled={sidePanelPage === 1}
-                      className={`px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1 transition-all ${
-                        sidePanelPage === 1
-                          ? "opacity-40 cursor-not-allowed text-slate-400"
-                          : "hover:bg-slate-100 text-slate-700 cursor-pointer"
-                      }`}
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                      <span>Previous</span>
-                    </button>
-
-                    <div className="flex items-center space-x-1.5">
-                      {[1, 2, 3, 4].map((p) => (
-                        <span
-                          key={p}
-                          onClick={() => setSidePanelPage(p)}
-                          className={`cursor-pointer transition-all rounded-full ${
-                            sidePanelPage === p
-                              ? "w-4 h-1.5 bg-[#05389f]"
-                              : "w-1.5 h-1.5 bg-slate-300 hover:bg-slate-400"
-                          }`}
-                        />
-                      ))}
-                      <span cla          {/* ═════════════════════════════════════════════════════════════
-              STATUTORY ASSISTANT BANNER (ORCHESTRATE-IQ GLOWING BLUE ORB + SIRI CARD)
-             ═════════════════════════════════════════════════════════════ */}
-          <div className="coolors-card p-5 relative overflow-hidden bg-gradient-to-r from-white via-[#fbfcfe] to-[#f4f7fc] border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-5">
-            {/* Left: 3D Glowing Blue Orb + Greeting */}
-            <div className="flex items-center space-x-4 shrink-0">
-              <div className="blue-orb flex items-center justify-center shrink-0">
-                <Sparkles className="w-6 h-6 text-white/90 animate-pulse" />
-              </div>
-              <div>
-                <h4 className="text-base font-extrabold text-[#0f172a] tracking-tight">
-                  Welcome, Mayor. What can I help with today?
-                </h4>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  Direct statutory AI reasoning on 44,892 PSA CBMS households across 27 Barangays.
-                </p>
-              </div>
-            </div>
-
-            {/* Middle: Quick Action Pills */}
-            <div className="flex flex-wrap items-center gap-1.5">
-              <button
-                onClick={() => {
-                  setIsAiOpen(true);
-                  executeAiQuery(`Audit ${selectedBarangay.realName} infrastructure deficit against RA 7160`);
-                }}
-                className="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:border-[#05389f] hover:text-[#05389f] transition-all cursor-pointer shadow-2xs"
-              >
-                🏷️ Check {selectedBarangay.realName} Deficit
-              </button>
-              <button
-                onClick={() => {
-                  setIsAiOpen(true);
-                  executeAiQuery("Explain RA 7160 Section 287 statutory requirement for 20% development fund");
-                }}
-                className="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:border-[#05389f] hover:text-[#05389f] transition-all cursor-pointer shadow-2xs"
-              >
-                📜 RA 7160 Sec. 287 20% LDF
-              </button>
-            </div>
-
-            {/* Right: Inset Prompt Bar */}
-            <div className="w-full md:w-80 shrink-0">
-              <div className="flex items-center space-x-2 bg-white border border-slate-200 rounded-full px-3 py-2 focus-within:border-[#05389f] transition-all shadow-2xs">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      setIsAiOpen(true);
-                      executeAiQuery(chatInput);
-                    }
-                  }}
-                  placeholder="Ask statutory copilot..."
-                  className="flex-1 bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400"
-                />
-                <button
-                  onClick={() => {
-                    setIsAiOpen(true);
-                    executeAiQuery(chatInput || `Analyze ${selectedBarangay.realName}`);
-                  }}
-                  className="w-7 h-7 rounded-full bg-[#05389f] text-white flex items-center justify-center hover:bg-[#1e40af] transition-all cursor-pointer shadow-2xs shrink-0"
-                >
-                  <Send className="w-3.5 h-3.5 text-[#facc15]" />
-                </button>
-              </div>
-            </div>
-          </div>s-within:border-[#05389f] transition-all shadow-2xs">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        setIsAiOpen(true);
-                        executeAiQuery(chatInput);
-                      }
-                    }}
-                    placeholder="Ask me anything..."
-                    className="flex-1 bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400"
-                  />
-                  <button
-                    onClick={() => {
-                      setIsAiOpen(true);
-                      executeAiQuery(chatInput || `Analyze ${selectedBarangay.realName}`);
-                    }}
-                    className="w-6 h-6 rounded-full bg-[#05389f] text-white flex items-center justify-center hover:bg-[#1e40af] transition-all cursor-pointer shadow-2xs"
-                  >
-                    <Send className="w-3 h-3 text-[#facc15]" />
-                  </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* ─────────────────────────────────────────────────────────────
               5. LOWER SPLIT SECTION: ROLE WORKBENCH & 27 BARANGAYS MATRIX
              ───────────────────────────────────────────────────────────── */}
           <div id="lower-split-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column (5 Cols): Department Domain-Isolated Control Deck */}
-            <section className="lg:col-span-5 space-y-5">
-              {/* Active Role Banner */}
-              <div className="coolors-card p-4 border border-[#e5e7eb]">
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2.5 rounded-xl ${currentRole.color}`}>
-                    <CurrentIcon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#0a1128]">
-                      {currentRole.label}
-                    </h3>
-                    <p className="text-[11px] text-[#4b5563] mt-0.5 font-medium">
-                      {role === "super_admin"
-                        ? "5 Executive Master Controls Active"
-                        : role === "ceo"
-                        ? "Infrastructure Sizer & Capital Costing Simulator"
-                        : role === "cpdo"
-                        ? "17 UN SDG Auditor & Survey Anomaly Log"
-                        : role === "drrmo"
-                        ? "Disaster Inundation & Bikol Emergency Dispatch"
-                        : role === "cho"
-                        ? "Epidemiological & WASH Surveillance"
-                        : role === "swo"
-                        ? "4Ps Safety Net & Youth NEET Placement"
-                        : "Executive Statutory Intelligence"}
-                    </p>
+            {/* Left Column (5 Cols): Department Domain-Isolated Control Deck (Non-super_admin roles) */}
+            {role !== "super_admin" && (
+              <section className="lg:col-span-5 space-y-5">
+                {/* Active Role Banner */}
+                <div className="coolors-card p-4 border border-[#e5e7eb]">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2.5 rounded-xl ${currentRole.color}`}>
+                      <CurrentIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0a1128]">
+                        {currentRole.label}
+                      </h3>
+                      <p className="text-[11px] text-[#4b5563] mt-0.5 font-medium">
+                        {role === "ceo"
+                          ? "Infrastructure Sizer & Capital Costing Simulator"
+                          : role === "cpdo"
+                          ? "17 UN SDG Auditor & Survey Anomaly Log"
+                          : role === "drrmo"
+                          ? "Disaster Inundation & Bikol Emergency Dispatch"
+                          : role === "cho"
+                          ? "Epidemiological & WASH Surveillance"
+                          : role === "swo"
+                          ? "4Ps Safety Net & Youth NEET Placement"
+                          : "Department Operations"}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-
-
-              {/* SUPER ADMIN 5-CONTROLS DECK */}
-              {role === "super_admin" && (
-                <div className="coolors-card p-5 space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f2f2f2]">
-                    <h4 className="text-xs font-bold text-[#0a1128] uppercase tracking-wider">
-                      Executive Master Controls
-                    </h4>
-                    <span className="text-[10px] font-bold text-[#05389f] bg-[#edf3fc] px-2.5 py-0.5 rounded-full border border-[#05389f]/20">
-                      Mayor Authority
-                    </span>
-                  </div>
-
-                  {/* Control 1 */}
-                  <div className="p-3 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb] flex items-center justify-between">
-                    <div>
-                      <div className="text-xs font-bold text-[#0a1128]">1. Cross-Office Data Federation</div>
-                      <div className="text-[11px] text-[#4b5563]">Unlocks DRRMO queries into CEO & CHO datasets</div>
-                    </div>
-                    <button
-                      onClick={() => setCrossOfficeSharing(!crossOfficeSharing)}
-                      className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
-                        crossOfficeSharing
-                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                          : "bg-slate-200 text-slate-600"
-                      }`}
-                    >
-                      {crossOfficeSharing ? "ENABLED" : "LOCKED"}
-                    </button>
-                  </div>
-
-                  {/* Control 2 */}
-                  <div className="p-3 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb] space-y-2">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-[#0a1128]">2. AIP 20% Dev Fund Ceiling</span>
-                      <span className="font-mono text-[#05389f] font-bold">
-                        ₱{(aipBudgetCeiling / 1000000).toFixed(1)}M
+                {/* DEPARTMENT ROLE WORKBENCHES (CEO, CPDO, DRRMO, CHO, SWO, BRGY CAPTAIN, CITIZEN) */}
+                {role === "ceo" && (
+                  <div className="coolors-card p-5 space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-[#f2f2f2]">
+                      <h4 className="text-xs font-bold text-[#0a1128] uppercase tracking-wider">
+                        CEO Infrastructure & WASH Sizer
+                      </h4>
+                      <span className="text-[10px] font-bold text-[#05389f] bg-[#edf3fc] px-2.5 py-0.5 rounded-full">
+                        {selectedBarangay.realName}
                       </span>
                     </div>
-                    <input
-                      type="range"
-                      min={20000000}
-                      max={80000000}
-                      step={5000000}
-                      value={aipBudgetCeiling}
-                      onChange={(e) => setAipBudgetCeiling(Number(e.target.value))}
-                      className="w-full accent-[#05389f] h-1.5 cursor-pointer"
-                    />
-                  </div>
-
-                  {/* Control 3: Sign-Off Queue */}
-                  <div className="p-3 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb] space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#0a1128]">3. Executive Sign-Off Queue</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#fccf17] text-[#0a1128] font-mono">
-                        {proposals.filter((p) => p.status === "PENDING").length} Pending
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                      {proposals.map((prop) => (
-                        <div
-                          key={prop.id}
-                          className="p-3 rounded-xl bg-white border border-[#e5e7eb] text-xs shadow-2xs space-y-1"
-                        >
-                          <div className="flex items-center justify-between font-bold">
-                            <span className="text-[11px] text-[#05389f]">{prop.office} • {prop.barangay}</span>
-                            <span className="font-mono text-[#0a1128] font-bold">₱{prop.budget.toLocaleString()}</span>
-                          </div>
-                          <p className="text-xs text-[#0a1128] font-semibold">{prop.title}</p>
-                          <div className="text-[10px] text-[#6b7280] font-mono">
-                            {prop.statute} ({prop.section})
-                          </div>
-                          <div className="flex items-center justify-between pt-2 border-t border-[#f2f2f2]">
-                            <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                prop.status === "APPROVED"
-                                  ? "bg-emerald-100 text-emerald-800"
-                                  : prop.status === "FUNDED"
-                                  ? "bg-[#edf3fc] text-[#05389f]"
-                                  : prop.status === "REJECTED"
-                                  ? "bg-rose-100 text-rose-800"
-                                  : "bg-[#fef9e7] text-[#b45309]"
-                              }`}
-                            >
-                              {prop.status}
-                            </span>
-
-                            {prop.status === "PENDING" && (
-                              <div className="flex space-x-1.5">
-                                <button
-                                  onClick={() => handleProposalAction(prop.id, "approve")}
-                                  className="px-2.5 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-[10px] font-bold cursor-pointer"
-                                >
-                                  Approve
-                                </button>
-                                <button
-                                  onClick={() => handleProposalAction(prop.id, "reject")}
-                                  className="px-2.5 py-0.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-[10px] font-bold cursor-pointer"
-                                >
-                                  Reject
-                                </button>
-                              </div>
-                            )}
-                            {prop.status === "APPROVED" && (
-                              <button
-                                onClick={() => handleProposalAction(prop.id, "fund")}
-                                className="px-2.5 py-0.5 bg-[#05389f] hover:bg-[#032770] text-white rounded-full text-[10px] font-bold cursor-pointer"
-                              >
-                                Allot Budget
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Control 4: RA 10173 */}
-                  <div className="p-3 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb] flex items-center justify-between">
-                    <div>
-                      <div className="text-xs font-bold text-[#0a1128]">4. RA 10173 Privacy Shield</div>
-                      <div className="text-[11px] text-[#4b5563]">
-                        Suppresses cells &lt;{privacyCellThreshold} households
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-[#0a1128]">Sanitation Unit Cost per HH</span>
+                        <span className="font-mono font-bold text-[#05389f]">₱{sanitationUnitCost.toLocaleString()}</span>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      {[3, 5, 10].map((num) => (
-                        <button
-                          key={num}
-                          onClick={() => setPrivacyCellThreshold(num)}
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-bold cursor-pointer transition-colors ${
-                            privacyCellThreshold === num
-                              ? "bg-[#05389f] text-white"
-                              : "bg-white text-[#4b5563] border border-[#bebcbc]"
-                          }`}
-                        >
-                          {num}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Control 5: 3D Calamity Scenario */}
-                  <div className="p-3 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb] flex items-center justify-between">
-                    <div>
-                      <div className="text-xs font-bold text-[#0a1128]">5. 3D Flood Surge Simulation</div>
-                      <div className="text-[11px] text-[#4b5563]">Renders Level 3 inundation hazard</div>
-                    </div>
-                    <button
-                      onClick={() => setCalamitySimActive(!calamitySimActive)}
-                      className={`px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-all ${
-                        calamitySimActive
-                          ? "bg-rose-600 text-white animate-pulse"
-                          : "bg-rose-100 text-rose-800 hover:bg-rose-200"
-                      }`}
-                    >
-                      {calamitySimActive ? "Stop Surge" : "Simulate"}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* DEPARTMENT ROLE WORKBENCHES (CEO, CPDO, DRRMO, CHO, SWO, BRGY CAPTAIN, CITIZEN) */}
-              {role === "ceo" && (
-                <div className="coolors-card p-5 space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#f2f2f2]">
-                    <h4 className="text-xs font-bold text-[#0a1128] uppercase tracking-wider">
-                      CEO Infrastructure & WASH Sizer
-                    </h4>
-                    <span className="text-[10px] font-bold text-[#05389f] bg-[#edf3fc] px-2.5 py-0.5 rounded-full">
-                      {selectedBarangay.realName}
-                    </span>
-                  </div>
-                  <div className="space-y-2 text-xs">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-[#0a1128]">Sanitation Unit Cost per HH</span>
-                      <span className="font-mono font-bold text-[#05389f]">₱{sanitationUnitCost.toLocaleString()}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={10000}
-                      max={50000}
-                      step={2500}
-                      value={sanitationUnitCost}
-                      onChange={(e) => setSanitationUnitCost(Number(e.target.value))}
-                      className="w-full accent-[#05389f] h-1.5 cursor-pointer"
-                    />
-                    <div className="p-3 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb] space-y-1">
-                      <div className="flex justify-between">
-                        <span className="text-[#6b7280]">Unimproved Sanitation HHs:</span>
-                        <span className="font-mono font-bold text-[#0a1128]">
-                          {selectedBarangay.infrastructure_ceo?.households_needing_sanitation || 0} HHs
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[#6b7280]">Estimated Capital Cost:</span>
-                        <span className="font-mono font-bold text-emerald-700">
-                          ₱{((selectedBarangay.infrastructure_ceo?.households_needing_sanitation || 0) * sanitationUnitCost).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {role === "cpdo" && (
-                <div className="coolors-card p-5 space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#f2f2f2]">
-                    <h4 className="text-xs font-bold text-[#0a1128] uppercase tracking-wider">
-                      17 UN SDG Localization Matrix
-                    </h4>
-                    <span className="text-[10px] font-bold text-[#05389f] bg-[#edf3fc] px-2.5 py-0.5 rounded-full">
-                      {selectedBarangay.realName} • RA 11315
-                    </span>
-                  </div>
-                  <div className="space-y-2 max-h-60 overflow-y-auto pr-1 text-xs">
-                    {Object.entries(selectedBarangay.sdg_scores || {}).map(([goalName, scoreVal]: [string, any]) => {
-                      const numScore = Number(scoreVal) || 0;
-                      const status = numScore < 50 ? "CRITICAL" : numScore < 75 ? "HIGH PRIORITY" : "ON TRACK";
-                      return (
-                        <div key={goalName} className="p-2.5 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb] flex items-center justify-between">
-                          <div>
-                            <div className="font-bold text-[#0a1128]">{goalName}</div>
-                            <div className="text-[10px] text-[#4b5563]">Empirical Index Score: {numScore} / 100</div>
-                          </div>
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            status === "CRITICAL" ? "bg-rose-100 text-rose-800" : status === "HIGH PRIORITY" ? "bg-[#fef9e7] text-[#b45309]" : "bg-emerald-100 text-emerald-800"
-                          }`}>
-                            {status}
+                      <input
+                        type="range"
+                        min={10000}
+                        max={50000}
+                        step={2500}
+                        value={sanitationUnitCost}
+                        onChange={(e) => setSanitationUnitCost(Number(e.target.value))}
+                        className="w-full accent-[#05389f] h-1.5 cursor-pointer"
+                      />
+                      <div className="p-3 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb] space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-[#6b7280]">Unimproved Sanitation HHs:</span>
+                          <span className="font-mono font-bold text-[#0a1128]">
+                            {selectedBarangay.infrastructure_ceo?.households_needing_sanitation || 0} HHs
                           </span>
                         </div>
-                      );
-                    })}
+                        <div className="flex justify-between">
+                          <span className="text-[#6b7280]">Estimated Capital Cost:</span>
+                          <span className="font-mono font-bold text-emerald-700">
+                            ₱{((selectedBarangay.infrastructure_ceo?.households_needing_sanitation || 0) * sanitationUnitCost).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {role === "drrmo" && (
-                <div className="coolors-card p-5 space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#f2f2f2]">
-                    <h4 className="text-xs font-bold text-[#0a1128] uppercase tracking-wider">
-                      DRRMO Bikol SMS Early Warning
-                    </h4>
+                {role === "cpdo" && (
+                  <div className="coolors-card p-5 space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#f2f2f2]">
+                      <h4 className="text-xs font-bold text-[#0a1128] uppercase tracking-wider">
+                        17 UN SDG Localization Matrix
+                      </h4>
+                      <span className="text-[10px] font-bold text-[#05389f] bg-[#edf3fc] px-2.5 py-0.5 rounded-full">
+                        {selectedBarangay.realName} • RA 11315
+                      </span>
+                    </div>
+                    <div className="space-y-2 max-h-60 overflow-y-auto pr-1 text-xs">
+                      {Object.entries(selectedBarangay.sdg_scores || {}).map(([goalName, scoreVal]: [string, any]) => {
+                        const numScore = Number(scoreVal) || 0;
+                        const status = numScore < 50 ? "CRITICAL" : numScore < 75 ? "HIGH PRIORITY" : "ON TRACK";
+                        return (
+                          <div key={goalName} className="p-2.5 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb] flex items-center justify-between">
+                            <div>
+                              <div className="font-bold text-[#0a1128]">{goalName}</div>
+                              <div className="text-[10px] text-[#4b5563]">Empirical Index Score: {numScore} / 100</div>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              status === "CRITICAL" ? "bg-rose-100 text-rose-800" : status === "HIGH PRIORITY" ? "bg-[#fef9e7] text-[#b45309]" : "bg-emerald-100 text-emerald-800"
+                            }`}>
+                              {status}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {role === "drrmo" && (
+                  <div className="coolors-card p-5 space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#f2f2f2]">
+                      <h4 className="text-xs font-bold text-[#0a1128] uppercase tracking-wider">
+                        DRRMO Bikol SMS Early Warning
+                      </h4>
+                      <button
+                        onClick={() => setCalamitySimActive(!calamitySimActive)}
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold cursor-pointer ${
+                          calamitySimActive ? "bg-rose-600 text-white animate-pulse" : "bg-rose-100 text-rose-800"
+                        }`}
+                      >
+                        {calamitySimActive ? "Surge Active" : "Trigger Surge"}
+                      </button>
+                    </div>
+                    <p className="text-xs text-[#4b5563] bg-[#fef9e7] p-3 rounded-xl border border-[#fccf17]">
+                      [NAGA-DRRMO] Patanid sa Brgy {selectedBarangay.realName}: Mag-andam sa posibleng pagbaha asin ebakwasyon. Weak Roof: {selectedBarangay.drrm?.weak_roof_pct}%.
+                    </p>
                     <button
-                      onClick={() => setCalamitySimActive(!calamitySimActive)}
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold cursor-pointer ${
-                        calamitySimActive ? "bg-rose-600 text-white animate-pulse" : "bg-rose-100 text-rose-800"
-                      }`}
+                      onClick={() => {
+                        setIsAiOpen(true);
+                        executeAiQuery(`Formulate RA 10121 BDRRM evacuation and shelter reinforcement plan for ${selectedBarangay.displayName}`);
+                      }}
+                      className="pill-btn-blue w-full py-2 text-xs font-bold cursor-pointer"
                     >
-                      {calamitySimActive ? "Surge Active" : "Trigger Surge"}
+                      Synthesize RA 10121 Dispatch for {selectedBarangay.realName}
                     </button>
                   </div>
-                  <p className="text-xs text-[#4b5563] bg-[#fef9e7] p-3 rounded-xl border border-[#fccf17]">
-                    [NAGA-DRRMO] Patanid sa Brgy {selectedBarangay.realName}: Mag-andam sa posibleng pagbaha asin ebakwasyon. Weak Roof: {selectedBarangay.drrm?.weak_roof_pct}%.
-                  </p>
-                  <button
-                    onClick={() => {
-                      setIsAiOpen(true);
-                      executeAiQuery(`Formulate RA 10121 BDRRM evacuation and shelter reinforcement plan for ${selectedBarangay.displayName}`);
-                    }}
-                    className="pill-btn-blue w-full py-2 text-xs font-bold cursor-pointer"
-                  >
-                    Synthesize RA 10121 Dispatch for {selectedBarangay.realName}
-                  </button>
-                </div>
-              )}
+                )}
 
-              {(role === "cho" || role === "swo") && (
-                <div className="coolors-card p-5 space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#f2f2f2]">
-                    <h4 className="text-xs font-bold text-[#0a1128] uppercase tracking-wider">
-                      {role === "cho"
-                        ? "CHO Health & Nutrition Surveillance"
-                        : "CSWDO 4Ps & Youth NEET Registry"}
-                    </h4>
-                    <span className="text-[10px] font-bold text-[#05389f] bg-[#edf3fc] px-2.5 py-0.5 rounded-full">
-                      {selectedBarangay.realName}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2.5 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb]">
-                      <span className="text-[10px] text-[#6b7280] font-bold block">Food Insecure HHs</span>
-                      <span className="font-mono font-bold text-rose-700 text-sm">
-                        {selectedBarangay.health_cho?.food_insecurity_count} ({selectedBarangay.health_cho?.food_insecurity_pct}%)
+                {(role === "cho" || role === "swo") && (
+                  <div className="coolors-card p-5 space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#f2f2f2]">
+                      <h4 className="text-xs font-bold text-[#0a1128] uppercase tracking-wider">
+                        {role === "cho"
+                          ? "CHO Health & Nutrition Surveillance"
+                          : "CSWDO 4Ps & Youth NEET Registry"}
+                      </h4>
+                      <span className="text-[10px] font-bold text-[#05389f] bg-[#edf3fc] px-2.5 py-0.5 rounded-full">
+                        {selectedBarangay.realName}
                       </span>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb]">
-                      <span className="text-[10px] text-[#6b7280] font-bold block">Youth NEET / Unbanked</span>
-                      <span className="font-mono font-bold text-[#05389f] text-sm">
-                        {selectedBarangay.social_swo?.neet_youth_pct}% / {selectedBarangay.social_swo?.unbanked_pct}%
-                      </span>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="p-2.5 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb]">
+                        <span className="text-[10px] text-[#6b7280] font-bold block">Food Insecure HHs</span>
+                        <span className="font-mono font-bold text-rose-700 text-sm">
+                          {selectedBarangay.health_cho?.food_insecurity_count} ({selectedBarangay.health_cho?.food_insecurity_pct}%)
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-[#f2f2f2] border border-[#e5e7eb]">
+                        <span className="text-[10px] text-[#6b7280] font-bold block">Youth NEET / Unbanked</span>
+                        <span className="font-mono font-bold text-[#05389f] text-sm">
+                          {selectedBarangay.social_swo?.neet_youth_pct}% / {selectedBarangay.social_swo?.unbanked_pct}%
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </section>
+                )}
+              </section>
+            )}
 
-            {/* Right Column (7 Cols): 27 Barangays Interactive Matrix & Category Filters */}
-            <section className="lg:col-span-7 space-y-5">
+            {/* Right Column: 27 Barangays Interactive Matrix & Category Filters (Expands to 12 Cols for super_admin) */}
+            <section className={role === "super_admin" ? "lg:col-span-12 space-y-5" : "lg:col-span-7 space-y-5"}>
               <div className="coolors-card p-5 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#f2f2f2]">
                   <div>
@@ -2851,144 +3068,557 @@ export default function ModernCategorizedCommandCenter() {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          6. STATUTORY COPILOT DRAWER (COOLORS DESIGN)
+          6. DEDICATED OMNISEARCH SPOTLIGHT COMMAND PALETTE MODAL (⌘K)
          ───────────────────────────────────────────────────────────── */}
-      {isAiOpen && (
-        <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-white shadow-2xl border-l border-[#e5e7eb] flex flex-col animate-in slide-in-from-right duration-200">
-          {/* Header */}
-          <div className="p-4 border-b border-[#f2f2f2] flex items-center justify-between bg-[#f2f2f2]">
-            <div className="flex items-center space-x-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-[#05389f] text-white flex items-center justify-center font-bold shadow-md shadow-blue-900/20 border border-[#fccf17]">
-                <Sparkles className="w-4 h-4 text-[#fccf17]" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-[#0a1128]">
-                  Statutory Decision Support Copilot
-                </h3>
-                <p className="text-[10px] text-[#4b5563] font-medium">
-                  CBMS Local Inference + Legal Corpus (RA 10121, RA 7160, RA 11223)
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setIsAiOpen(false)}
-              className="p-1 rounded-full text-[#6b7280] hover:text-[#0a1128] hover:bg-slate-200 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-start justify-center pt-16 sm:pt-24 px-4 animate-in fade-in duration-150">
+          {/* Backdrop click to close */}
+          <div className="fixed inset-0" onClick={() => setIsSearchOpen(false)} />
 
-          {/* Messages Feed */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
-            {chatMessages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}
-              >
-                <div
-                  className={`p-3.5 rounded-2xl max-w-[90%] leading-relaxed ${
-                    msg.sender === "user"
+          <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[82vh] z-10 animate-in zoom-in-95 duration-150 font-sans">
+            {/* Top Search Input Bar */}
+            <div className="p-4 border-b border-slate-100 flex items-center space-x-3 bg-[#fbfcfe]">
+              <Search className="w-5 h-5 text-[#05389f] shrink-0" />
+              <input
+                autoFocus
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchQuery.trim()) {
+                    setIsSearchOpen(false);
+                    setIsAiOpen(true);
+                    executeAiQuery(searchQuery);
+                  }
+                }}
+                placeholder="Search hotlines (911/police/fire/hospital), indicators (sanitation/water/roof), barangays..."
+                className="flex-1 bg-transparent text-sm sm:text-base text-slate-900 outline-none placeholder:text-slate-400 font-medium"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="text-slate-400 hover:text-slate-600 text-xs px-2 py-1 rounded-full hover:bg-slate-100 cursor-pointer transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+              <kbd className="hidden sm:inline-block text-[10px] font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">
+                ESC
+              </kbd>
+            </div>
+
+            {/* Category Filter Chips */}
+            <div className="flex items-center space-x-1.5 px-4 py-2.5 border-b border-slate-100 bg-[#f8f9fc] overflow-x-auto text-xs shrink-0">
+              {[
+                { id: "all", label: "All" },
+                { id: "hotlines", label: "🚨 Hotlines (911)" },
+                { id: "indicators", label: "📊 CBMS Indicators" },
+                { id: "barangays", label: "📍 27 Barangays" },
+                { id: "statutory", label: "⚖️ Statutory RA 7160" }
+              ].map((chip) => (
+                <button
+                  key={chip.id}
+                  onClick={() => setSearchCategory(chip.id)}
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                    searchCategory === chip.id
                       ? "bg-[#05389f] text-white shadow-xs"
-                      : "bg-[#f2f2f2] text-[#0a1128] border border-[#e5e7eb]"
+                      : "bg-white text-slate-600 hover:bg-slate-200/70 border border-slate-200/80"
                   }`}
                 >
-                  <p>{msg.text}</p>
+                  {chip.label}
+                </button>
+              ))}
+            </div>
 
-                  {/* Legal Citation Badge */}
-                  {msg.citation && (
-                    <div className="mt-2.5 pt-2 border-t border-[#bebcbc]/40 flex flex-wrap items-center gap-1.5 text-[10px]">
-                      <span className="font-bold text-[#0a1128]">Statutory Citation:</span>
-                      <span className="px-2 py-0.5 rounded-full bg-white text-[#05389f] font-mono font-bold border border-[#05389f]/20">
-                        {msg.citation}
-                      </span>
+            {/* Real-time Filtered Results Area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {/* 1. NAGA EMERGENCY HOTLINES SECTION */}
+              {(searchCategory === "all" || searchCategory === "hotlines") && (() => {
+                const q = searchQuery.toLowerCase().trim();
+                const matchedHotlines = NAGA_EMERGENCY_HOTLINES.filter((h) => {
+                  if (!q) return searchCategory === "hotlines";
+                  return (
+                    h.agency.toLowerCase().includes(q) ||
+                    h.subtext.toLowerCase().includes(q) ||
+                    h.primaryPhone.includes(q) ||
+                    h.landline.includes(q) ||
+                    h.altPhone.toLowerCase().includes(q) ||
+                    (q.includes("911") && h.id === "cdrrmo") ||
+                    (q.includes("police") && h.id === "pnp") ||
+                    (q.includes("fire") && h.id === "bfp") ||
+                    (q.includes("hospital") && h.id === "bmc") ||
+                    (q.includes("doctor") && h.id === "bmc") ||
+                    (q.includes("emergency") && (h.id === "cdrrmo" || h.id === "bmc"))
+                  );
+                });
+
+                if (matchedHotlines.length === 0) return null;
+
+                return (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      <span>🚨 Official Naga City Emergency Hotlines (Verified)</span>
+                      <span className="text-rose-600 font-semibold font-mono text-[10px]">24/7 ComCen Active</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {matchedHotlines.map((h) => (
+                        <div
+                          key={h.id}
+                          className="bg-slate-50 hover:bg-blue-50/40 p-3 rounded-2xl border border-slate-200 transition-all flex flex-col justify-between space-y-2"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-xl shrink-0">{h.icon}</span>
+                              <div>
+                                <h4 className="font-extrabold text-xs text-slate-900 leading-tight">{h.agency}</h4>
+                                <p className="text-[10px] text-slate-500 leading-tight mt-0.5 line-clamp-1">{h.subtext}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-white p-2 rounded-xl border border-slate-200/80 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] text-slate-400 font-semibold">Primary:</span>
+                              <span className="font-mono font-extrabold text-[#05389f] text-xs">{h.primaryPhone}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-[10px] text-slate-500">
+                              <span>Landline:</span>
+                              <span className="font-mono">{h.landline}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-1.5 pt-1">
+                            <a
+                              href={`tel:${h.primaryPhone.replace(/[^0-9]/g, "")}`}
+                              className="flex-1 py-1.5 bg-[#05389f] hover:bg-[#042d82] text-white rounded-xl text-xs font-bold text-center transition-colors flex items-center justify-center space-x-1"
+                            >
+                              <PhoneCall className="w-3 h-3" />
+                              <span>Call Agency</span>
+                            </a>
+                            <button
+                              onClick={() => copyToClipboard(h.primaryPhone, h.id)}
+                              className="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center space-x-1"
+                              title="Copy number"
+                            >
+                              {copiedHotline === h.id ? (
+                                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                              <span>{copiedHotline === h.id ? "Copied" : "Copy"}</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 2. CBMS INDICATORS & URBAN DEFICITS SECTION */}
+              {(searchCategory === "all" || searchCategory === "indicators") && (() => {
+                const q = searchQuery.toLowerCase().trim();
+                const matchedIndicators = SEARCHABLE_INDICATORS.filter((ind) => {
+                  if (!q) return searchCategory === "indicators";
+                  return (
+                    ind.name.toLowerCase().includes(q) ||
+                    ind.dept.toLowerCase().includes(q) ||
+                    ind.summary.toLowerCase().includes(q) ||
+                    ind.id.includes(q)
+                  );
+                });
+
+                if (matchedIndicators.length === 0) return null;
+
+                return (
+                  <div className="space-y-2">
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      <span>📊 PSA CBMS Vulnerability Indicators</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {matchedIndicators.map((ind) => (
+                        <div
+                          key={ind.id}
+                          className="bg-white p-3 rounded-2xl border border-slate-200 hover:border-[#05389f]/40 hover:bg-slate-50 transition-all flex items-center justify-between"
+                        >
+                          <div className="flex items-center space-x-3 min-w-0">
+                            <span className="text-xl shrink-0">{ind.icon}</span>
+                            <div className="min-w-0">
+                              <div className="flex items-center space-x-2">
+                                <h4 className="font-extrabold text-xs text-slate-900 truncate">{ind.name}</h4>
+                                <span className="font-mono text-xs font-black text-[#05389f] bg-blue-50 px-2 py-0.2 rounded-full border border-blue-200">
+                                  {ind.metric}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-slate-500 mt-0.5 truncate">{ind.summary}</p>
+                              <span className="text-[9px] font-bold text-slate-400 block mt-0.5">{ind.dept}</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setIsSearchOpen(false);
+                              setIsAiOpen(true);
+                              executeAiQuery(ind.prompt);
+                            }}
+                            className="px-3 py-1.5 bg-[#05389f] hover:bg-[#042d82] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0 ml-3 flex items-center space-x-1"
+                          >
+                            <Sparkles className="w-3 h-3 text-[#facc15]" />
+                            <span>Audit Indicator</span>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 3. NAGA 27 BARANGAYS SECTION */}
+              {(searchCategory === "all" || searchCategory === "barangays") && (() => {
+                const q = searchQuery.toLowerCase().trim();
+                const matchedBarangays = barangays.filter((b) => {
+                  if (!q) return searchCategory === "barangays";
+                  const rName = (NAGA_BARANGAY_NAMES[b.id] || b.name).toLowerCase();
+                  const cat = BARANGAY_CATEGORIES[b.id]?.id || "";
+                  return (
+                    rName.includes(q) ||
+                    `#${b.id}`.includes(q) ||
+                    cat.includes(q)
+                  );
+                });
+
+                if (matchedBarangays.length === 0) return null;
+
+                return (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      <span>📍 Naga City 27 Barangays (Select to Pan 3D Map)</span>
+                      <span className="text-slate-400 font-mono text-[10px]">{matchedBarangays.length} found</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {matchedBarangays.slice(0, 10).map((b) => {
+                        const rName = NAGA_BARANGAY_NAMES[b.id] || b.name;
+                        const cat = BARANGAY_CATEGORIES[b.id];
+                        const isCurrent = b.id === selectedBarangayId;
+
+                        return (
+                          <button
+                            key={b.id}
+                            onClick={() => {
+                              handleSelectBarangay(b.id);
+                              setIsSearchOpen(false);
+                            }}
+                            className={`w-full text-left p-2.5 rounded-2xl transition-all flex items-center justify-between text-xs cursor-pointer border ${
+                              isCurrent
+                                ? "bg-blue-50 border-[#05389f] font-bold shadow-2xs"
+                                : "bg-white hover:bg-slate-50 border-slate-200"
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2.5 min-w-0">
+                              <span
+                                className="w-3 h-3 rounded-md shrink-0 shadow-2xs"
+                                style={{ backgroundColor: NAGA_ADMIN_COLORS[b.id]?.hex || "#05389f" }}
+                              />
+                              <div className="min-w-0">
+                                <div className="flex items-center space-x-1.5">
+                                  <span className="font-mono text-slate-400 text-[10px]">#{b.id}</span>
+                                  <span className="text-slate-900 font-extrabold truncate">{rName}</span>
+                                </div>
+                                {cat && (
+                                  <span className="text-[10px] text-slate-500 truncate block">{cat.short}</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="shrink-0 ml-2">
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                                  b.vulnerability_index >= 70
+                                    ? "bg-rose-100 text-rose-800"
+                                    : b.vulnerability_index >= 50
+                                    ? "bg-amber-100 text-amber-800"
+                                    : "bg-emerald-100 text-emerald-800"
+                                }`}
+                              >
+                                MVI {b.vulnerability_index}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 4. STATUTORY POLICIES & MASTER CONTROLS SECTION */}
+              {(searchCategory === "all" || searchCategory === "statutory") && (() => {
+                const q = searchQuery.toLowerCase().trim();
+                const statutoryItems = [
+                  {
+                    title: "RA 7160 Local Government Code (Section 287)",
+                    desc: "Statutory baseline requiring minimum 20% of NTA/IRA earmarked for development fund.",
+                    action: () => {
+                      setIsSearchOpen(false);
+                      setIsAiOpen(true);
+                      executeAiQuery("Explain RA 7160 Section 287 statutory requirement for 20% development fund baseline");
+                    }
+                  },
+                  {
+                    title: "AIP 2026 Dev Fund Statutory Ceiling (₱45.0M)",
+                    desc: "Executive threshold slider capping annual capital project disbursements.",
+                    action: () => {
+                      setIsSearchOpen(false);
+                      setSidePanelTab("controls");
+                    }
+                  },
+                  {
+                    title: "3D Bicol River Flood Surge Simulation",
+                    desc: "Level 3 inundation overlay modeling flash tidal surge across low-lying barangays.",
+                    action: () => {
+                      setIsSearchOpen(false);
+                      setCalamitySimActive(true);
+                    }
+                  },
+                  {
+                    title: "Cross-Office Data Federation (CEO + CHO + DRRMO)",
+                    desc: "Inter-agency data pipeline integrating infrastructure, health, and disaster telemetry.",
+                    action: () => {
+                      setIsSearchOpen(false);
+                      setSidePanelTab("controls");
+                    }
+                  }
+                ];
+
+                const filtered = statutoryItems.filter((s) => !q || s.title.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q));
+                if (filtered.length === 0) return null;
+
+                return (
+                  <div className="space-y-2">
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      <span>⚖️ Statutory Commands & Controls</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {filtered.map((item, idx) => (
+                        <div
+                          key={idx}
+                          onClick={item.action}
+                          className="bg-white p-3 rounded-2xl border border-slate-200 hover:border-[#05389f]/40 hover:bg-slate-50 transition-all flex items-center justify-between cursor-pointer"
+                        >
+                          <div>
+                            <h4 className="font-extrabold text-xs text-slate-900">{item.title}</h4>
+                            <p className="text-[10px] text-slate-500 mt-0.5">{item.desc}</p>
+                          </div>
+                          <span className="text-[#05389f] font-bold text-xs shrink-0 ml-2">Execute →</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 5. DIRECT ASK COPILOT ACTION */}
+              {searchQuery.trim() && (
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 flex items-center justify-between">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#05389f] text-white flex items-center justify-center font-bold shadow-xs">
+                      <Sparkles className="w-4 h-4 text-[#facc15]" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-slate-900">
+                        Ask Statutory Copilot: &quot;{searchQuery}&quot;
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-medium">
+                        Run full legal corpus & CBMS synthesis on this prompt
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      setIsAiOpen(true);
+                      executeAiQuery(searchQuery);
+                    }}
+                    className="px-3.5 py-1.5 bg-[#05389f] hover:bg-[#042d82] text-white rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-xs"
+                  >
+                    Ask Copilot ↵
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Keyboard Navigation Tips */}
+            <div className="px-4 py-2.5 border-t border-slate-100 bg-[#f8f9fc] flex items-center justify-between text-[11px] text-slate-400 font-medium">
+              <div className="flex items-center space-x-3">
+                <span>↵ to select / ask Copilot</span>
+                <span>•</span>
+                <span>Esc to close</span>
+              </div>
+              <span className="font-mono text-[#05389f] font-bold">Project Banwaan Omnisearch</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          7. ULTRA-MODERN STATUTORY COPILOT DRAWER (APPLE / ORCHESTRATEIQ)
+         ───────────────────────────────────────────────────────────── */}
+      {isAiOpen && (
+        <>
+          {/* Glassmorphic Backdrop */}
+          <div
+            className="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+            onClick={() => setIsAiOpen(false)}
+          />
+
+          {/* Slide-over Drawer Panel */}
+          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-white shadow-2xl border-l border-slate-200 flex flex-col animate-in slide-in-from-right duration-250 ease-out font-sans">
+            {/* Header */}
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-[#fbfcfe]">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#05389f] text-white flex items-center justify-center font-bold shadow-md shadow-blue-900/20 shrink-0">
+                  <Sparkles className="w-5 h-5 text-[#facc15]" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h3 className="text-sm font-black text-slate-900">
+                      Statutory Decision Copilot
+                    </h3>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                  </div>
+                  <p className="text-[10px] text-slate-500 font-medium">
+                    CBMS Local Inference + Legal Corpus (RA 7160, RA 10121, RA 11223)
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsAiOpen(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-800 hover:bg-slate-100 cursor-pointer transition-colors"
+                title="Close Copilot"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Messages Feed */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-[#fbfcfe]">
+              {chatMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}
+                >
+                  <div
+                    className={`p-3.5 rounded-2xl max-w-[90%] leading-relaxed ${
+                      msg.sender === "user"
+                        ? "bg-[#05389f] text-white shadow-xs rounded-tr-xs"
+                        : "bg-white text-slate-900 border border-slate-200/80 shadow-2xs rounded-tl-xs"
+                    }`}
+                  >
+                    <p className="font-medium text-xs sm:text-[13px] leading-relaxed">{msg.text}</p>
+
+                    {/* Legal Citation Badge */}
+                    {msg.citation && (
+                      <div className="mt-2.5 pt-2 border-t border-slate-100 flex flex-wrap items-center gap-1.5 text-[10px]">
+                        <span className="font-bold text-slate-500">Statutory Citation:</span>
+                        <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#05389f] font-mono font-bold border border-blue-200/80">
+                          {msg.citation}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* SDG Badges */}
+                    {msg.sdgs && (
+                      <div className="mt-1.5 flex flex-wrap gap-1 text-[10px]">
+                        {msg.sdgs.map((sdg, sIdx) => (
+                          <span
+                            key={sIdx}
+                            className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200/60"
+                          >
+                            {sdg}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Drafted Proposal Card (Sunshine Yellow Card matching OrchestrateIQ) */}
+                  {msg.proposalDraft && (
+                    <div className="mt-2.5 p-3.5 w-full bg-[#fefce8] border border-amber-300/80 rounded-2xl space-y-2 text-xs shadow-2xs">
+                      <div className="flex items-center justify-between font-bold text-slate-900">
+                        <div className="flex items-center space-x-1.5">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                          <span className="text-[#05389f] font-black">Drafted Statutory Proposal</span>
+                        </div>
+                        <span className="font-mono text-emerald-800 font-extrabold text-xs sm:text-sm">
+                          ₱{msg.proposalDraft.estimated_budget_php?.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="font-extrabold text-slate-900 text-xs sm:text-[13px]">
+                        {msg.proposalDraft.project_title}
+                      </div>
+                      <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                        {msg.proposalDraft.problem_statement}
+                      </p>
+                      <button
+                        onClick={() => handleQueueDraftProposal(msg.proposalDraft)}
+                        className="w-full mt-1.5 py-2 rounded-xl bg-[#05389f] hover:bg-[#042d82] text-white text-xs font-bold cursor-pointer transition-colors shadow-xs flex items-center justify-center space-x-1.5"
+                      >
+                        <Check className="w-3.5 h-3.5 text-[#facc15]" />
+                        <span>Queue to Mayor&apos;s Review Deck</span>
+                      </button>
                     </div>
                   )}
 
-                  {/* SDG Badges */}
-                  {msg.sdgs && (
-                    <div className="mt-1.5 flex flex-wrap gap-1 text-[10px]">
-                      {msg.sdgs.map((sdg, sIdx) => (
-                        <span
-                          key={sIdx}
-                          className="px-2 py-0.5 rounded-full bg-[#fef9e7] text-[#0a1128] font-bold border border-[#fccf17]/40"
+                  {/* Suggested Actions */}
+                  {msg.suggestedActions && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {msg.suggestedActions.map((action, aIdx) => (
+                        <button
+                          key={aIdx}
+                          onClick={() => executeAiQuery(action)}
+                          className="px-3 py-1 bg-white hover:bg-[#edf3fc] border border-slate-200 hover:border-[#05389f]/40 rounded-full text-[10px] text-[#05389f] font-bold cursor-pointer shadow-2xs transition-all"
                         >
-                          {sdg}
-                        </span>
+                          {action}
+                        </button>
                       ))}
                     </div>
                   )}
                 </div>
+              ))}
 
-                {/* Drafted Proposal Card */}
-                {msg.proposalDraft && (
-                  <div className="mt-2 p-3.5 w-full bg-[#fef9e7] border border-[#fccf17] rounded-2xl space-y-2 text-xs shadow-2xs">
-                    <div className="flex items-center justify-between font-bold text-[#0a1128]">
-                      <span className="text-[#05389f]">Drafted Statutory Proposal</span>
-                      <span className="font-mono text-emerald-800">
-                        ₱{msg.proposalDraft.estimated_budget_php?.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="font-bold text-[#0a1128]">
-                      {msg.proposalDraft.project_title}
-                    </div>
-                    <p className="text-[11px] text-[#4b5563] leading-relaxed">
-                      {msg.proposalDraft.problem_statement}
-                    </p>
-                    <button
-                      onClick={() => handleQueueDraftProposal(msg.proposalDraft)}
-                      className="pill-btn-blue w-full mt-1 py-2 text-xs font-bold cursor-pointer transition-colors shadow-xs"
-                    >
-                      Queue to Mayor&apos;s Review Deck
-                    </button>
-                  </div>
-                )}
+              {isAiLoading && (
+                <div className="flex items-center space-x-2 text-slate-600 text-xs p-3 bg-white rounded-2xl border border-slate-100 shadow-2xs">
+                  <Sparkles className="w-4 h-4 animate-spin text-[#05389f]" />
+                  <span className="font-medium">Analyzing CBMS datasets & statutory mandates...</span>
+                </div>
+              )}
+            </div>
 
-                {/* Suggested Actions */}
-                {msg.suggestedActions && (
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {msg.suggestedActions.map((action, aIdx) => (
-                      <button
-                        key={aIdx}
-                        onClick={() => executeAiQuery(action)}
-                        className="px-3 py-1 bg-white hover:bg-slate-50 border border-[#bebcbc]/50 rounded-full text-[10px] text-[#05389f] font-bold cursor-pointer shadow-2xs"
-                      >
-                        {action}
-                      </button>
-                    ))}
-                  </div>
-                )}
+            {/* Chat Input Bar */}
+            <div className="p-3 border-t border-slate-100 bg-white">
+              <div className="flex items-center space-x-2 bg-[#f4f5f9] border border-slate-200 rounded-full px-3.5 py-2 focus-within:bg-white focus-within:border-[#05389f] transition-all shadow-2xs">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && chatInput.trim()) executeAiQuery(chatInput);
+                  }}
+                  placeholder="Ask statutory synthesis, RA 7160 basis, or budget..."
+                  className="flex-1 bg-transparent text-xs sm:text-[13px] text-slate-900 outline-none placeholder:text-slate-400 font-medium"
+                />
+                <button
+                  onClick={() => executeAiQuery(chatInput)}
+                  disabled={isAiLoading || !chatInput.trim()}
+                  className="w-7 h-7 rounded-full bg-[#05389f] disabled:opacity-40 text-white flex items-center justify-center cursor-pointer shadow-xs hover:bg-[#042d82] transition-colors shrink-0"
+                >
+                  <Send className="w-3.5 h-3.5 text-[#facc15]" />
+                </button>
               </div>
-            ))}
-
-            {isAiLoading && (
-              <div className="flex items-center space-x-2 text-[#4b5563] text-xs p-2">
-                <Sparkles className="w-4 h-4 animate-spin text-[#05389f]" />
-                <span>Analyzing CBMS datasets & statutory mandates...</span>
-              </div>
-            )}
+              <p className="text-[9px] text-center text-slate-400 font-medium mt-1.5">
+                Direct statutory AI reasoning grounded in 44,892 PSA CBMS households across 27 Barangays.
+              </p>
+            </div>
           </div>
-
-          {/* Chat Input */}
-          <div className="p-3.5 border-t border-[#f2f2f2] bg-[#f2f2f2] flex items-center space-x-2">
-            <input
-              type="text"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") executeAiQuery(chatInput);
-              }}
-              placeholder="Ask CBMS synthesis, statutory basis, or budget..."
-              className="flex-1 bg-white border border-[#bebcbc] rounded-full px-4 py-2 text-xs text-[#0a1128] outline-none focus:border-[#05389f] shadow-2xs"
-            />
-            <button
-              onClick={() => executeAiQuery(chatInput)}
-              disabled={isAiLoading || !chatInput.trim()}
-              className="pill-btn-blue p-2.5 disabled:opacity-50 text-white rounded-full cursor-pointer shadow-xs"
-            >
-              <Send className="w-4 h-4 text-[#fccf17]" />
-            </button>
-          </div>
-        </div>
+        </>
       )}
     </div>
   );
