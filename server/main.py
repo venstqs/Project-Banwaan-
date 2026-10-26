@@ -6,6 +6,21 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+try:
+    from groq_policy_agent import (
+        query_groq_policy_llm,
+        resolve_groq_credentials,
+        POLICY_MD_PATH,
+        GROQ_KEY_MD_PATH,
+    )
+except ImportError:
+    from server.groq_policy_agent import (
+        query_groq_policy_llm,
+        resolve_groq_credentials,
+        POLICY_MD_PATH,
+        GROQ_KEY_MD_PATH,
+    )
+
 app = FastAPI(
     title="Project Banwaan Core Intelligence API",
     description="Backend engine for Naga City CBMS Analytics, PCA Vulnerability, SDG Alignment, and Statutory Synthesis",
@@ -215,6 +230,10 @@ class MobileFieldReport(BaseModel):
     offline_created_at: str
     image_base64: Optional[str] = None
     reporter_role: str = "Barangay Captain"
+
+class GroqKeyRequest(BaseModel):
+    api_key: str
+    model: Optional[str] = "llama-3.3-70b-versatile"
 
 # --- Endpoints ---
 
@@ -590,6 +609,36 @@ def agent_query(req: AgentQueryRequest):
 
     proposal["project_title"] = proposal["title"]
 
+    # Query Groq LLM with SDG + Statutory Policy Knowledge Base (data/POLICY_KNOWLEDGE.md)
+    groq_result = query_groq_policy_llm(
+        user_query=req.query,
+        barangay=brgy,
+        barangay_display_name=brgy_name,
+        domain=domain,
+        fallback_proposal=proposal,
+    )
+
+    if groq_result.get("groq_active"):
+        proposal = groq_result["proposal_draft"]
+        ai_synthesis = groq_result["response_text"]
+        active_model = groq_result.get("model", "groq/llama-3.3-70b-versatile")
+    else:
+        sdg_scores = brgy.get("sdg_scores", {})
+        lowest_sdg = (
+            min(sdg_scores.items(), key=lambda x: x[1])
+            if sdg_scores
+            else ("SDG 11 Sustainable Cities", 62.0)
+        )
+        ai_synthesis = (
+            f"[SDG & Statutory Policy Synthesis — {brgy_name}] "
+            f"Empirical 2024 CBMS telemetry across {hh:,} households ({pop:,} residents) records a Master Vulnerability Index of {mvi}/100 "
+            f"with priority SDG localization gap in {lowest_sdg[0]} (score: {lowest_sdg[1]}/100). "
+            f"{proposal['problem_statement']} "
+            f"Pursuant to {proposal['statutory_basis']['law']} ({proposal['statutory_basis']['section']} — {proposal['statutory_basis']['title']}), "
+            f"this policy brief recommends a ₱{proposal['estimated_budget_php']:,.0f} {domain} intervention aligned with {', '.join(proposal['sdgs'])}."
+        )
+        active_model = "banwaan-sdg-policy-engine (Groq key ready in GROQ_API_KEY.md)"
+
     if req.auto_queue_proposal:
         proposals_db.insert(0, {
             "id": proposal["id"],
@@ -605,14 +654,9 @@ def agent_query(req: AgentQueryRequest):
             "created_by": proposal["created_by"]
         })
 
-    ai_synthesis = (
-        f"[Statutory Decision Synthesis] Analyzing {brgy_name} ({hh:,} households, {pop:,} residents, PCA Vulnerability Index: {mvi}/100). "
-        f"{proposal['problem_statement']} Pursuant to {proposal['statutory_basis']['law']} ({proposal['statutory_basis']['section']}), "
-        f"an evidence-based {domain} intervention of ₱{proposal['estimated_budget_php']:,.0f} is formulated to advance {', '.join(proposal['sdgs'])}."
-    )
-
     return {
-        "model": "banwaan-statutory-engine",
+        "model": active_model,
+        "groq_active": bool(groq_result.get("groq_active")),
         "query": req.query,
         "target_office": domain,
         "barangay": brgy_name,
@@ -624,6 +668,16 @@ def agent_query(req: AgentQueryRequest):
         "suggested_actions": proposal["suggested_actions"],
         "proposal_draft": proposal,
         "drafted_proposal": proposal
+    }
+
+@app.get("/api/agent/status")
+def agent_status():
+    api_key, model_name = resolve_groq_credentials()
+    return {
+        "groq_configured": bool(api_key),
+        "model": model_name,
+        "key_file": "GROQ_API_KEY.md",
+        "policy_knowledge_file": "data/POLICY_KNOWLEDGE.md",
     }
 
 @app.post("/api/mobile/field-report")

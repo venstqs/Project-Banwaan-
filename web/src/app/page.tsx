@@ -53,7 +53,8 @@ import {
   PhoneCall,
   Copy,
   ExternalLink,
-  Command
+  Command,
+  Target
 } from "lucide-react";
 
 import cbmsDataRaw from "../data/processed_cbms_data.json";
@@ -871,19 +872,6 @@ export default function ModernCategorizedCommandCenter() {
 
           {/* Right: Controls & Avatar */}
           <div className="flex items-center space-x-2.5 shrink-0">
-            {/* Live Status Pill */}
-            <div className="bg-[#eaf8ee] text-[#16a34a] border border-emerald-200/80 rounded-full px-3 py-1 text-xs font-bold flex items-center space-x-1.5 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 pulse-live" />
-              <span>Live</span>
-            </div>
-
-            {/* Cycle Pill */}
-            <div className="hidden md:flex items-center space-x-1.5 bg-white border border-slate-200 rounded-full px-3 py-1 text-xs font-semibold text-slate-700 shadow-2xs">
-              <Activity className="w-3.5 h-3.5 text-slate-400" />
-              <span>2026 AIP Cycle</span>
-              <ChevronDown className="w-3 h-3 text-slate-400 ml-0.5" />
-            </div>
-
             {/* Header Omnisearch Pill (Opens Dedicated Spotlight Modal) */}
             <button
               onClick={() => setIsSearchOpen(true)}
@@ -1165,29 +1153,21 @@ export default function ModernCategorizedCommandCenter() {
                 </p>
               </div>
 
-              {/* Right Headline Pills */}
+              {/* Right Headline Actions: Functional Search & Validated CBMS Badge */}
               <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setIsSearchOpen(true)}
+                  className="bg-white border border-slate-200 hover:border-[#05389f] rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-700 flex items-center space-x-2 shadow-2xs hover:bg-slate-50 transition-all cursor-pointer"
+                  title="Search 27 Barangays & Datasets (Cmd+K / Ctrl+K)"
+                >
+                  <Search className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Search Datasets</span>
+                  <kbd className="text-[10px] font-mono bg-slate-100 border border-slate-300 rounded px-1.5 py-0.2 text-slate-500">⌘K</kbd>
+                </button>
                 <div className="bg-[#eaf8ee] text-[#16a34a] border border-emerald-200/80 rounded-full px-3.5 py-1.5 text-xs font-semibold flex items-center space-x-1.5 shadow-2xs">
                   <Check className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Setup complete • 27 of 27</span>
+                  <span>27 Barangays Mapped</span>
                 </div>
-                <div className="bg-white border border-slate-200 rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-700 flex items-center space-x-1 shadow-2xs">
-                  <span>📅 FY 2026 AIP Cycle</span>
-                  <ChevronDown className="w-3 h-3 text-slate-400" />
-                </div>
-                <div className="bg-white border border-slate-200 rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-700 flex items-center space-x-1 shadow-2xs">
-                  <Sliders className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Filter</span>
-                </div>
-                <button
-                  onClick={() => {
-                    const el = document.getElementById("cesium-3d-viewport");
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="bg-white border border-slate-200 rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-700 flex items-center space-x-1 shadow-2xs hover:bg-slate-50 cursor-pointer"
-                >
-                  <span>↗ Live Map</span>
-                </button>
               </div>
             </div>
 
@@ -1212,57 +1192,62 @@ export default function ModernCategorizedCommandCenter() {
                       : "bg-[#f2f2f2] text-slate-600 hover:text-slate-900"
                   }`}
                 >
-                  🌐 All 27
+                  All 27
                 </button>
                 <button
                   onClick={() => handleSelectCategory("upland")}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
                     selectedCategoryFilter === "upland"
                       ? "bg-[#b59410] text-white shadow-xs"
                       : "bg-[#fef9e7] text-[#b59410] hover:bg-[#fee573]"
                   }`}
                 >
-                  ⛰️ Upland (5)
+                  <span className="w-2 h-2 rounded-full bg-[#b59410] inline-block" />
+                  <span>Upland (5)</span>
                 </button>
                 <button
                   onClick={() => handleSelectCategory("cbd")}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
                     selectedCategoryFilter === "cbd"
                       ? "bg-[#05389f] text-white shadow-xs"
                       : "bg-[#edf3fc] text-[#05389f] hover:bg-[#dbeafe]"
                   }`}
                 >
-                  🏢 CBD Core (6)
+                  <span className="w-2 h-2 rounded-full bg-[#05389f] inline-block" />
+                  <span>CBD Core (6)</span>
                 </button>
                 <button
                   onClick={() => handleSelectCategory("poblacion")}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
                     selectedCategoryFilter === "poblacion"
                       ? "bg-[#7c3aed] text-white shadow-xs"
                       : "bg-purple-50 text-[#7c3aed] hover:bg-purple-100"
                   }`}
                 >
-                  🏛️ Poblacion (8)
+                  <span className="w-2 h-2 rounded-full bg-[#7c3aed] inline-block" />
+                  <span>Poblacion (8)</span>
                 </button>
                 <button
                   onClick={() => handleSelectCategory("riverine")}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
                     selectedCategoryFilter === "riverine"
                       ? "bg-[#ea580c] text-white shadow-xs"
                       : "bg-[#fff1f2] text-[#ea580c] hover:bg-[#fee2e2]"
                   }`}
                 >
-                  🌊 Riverine (4)
+                  <span className="w-2 h-2 rounded-full bg-[#ea580c] inline-block" />
+                  <span>Riverine (4)</span>
                 </button>
                 <button
                   onClick={() => handleSelectCategory("growth")}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
                     selectedCategoryFilter === "growth"
                       ? "bg-[#0d9488] text-white shadow-xs"
                       : "bg-teal-50 text-[#0d9488] hover:bg-teal-100"
                   }`}
                 >
-                  🏥 Growth (4)
+                  <span className="w-2 h-2 rounded-full bg-[#0d9488] inline-block" />
+                  <span>Growth Corridor (4)</span>
                 </button>
               </div>
 
@@ -1287,8 +1272,8 @@ export default function ModernCategorizedCommandCenter() {
 
             {!isDigitalTwinSectionMinimized && (
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 p-3 bg-[#f7f8fa] rounded-b-xl items-stretch">
-                {/* Shortened Geo Map (7 Cols on Desktop) */}
-                <div className="xl:col-span-7 rounded-2xl overflow-hidden border border-[#e5e7eb] shadow-xs relative bg-white">
+                {/* 3D GIS Map (7 Cols on Desktop) */}
+                <div className="xl:col-span-7 flex flex-col h-full min-h-[660px]">
                   <CesiumViewer
                     selectedBarangayId={selectedBarangayId}
                     onSelectBarangay={handleSelectBarangay}
@@ -1301,13 +1286,18 @@ export default function ModernCategorizedCommandCenter() {
                 </div>
 
                 {/* Right Side: Barangay Diagnostic & Executive Intelligence Deck (5 Cols on Desktop) */}
-                <div className="xl:col-span-5 bg-white rounded-2xl p-4 border border-[#e5e7eb] shadow-sm flex flex-col h-[590px]">
+                <div className="xl:col-span-5 bg-white rounded-2xl p-4 border border-[#e5e7eb] shadow-sm flex flex-col h-full min-h-[660px]">
                   {/* Top Row: Barangay Cycler & Tab Switcher (Intel vs Controls) */}
                   <div className="space-y-2 pb-2 border-b border-slate-100 shrink-0">
                     {/* Barangay Cycler Header */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center space-x-2.5 min-w-0">
-                        <span className="text-2xl shrink-0">{selectedBarangay.category.icon}</span>
+                        <div
+                          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-white font-black text-xs shadow-xs"
+                          style={{ backgroundColor: selectedBarangay.category.color }}
+                        >
+                          {selectedBarangay.category.name.substring(0, 2).toUpperCase()}
+                        </div>
                         <div className="min-w-0">
                           <div className="flex items-center space-x-1.5">
                             <h3 className="font-extrabold text-[#0a1128] text-base leading-tight truncate">
@@ -1350,33 +1340,35 @@ export default function ModernCategorizedCommandCenter() {
                     <div className="flex items-center bg-[#f1f3f9] p-0.5 rounded-xl border border-slate-200/60 text-xs font-bold">
                       <button
                         onClick={() => setSidePanelTab("intel")}
-                        className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer text-[11px] ${
+                        className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer text-[11px] flex items-center justify-center space-x-1.5 ${
                           sidePanelTab === "intel"
                             ? "bg-[#05389f] text-white shadow-xs font-extrabold"
                             : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
-                        📍 Barangay Intel & AI
+                        <Compass className="w-3.5 h-3.5" />
+                        <span>Barangay Intel &amp; AI</span>
                       </button>
                       <button
                         onClick={() => setSidePanelTab("controls")}
-                        className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer text-[11px] ${
+                        className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer text-[11px] flex items-center justify-center space-x-1.5 ${
                           sidePanelTab === "controls"
                             ? "bg-[#05389f] text-white shadow-xs font-extrabold"
                             : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
-                        ⚙️ Master Controls
+                        <Sliders className="w-3.5 h-3.5" />
+                        <span>Master Controls</span>
                       </button>
                     </div>
                   </div>
 
-                  {/* Scrollable Container with Smooth Scrollbar */}
+                  {/* Scrollable Container with Smooth Scrollbar matching 3D GIS frame */}
                   <div className="flex-1 overflow-y-auto pr-1 space-y-3 min-h-0 pt-2">
                     {/* TAB 1: BARANGAY INTEL (OVERVIEW, NEXT STEPS, DETECTED) */}
                     {sidePanelTab === "intel" && (
                       <div className="space-y-3 animate-in fade-in duration-150">
-                        {/* Sub-tab segmented pill bar (Overview, Next Steps, Detected - NO 'ALL' BUTTON, NO MOVING DOTS) */}
+                        {/* Sub-tab segmented pill bar (Overview, Next Steps, Detected) */}
                         <div className="flex items-center space-x-1 bg-[#f3f5f9] p-1 rounded-xl border border-slate-200/70 text-[11px] font-bold shrink-0">
                           <button
                             onClick={() => setIntelSubTab("overview")}
@@ -1386,7 +1378,7 @@ export default function ModernCategorizedCommandCenter() {
                                 : "text-slate-600 hover:text-slate-900"
                             }`}
                           >
-                            📍 Overview
+                            Overview
                           </button>
                           <button
                             onClick={() => setIntelSubTab("next_steps")}
@@ -1396,7 +1388,7 @@ export default function ModernCategorizedCommandCenter() {
                                 : "text-slate-600 hover:text-slate-900"
                             }`}
                           >
-                            ⚡ Next Steps
+                            Next Steps
                           </button>
                           <button
                             onClick={() => setIntelSubTab("detected")}
@@ -1406,11 +1398,11 @@ export default function ModernCategorizedCommandCenter() {
                                 : "text-slate-600 hover:text-slate-900"
                             }`}
                           >
-                            🔍 Detected
+                            Detected Signals
                           </button>
                         </div>
 
-                        {/* ── SUB-SECTION: OVERVIEW (CLEAN DIAGNOSTICS + COPILOT LAUNCHER) ── */}
+                        {/* ── SUB-SECTION: OVERVIEW ── */}
                         {intelSubTab === "overview" && (
                           <div className="space-y-3 animate-in fade-in duration-150">
                             {/* Risk Badge & MVI Row */}
@@ -1420,24 +1412,24 @@ export default function ModernCategorizedCommandCenter() {
                                   const mvi = selectedBarangay.vulnerability_index || 50;
                                   if (mvi >= 70) {
                                     return (
-                                      <span className="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold flex items-center space-x-1">
-                                        <span className="w-2 h-2 rounded-full bg-rose-500 inline-block" />
-                                        <span>🔴 High Risk Level</span>
+                                      <span className="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold flex items-center space-x-1.5">
+                                        <span className="w-2 h-2 rounded-full bg-rose-500 inline-block animate-pulse" />
+                                        <span>High Risk Level</span>
                                       </span>
                                     );
                                   }
                                   if (mvi >= 50) {
                                     return (
-                                      <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center space-x-1">
+                                      <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center space-x-1.5">
                                         <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-                                        <span>🟡 Medium Risk Level</span>
+                                        <span>Medium Risk Level</span>
                                       </span>
                                     );
                                   }
                                   return (
-                                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center space-x-1">
+                                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center space-x-1.5">
                                       <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                                      <span>🟢 Low Risk Level</span>
+                                      <span>Low Risk Level</span>
                                     </span>
                                   );
                                 })()}
@@ -1493,19 +1485,19 @@ export default function ModernCategorizedCommandCenter() {
                               </div>
                             </div>
 
-                            {/* REVISED GROQ SDG & STATUTORY POLICY AI COPILOT FRAME */}
-                            <div className="bg-gradient-to-b from-[#f8faff] to-white rounded-2xl p-4 border border-[#05389f]/20 shadow-xs space-y-3">
-                              {/* Frame Header: Orb + Groq SDG Policy Badge + Primary Generate Button */}
-                              <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-200/70">
+                            {/* GROQ SDG & STATUTORY POLICY AI COPILOT FRAME (EXACT SCREENSHOT UI) */}
+                            <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs space-y-3 flex flex-col justify-between">
+                              {/* Card Header: Icon + Title + LIVE Badge + Synthesize Policy Button */}
+                              <div className="flex items-center justify-between gap-2">
                                 <div className="flex items-center space-x-2.5 min-w-0">
-                                  <div className="w-9 h-9 rounded-2xl bg-[#05389f] text-white flex items-center justify-center shrink-0 shadow-sm border border-[#fccf17]">
-                                    <Sparkles className="w-4 h-4 text-[#fccf17]" />
+                                  <div className="w-8 h-8 rounded-full bg-[#05389f] text-white flex items-center justify-center shrink-0 shadow-xs">
+                                    <Sparkles className="w-4 h-4 text-[#facc15]" />
                                   </div>
                                   <div className="min-w-0">
                                     <div className="flex items-center space-x-1.5">
-                                      <h3 className="text-xs font-extrabold text-[#0a1128] truncate">
+                                      <h4 className="text-xs font-bold text-slate-900 truncate">
                                         Groq SDG &amp; Policy Copilot
-                                      </h3>
+                                      </h4>
                                       <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                         LIVE
                                       </span>
@@ -1523,14 +1515,14 @@ export default function ModernCategorizedCommandCenter() {
                                     )
                                   }
                                   disabled={isAiLoading}
-                                  className="px-3 py-1.5 rounded-xl bg-[#05389f] hover:bg-[#042d82] disabled:opacity-60 text-white text-[11px] font-bold flex items-center space-x-1.5 shadow-xs transition-all cursor-pointer shrink-0"
+                                  className="px-3.5 py-1.5 rounded-full bg-[#05389f] hover:bg-[#042d82] disabled:opacity-60 text-white text-xs font-bold flex items-center space-x-1.5 shadow-xs transition-all cursor-pointer shrink-0"
                                 >
-                                  <Sparkles className={`w-3.5 h-3.5 text-[#fccf17] ${isAiLoading ? "animate-spin" : ""}`} />
+                                  <Sparkles className={`w-3.5 h-3.5 text-[#facc15] ${isAiLoading ? "animate-spin" : ""}`} />
                                   <span>{isAiLoading ? "Synthesizing..." : "Synthesize Policy"}</span>
                                 </button>
                               </div>
 
-                              {/* Quick SDG & Policy Prompt Buttons */}
+                              {/* Suggestion Chips */}
                               <div className="flex flex-wrap items-center gap-1.5">
                                 <button
                                   onClick={() =>
@@ -1538,9 +1530,10 @@ export default function ModernCategorizedCommandCenter() {
                                       `Audit ${selectedBarangay.realName} CBMS deficits against the 17 UN SDGs and recommend top statutory priorities.`
                                     )
                                   }
-                                  className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs"
+                                  className="px-3 py-1 rounded-full bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs flex items-center space-x-1.5"
                                 >
-                                  🎯 SDG Gap Audit ({selectedBarangay.realName})
+                                  <Target className="w-3.5 h-3.5 text-[#05389f]" />
+                                  <span>SDG Gap Audit ({selectedBarangay.realName})</span>
                                 </button>
                                 <button
                                   onClick={() =>
@@ -1548,9 +1541,10 @@ export default function ModernCategorizedCommandCenter() {
                                       `Cite exact RA 7160, RA 10121, and RA 11223 statutory mandates applicable to ${selectedBarangay.realName}'s highest household deficits.`
                                     )
                                   }
-                                  className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs"
+                                  className="px-3 py-1 rounded-full bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs flex items-center space-x-1.5"
                                 >
-                                  📜 Statutory Policy Basis
+                                  <FileText className="w-3.5 h-3.5 text-[#05389f]" />
+                                  <span>Statutory Policy Basis</span>
                                 </button>
                                 <button
                                   onClick={() =>
@@ -1558,21 +1552,21 @@ export default function ModernCategorizedCommandCenter() {
                                       `Draft a 2026 AIP 20% Local Development Fund project ordinance for ${selectedBarangay.realName} with budget and SDG targets.`
                                     )
                                   }
-                                  className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs"
+                                  className="px-3 py-1 rounded-full bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs flex items-center space-x-1.5"
                                 >
-                                  ⚖️ Draft AIP Proposal
+                                  <Scale className="w-3.5 h-3.5 text-[#05389f]" />
+                                  <span>Draft AIP Proposal</span>
                                 </button>
                               </div>
 
-                              {/* Live Inline AI Synthesis Output Box */}
+                              {/* LATEST POLICY & SDG SYNTHESIS Output Box */}
                               {(() => {
-                                const latestAiMsg = [...chatMessages].reverse().find((m) => m.sender === "ai");
-                                if (!latestAiMsg) return null;
+                                const latestAiMsg = [...chatMessages].reverse().find((m) => m.sender === "ai") || chatMessages[0];
                                 return (
-                                  <div className="p-3 rounded-xl bg-white border border-slate-200/90 space-y-2 text-xs shadow-2xs">
+                                  <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 space-y-2.5 text-xs shadow-2xs">
                                     <div className="flex items-center justify-between">
                                       <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#05389f]">
-                                        Latest Policy &amp; SDG Synthesis
+                                        LATEST POLICY &amp; SDG SYNTHESIS
                                       </span>
                                       <button
                                         onClick={() => setIsAiOpen(true)}
@@ -1583,36 +1577,37 @@ export default function ModernCategorizedCommandCenter() {
                                       </button>
                                     </div>
 
-                                    <p className="text-[11px] text-slate-700 leading-relaxed">
-                                      {latestAiMsg.text}
+                                    <p className="text-[11px] text-slate-700 leading-relaxed max-h-48 overflow-y-auto">
+                                      {latestAiMsg?.text}
                                     </p>
 
                                     {/* Statutory Citation + SDG Pills */}
-                                    <div className="flex flex-wrap items-center gap-1 pt-1">
-                                      {latestAiMsg.citation && (
-                                        <span className="px-2 py-0.5 rounded-md bg-[#edf3fc] text-[#05389f] font-mono font-bold text-[10px] border border-[#05389f]/20">
-                                          ⚖️ {latestAiMsg.citation}
+                                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                      {latestAiMsg?.citation && (
+                                        <span className="px-2.5 py-0.5 rounded-md bg-[#edf3fc] text-[#05389f] font-mono font-bold text-[10px] border border-[#05389f]/20 flex items-center space-x-1">
+                                          <Scale className="w-3 h-3 text-[#05389f]" />
+                                          <span>{latestAiMsg.citation}</span>
                                         </span>
                                       )}
-                                      {latestAiMsg.sdgs?.map((sdg, idx) => (
+                                      {latestAiMsg?.sdgs?.map((sdg: string, idx: number) => (
                                         <span
                                           key={idx}
-                                          className="px-2 py-0.5 rounded-md bg-[#fef9e7] text-[#92400e] font-bold text-[10px] border border-[#fccf17]/50"
+                                          className="px-2.5 py-0.5 rounded-md bg-[#fef9e7] text-[#92400e] font-bold text-[10px] border border-[#fccf17]/50"
                                         >
                                           {sdg}
                                         </span>
                                       ))}
                                     </div>
 
-                                    {/* One-Click Queue Draft Proposal if present */}
-                                    {latestAiMsg.proposalDraft && (
+                                    {/* One-Click Queue Draft Proposal if present (Matching Image 1) */}
+                                    {latestAiMsg?.proposalDraft && (
                                       <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                                         <div className="truncate text-[10px] font-semibold text-slate-600">
                                           Draft: <strong className="text-slate-900">{latestAiMsg.proposalDraft.project_title}</strong> (₱{latestAiMsg.proposalDraft.estimated_budget_php?.toLocaleString()})
                                         </div>
                                         <button
                                           onClick={() => handleQueueDraftProposal(latestAiMsg.proposalDraft)}
-                                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold shrink-0 cursor-pointer transition-colors"
+                                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold shrink-0 cursor-pointer transition-colors shadow-2xs"
                                         >
                                           + Queue to AIP
                                         </button>
@@ -1622,9 +1617,9 @@ export default function ModernCategorizedCommandCenter() {
                                 );
                               })()}
 
-                              {/* Bottom Inset Input Bar */}
+                              {/* Inset Ask AI Input Bar */}
                               <div className="pt-0.5">
-                                <div className="flex items-center bg-white border border-slate-200 rounded-xl pl-3 pr-1.5 py-1.5 focus-within:border-[#05389f] transition-all shadow-2xs">
+                                <div className="flex items-center bg-[#f8fafd] border border-slate-200 rounded-full pl-3.5 pr-1 py-1 focus-within:border-[#05389f] focus-within:bg-white transition-all shadow-2xs">
                                   <input
                                     type="text"
                                     value={chatInput}
@@ -1642,36 +1637,16 @@ export default function ModernCategorizedCommandCenter() {
                                       if (chatInput.trim()) {
                                         executeAiQuery(chatInput);
                                       } else {
-                                        executeAiQuery(`Synthesize statutory priorities and SDG alignment for ${selectedBarangay.realName}`);
+                                        executeAiQuery(`Synthesize SDG priorities and statutory policies for ${selectedBarangay.realName}`);
                                       }
                                     }}
-                                    disabled={isAiLoading}
-                                    className="px-2.5 py-1 rounded-lg bg-[#05389f] hover:bg-[#042d82] disabled:opacity-50 text-white flex items-center space-x-1 text-[11px] font-bold transition-all cursor-pointer shadow-xs shrink-0 ml-1.5"
-                                    title="Send Query to Groq Policy Copilot"
+                                    className="px-3.5 py-1.5 rounded-full bg-[#05389f] hover:bg-[#042d82] text-white text-xs font-bold transition-all cursor-pointer flex items-center space-x-1 shrink-0 shadow-xs"
                                   >
                                     <span>Ask AI</span>
-                                    <Send className="w-3 h-3 text-[#fccf17]" />
+                                    <Send className="w-3 h-3 text-[#facc15]" />
                                   </button>
                                 </div>
                               </div>
-                            </div>
-
-                            {/* Rapid Emergency Hotline Quick-Link */}
-                            <div className="bg-rose-50/70 border border-rose-200/80 rounded-xl p-2.5 flex items-center justify-between text-xs">
-                              <div className="flex items-center space-x-2">
-                                <span className="text-base shrink-0">🚨</span>
-                                <div>
-                                  <div className="font-bold text-rose-900 text-[11px] leading-tight">Naga 911 / CDRRMO Central</div>
-                                  <div className="text-[10px] text-rose-700 font-mono font-semibold">0908-525-3000 • 24/7 ComCen</div>
-                                </div>
-                              </div>
-                              <a
-                                href="tel:09085253000"
-                                className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold transition-all flex items-center space-x-1 cursor-pointer"
-                              >
-                                <PhoneCall className="w-2.5 h-2.5" />
-                                <span>Call 911</span>
-                              </a>
                             </div>
                           </div>
                         )}
@@ -1700,7 +1675,7 @@ export default function ModernCategorizedCommandCenter() {
                               </button>
                             </div>
 
-                            {/* Sunshine Yellow Hero Card (OrchestrateIQ Style - Rock Solid, No translateY jump) */}
+                            {/* Sunshine Yellow Hero Card */}
                             <div className="yellow-feature-card p-4 relative overflow-hidden flex flex-col justify-between rounded-2xl shadow-sm">
                               <div>
                                 <div className="flex items-center justify-between">
@@ -1708,7 +1683,7 @@ export default function ModernCategorizedCommandCenter() {
                                     Prioritize {selectedBarangay.realName} Dredging
                                   </h4>
                                   <span className="bg-white/95 text-[#0f172a] font-black px-2 py-0.5 rounded-full text-[10px] shadow-2xs">
-                                    • Do first
+                                    • Priority
                                   </span>
                                 </div>
                                 <p className="text-xs text-[#0f172a]/85 mt-1 font-medium leading-relaxed">
@@ -1719,10 +1694,10 @@ export default function ModernCategorizedCommandCenter() {
                               <div className="mt-3 pt-2.5 border-t border-black/10 flex items-center justify-between">
                                 <div className="flex items-center space-x-1.5">
                                   <span className="px-2 py-0.5 rounded-full bg-white/90 text-[#0f172a] text-[10px] font-bold shadow-2xs">
-                                    🌊 2 projects
+                                    2 Projects
                                   </span>
                                   <span className="px-2 py-0.5 rounded-full bg-white/90 text-[#0f172a] text-[10px] font-bold shadow-2xs">
-                                    ⏱️ ~2 min
+                                    ~2 min SLA
                                   </span>
                                 </div>
                                 <div className="flex -space-x-1">
@@ -1753,8 +1728,8 @@ export default function ModernCategorizedCommandCenter() {
                                 <div className="text-xs font-bold text-slate-900">Set LDF Statutory Ceiling</div>
                                 <div className="text-[10px] text-slate-500 mt-0.5">RA 7160 Sec. 287 minimum 20% dev fund baseline</div>
                                 <div className="flex items-center space-x-2.5 mt-1.5 text-[10px] text-slate-600 font-medium">
-                                  <span>💰 ₱{(aipBudgetCeiling / 1000000).toFixed(1)}M Ceiling</span>
-                                  <span>📅 2026 Cycle</span>
+                                  <span>₱{(aipBudgetCeiling / 1000000).toFixed(1)}M Ceiling</span>
+                                  <span>2026 Mandate</span>
                                 </div>
                               </div>
                               <button
@@ -1784,15 +1759,16 @@ export default function ModernCategorizedCommandCenter() {
                             <div className="bg-rose-50/50 p-3 rounded-xl border border-rose-200/80 flex items-center justify-between">
                               <div>
                                 <div className="text-xs font-bold text-rose-950 flex items-center space-x-1.5">
-                                  <span>🚨 CDRRMO Disaster Dispatch</span>
+                                  <ShieldAlert className="w-3.5 h-3.5 text-rose-700" />
+                                  <span>CDRRMO Emergency Dispatch</span>
                                 </div>
-                                <div className="text-[10px] text-rose-700 mt-0.5">Emergency Command Center (0908-525-3000)</div>
+                                <div className="text-[10px] text-rose-700 mt-0.5">Command Center (0908-525-3000)</div>
                               </div>
                               <a
                                 href="tel:09085253000"
                                 className="px-2.5 py-1 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold transition-colors cursor-pointer"
                               >
-                                Call 911
+                                Dispatch
                               </a>
                             </div>
                           </div>
@@ -1807,7 +1783,7 @@ export default function ModernCategorizedCommandCenter() {
                                   Detected
                                 </h4>
                                 <span className="px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-blue-50 text-[#05389f] border border-blue-200">
-                                  Citywide & Brgy
+                                  Citywide &amp; Brgy
                                 </span>
                               </div>
                               <button
@@ -1822,7 +1798,7 @@ export default function ModernCategorizedCommandCenter() {
                               </button>
                             </div>
 
-                            {/* 2x2 Grid of Cards (Matching OrchestrateIQ) */}
+                            {/* 2x2 Grid of Cards */}
                             <div className="grid grid-cols-2 gap-2.5">
                               <div className="bg-[#f7f8fa] p-3 rounded-2xl border border-slate-200 flex flex-col justify-between min-h-[92px]">
                                 <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -1831,7 +1807,7 @@ export default function ModernCategorizedCommandCenter() {
                                 <div className="mt-2">
                                   <div className="text-base font-extrabold text-slate-900 font-mono">27</div>
                                   <div className="text-[11px] font-bold text-slate-700">Barangays</div>
-                                  <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ 100% CBMS mapped</div>
+                                  <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">PSA CBMS mapped</div>
                                 </div>
                               </div>
 
@@ -1842,7 +1818,7 @@ export default function ModernCategorizedCommandCenter() {
                                 <div className="mt-2">
                                   <div className="text-base font-extrabold text-slate-900 font-mono">5</div>
                                   <div className="text-[11px] font-bold text-slate-700">Planning Sectors</div>
-                                  <div className="text-[10px] text-purple-600 font-semibold mt-0.5">✓ 92% statutory audit</div>
+                                  <div className="text-[10px] text-purple-600 font-semibold mt-0.5">Statutory audit</div>
                                 </div>
                               </div>
 
@@ -1853,7 +1829,7 @@ export default function ModernCategorizedCommandCenter() {
                                 <div className="mt-2">
                                   <div className="text-base font-extrabold text-slate-900 font-mono">44,892</div>
                                   <div className="text-[11px] font-bold text-slate-700">Households</div>
-                                  <div className="text-[10px] text-blue-600 font-semibold mt-0.5">✓ PSA validated</div>
+                                  <div className="text-[10px] text-blue-600 font-semibold mt-0.5">PSA validated</div>
                                 </div>
                               </div>
 
@@ -1864,7 +1840,7 @@ export default function ModernCategorizedCommandCenter() {
                                 <div className="mt-2">
                                   <div className="text-base font-extrabold text-slate-900 font-mono">₱112.5M</div>
                                   <div className="text-[11px] font-bold text-slate-700">Hotspot Deficit</div>
-                                  <div className="text-[10px] text-amber-600 font-semibold mt-0.5">⚡ 4 high priority</div>
+                                  <div className="text-[10px] text-amber-600 font-semibold mt-0.5">4 High Priority Hotspots</div>
                                 </div>
                               </div>
                             </div>

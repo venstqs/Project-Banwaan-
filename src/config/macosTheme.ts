@@ -1,8 +1,8 @@
-import { Platform, TextStyle, ViewStyle } from 'react-native';
+import { Platform, TextStyle } from 'react-native';
 
 /**
- * macOS San Francisco Human Interface Design System for Project Banwaan Mobile
- * Inspired by macOS Sequoia / Sonoma / Big Sur dark vibrancy aesthetic.
+ * macOS Sequoia / Sonoma Light Human Interface Design System for Project Banwaan Mobile
+ * Faithful to the White, Royal Blue, and Sunshine Yellow palette from OrchestrateIQ reference.
  */
 
 export const sfFont = Platform.select({
@@ -13,61 +13,74 @@ export const sfFont = Platform.select({
 });
 
 export const macosColors = {
-  // macOS Desktop & Window Surfaces
-  windowBackground: '#0d111a',
-  sidebarBackground: '#131824',
-  cardBackground: '#181e2e',
-  cardBackgroundElevated: '#20283d',
-  cardBorder: 'rgba(255, 255, 255, 0.08)',
-  cardBorderHover: 'rgba(255, 255, 255, 0.16)',
-  cardHighlight: 'rgba(255, 255, 255, 0.04)',
+  // Desktop & Window Surfaces (Light Modern Theme)
+  windowBackground: '#eceef4',
+  sidebarBackground: '#f8f9fc',
+  cardBackground: '#ffffff',
+  cardBackgroundElevated: '#ffffff',
+  cardInset: '#f8f9fc',
+  cardBorder: '#e2e8f0',
+  cardBorderHover: '#cbd5e1',
+  cardHighlight: '#f1f5f9',
 
-  // Apple macOS System Colors
-  appleBlue: '#0a84ff',
-  appleBlueHover: '#0071e3',
-  appleBlueSubtle: 'rgba(10, 132, 255, 0.15)',
-  appleGreen: '#30d158',
-  appleGreenSubtle: 'rgba(48, 209, 88, 0.15)',
-  appleYellow: '#ffd60a',
-  appleYellowSubtle: 'rgba(255, 214, 10, 0.15)',
-  appleOrange: '#ff9f0a',
-  appleOrangeSubtle: 'rgba(255, 159, 10, 0.15)',
-  appleRed: '#ff453a',
-  appleRedSubtle: 'rgba(255, 69, 58, 0.15)',
-  applePurple: '#bf5af2',
-  applePurpleSubtle: 'rgba(191, 90, 242, 0.15)',
-  appleTeal: '#64d2ff',
+  // OrchestrateIQ Primary Vibrant Colors
+  appleBlue: '#05389f',
+  appleBlueVibrant: '#2563eb',
+  appleBlueHover: '#1d4ed8',
+  appleBlueSubtle: '#edf3fc',
+  appleBlueBorder: 'rgba(5, 56, 159, 0.2)',
 
-  // Naga City Gold Accent
-  nagaGold: '#fccf17',
-  nagaGoldSubtle: 'rgba(252, 207, 23, 0.15)',
+  // Sunshine Gold / Yellow Accent (as seen in the "Name your workflows" card)
+  nagaGold: '#facc15',
+  nagaGoldHover: '#eab308',
+  nagaGoldSubtle: '#fef9c3',
+  nagaGoldBorder: 'rgba(250, 204, 21, 0.4)',
 
-  // macOS Text Levels
-  textPrimary: '#f5f5f7',
-  textSecondary: '#9ca3af',
-  textTertiary: '#6b7280',
-  textMuted: '#4b5563',
+  // Secondary Accents (Live indicators, status chips)
+  appleGreen: '#10b981',
+  appleGreenSubtle: '#ecfdf5',
+  appleGreenBorder: 'rgba(16, 185, 129, 0.3)',
+  appleYellow: '#f59e0b',
+  appleYellowSubtle: '#fffbeb',
+  appleOrange: '#f97316',
+  appleOrangeSubtle: '#fff7ed',
+  appleRed: '#ef4444',
+  appleRedSubtle: '#fef2f2',
+  appleRedBorder: 'rgba(239, 68, 68, 0.3)',
+  applePurple: '#8b5cf6',
+  applePurpleSubtle: '#f5f3ff',
+  applePurpleBorder: 'rgba(139, 92, 246, 0.3)',
+  appleTeal: '#0d9488',
+  appleTealSubtle: '#f0fdfa',
+
+  // Clean Typography Scale
+  textPrimary: '#0f172a',
+  textSecondary: '#475569',
+  textTertiary: '#94a3b8',
+  textMuted: '#cbd5e1',
+  textOnBlue: '#ffffff',
+  textOnYellow: '#0f172a',
 
   // macOS Traffic Light Dots
   trafficClose: '#ff5f56',
   trafficMin: '#ffbd2e',
   trafficZoom: '#27c93f',
 
-  // macOS Controls & Inputs
-  controlBackground: 'rgba(255, 255, 255, 0.06)',
-  controlBorder: 'rgba(255, 255, 255, 0.12)',
-  inputBackground: '#090d16',
-  inputBorder: 'rgba(255, 255, 255, 0.12)',
-  inputFocusBorder: '#0a84ff',
-  dockBackground: 'rgba(19, 24, 36, 0.88)',
-  dockBorder: 'rgba(255, 255, 255, 0.12)',
+  // Controls & Inputs
+  controlBackground: '#f1f5f9',
+  controlBorder: '#e2e8f0',
+  inputBackground: '#ffffff',
+  inputBorder: '#e2e8f0',
+  inputFocusBorder: '#05389f',
+  dockBackground: '#ffffff',
+  dockBorder: '#e2e8f0',
 };
 
 export const macosTypography = {
   largeTitle: {
     fontFamily: sfFont,
-    fontSize: 26,
-    fontWeight: '700' as TextStyle['fontWeight'],
+    fontSize: 24,
+    fontWeight: '800' as TextStyle['fontWeight'],
     color: macosColors.textPrimary,
     letterSpacing: -0.5,
   },
@@ -80,29 +93,29 @@ export const macosTypography = {
   },
   title2: {
     fontFamily: sfFont,
-    fontSize: 17,
-    fontWeight: '600' as TextStyle['fontWeight'],
+    fontSize: 16,
+    fontWeight: '700' as TextStyle['fontWeight'],
     color: macosColors.textPrimary,
     letterSpacing: -0.3,
   },
   headline: {
     fontFamily: sfFont,
-    fontSize: 15,
-    fontWeight: '600' as TextStyle['fontWeight'],
+    fontSize: 14,
+    fontWeight: '700' as TextStyle['fontWeight'],
     color: macosColors.textPrimary,
   },
   body: {
     fontFamily: sfFont,
     fontSize: 13,
     fontWeight: '400' as TextStyle['fontWeight'],
-    color: macosColors.textPrimary,
+    color: macosColors.textSecondary,
     lineHeight: 18,
   },
   callout: {
     fontFamily: sfFont,
     fontSize: 12,
-    fontWeight: '500' as TextStyle['fontWeight'],
-    color: macosColors.textSecondary,
+    fontWeight: '600' as TextStyle['fontWeight'],
+    color: macosColors.textPrimary,
   },
   subhead: {
     fontFamily: sfFont,
@@ -114,12 +127,12 @@ export const macosTypography = {
   footnote: {
     fontFamily: sfFont,
     fontSize: 10,
-    fontWeight: '400' as TextStyle['fontWeight'],
+    fontWeight: '500' as TextStyle['fontWeight'],
     color: macosColors.textTertiary,
   },
   mono: {
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', web: 'ui-monospace, Menlo, Monaco, monospace', default: 'monospace' }),
     fontSize: 12,
-    fontWeight: '600' as TextStyle['fontWeight'],
+    fontWeight: '700' as TextStyle['fontWeight'],
   },
 };

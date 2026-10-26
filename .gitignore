@@ -23,6 +23,7 @@ venv/
 # Environment & Secrets
 .env*
 !.env.example
+GROQ_API_KEY.md
 
 # Misc / OS / Logs
 .DS_Store

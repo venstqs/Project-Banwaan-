@@ -9,3 +9,5 @@ export const API_BASE =
 
 export const AGENT_ENDPOINT = `${API_BASE}/api/agent/query`;
 export const FIELD_REPORT_ENDPOINT = `${API_BASE}/api/mobile/field-report`;
+export const FIELD_REPORTS_LIST_ENDPOINT = `${API_BASE}/api/mobile/field-reports`;
+export const PROPOSALS_ENDPOINT = `${API_BASE}/api/proposals`;

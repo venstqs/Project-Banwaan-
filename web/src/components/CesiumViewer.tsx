@@ -310,7 +310,7 @@ export default function CesiumViewer({
     });
 
     const viewer = new Cesium.Viewer(containerRef.current, {
-      sceneMode: Cesium.SceneMode.SCENE2D,
+      sceneMode: Cesium.SceneMode.SCENE3D,
       baseLayer: new Cesium.ImageryLayer(esriWorldImageryProvider),
       baseLayerPicker: false,
       geocoder: false,
@@ -337,12 +337,12 @@ export default function CesiumViewer({
     viewer.scene.globe.depthTestAgainstTerrain = false;
     viewer.scene.globe.maximumScreenSpaceError = 2;
 
-    // Lock camera controls strictly to 2D panning & zooming (no 3D tilt or rotation)
-    viewer.scene.screenSpaceCameraController.enableRotate = false;
-    viewer.scene.screenSpaceCameraController.enableTilt = false;
-    viewer.scene.screenSpaceCameraController.enableLook = false;
+    // Enable camera controls for 3D navigation, tilt, and perspective panning
+    viewer.scene.screenSpaceCameraController.enableRotate = true;
+    viewer.scene.screenSpaceCameraController.enableTilt = true;
+    viewer.scene.screenSpaceCameraController.enableLook = true;
 
-    // Initial 2D Top-Down Map View covering all 27 Naga City Barangays
+    // Initial Map View covering all 27 Naga City Barangays
     viewer.camera.setView({
       destination: Cesium.Cartesian3.fromDegrees(123.218, 13.628, 13500)
     });
@@ -789,7 +789,7 @@ export default function CesiumViewer({
 
   return (
     <div
-      className={`relative w-full rounded-2xl overflow-hidden border border-slate-200/90 bg-slate-900 shadow-md flex flex-col transition-all ${
+      className={`relative w-full h-full rounded-2xl overflow-hidden border border-[#e5e7eb] bg-slate-900 shadow-sm flex flex-col transition-all ${
         isExpanded ? "fixed inset-3 z-50 h-auto" : ""
       }`}
     >
@@ -816,18 +816,19 @@ export default function CesiumViewer({
               )}
             </div>
             <p className="text-[10px] text-slate-500 font-medium">
-              Esri World Imagery • 2D Contiguous CLUP Zoning & Statutory Risk Levels
+              Esri World Imagery • 3D Contiguous CLUP Zoning & Statutory Risk Levels
             </p>
           </div>
         </div>
 
-        {/* 2D Mode Badge, Color Scheme, Legend & Controls */}
+        {/* Color Scheme, Legend & Controls */}
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
-          {/* Color Scheme Switcher: Red/Yellow/Green Risk Levels vs Categories vs 27 Colors */}
+
+          {/* Color Scheme Switcher: Risk Levels vs Categories vs 27 Colors */}
           <div className="flex items-center bg-slate-100 border border-slate-200 rounded-xl p-0.5">
             {(
               [
-                { id: "vulnerability", label: "🔴🟡🟢 Risk Levels" },
+                { id: "vulnerability", label: "Risk Index" },
                 { id: "category_zones", label: "5 Sectors" },
                 { id: "admin_colors", label: "27 Colors" }
               ] as const
@@ -921,7 +922,7 @@ export default function CesiumViewer({
          ───────────────────────────────────────────────────────────── */}
       <div
         className={`relative w-full ${
-          isTwinMinimized ? "h-0 overflow-hidden" : isExpanded ? "flex-1" : "h-[580px]"
+          isTwinMinimized ? "h-0 overflow-hidden" : isExpanded ? "flex-1" : "flex-1 min-h-[580px]"
         } bg-[#0a1128] overflow-hidden transition-all duration-300`}
       >
         {!isCesiumLoaded && (
@@ -957,9 +958,26 @@ export default function CesiumViewer({
             </span>
             {(() => {
               const mvi = hoveredFeature.properties.vulnerability_index || 50;
-              if (mvi >= 70) return <span className="px-1.5 py-0.2 rounded-md bg-rose-100 text-rose-700 font-bold text-[10px]">🔴 High Risk</span>;
-              if (mvi >= 50) return <span className="px-1.5 py-0.2 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px]">🟡 Medium Risk</span>;
-              return <span className="px-1.5 py-0.2 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[10px]">🟢 Low Risk</span>;
+              if (mvi >= 70)
+                return (
+                  <span className="flex items-center space-x-1 px-1.5 py-0.5 rounded-md bg-rose-100 text-rose-700 font-bold text-[10px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-600 inline-block" />
+                    <span>High Risk</span>
+                  </span>
+                );
+              if (mvi >= 50)
+                return (
+                  <span className="flex items-center space-x-1 px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
+                    <span>Medium Risk</span>
+                  </span>
+                );
+              return (
+                <span className="flex items-center space-x-1 px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                  <span>Low Risk</span>
+                </span>
+              );
             })()}
           </div>
         )}
@@ -972,15 +990,15 @@ export default function CesiumViewer({
             </span>
             <div className="flex items-center space-x-1.5">
               <span className="w-2 h-2 rounded-full bg-[#ef4444] shadow-2xs inline-block animate-pulse" />
-              <span className="font-bold text-rose-600 text-[11px]">🔴 High (≥70)</span>
+              <span className="font-bold text-rose-600 text-[11px]">High (≥70)</span>
             </div>
             <div className="flex items-center space-x-1.5">
               <span className="w-2 h-2 rounded-full bg-[#facc15] shadow-2xs inline-block" />
-              <span className="font-bold text-amber-600 text-[11px]">🟡 Medium (50–69)</span>
+              <span className="font-bold text-amber-600 text-[11px]">Medium (50–69)</span>
             </div>
             <div className="flex items-center space-x-1.5">
               <span className="w-2 h-2 rounded-full bg-[#10b981] shadow-2xs inline-block" />
-              <span className="font-bold text-emerald-600 text-[11px]">🟢 Low (&lt;50)</span>
+              <span className="font-bold text-emerald-600 text-[11px]">Low (&lt;50)</span>
             </div>
           </div>
         )}
