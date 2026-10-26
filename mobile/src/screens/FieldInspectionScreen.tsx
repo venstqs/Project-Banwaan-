@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, Image, Modal, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Image,
+  Modal,
+  SafeAreaView,
+} from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +31,7 @@ export const FieldInspectionScreen: React.FC = () => {
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [feedbackBanner, setFeedbackBanner] = useState<{ type: 'success' | 'info'; text: string } | null>(null);
-  
+
   const [showAllQueue, setShowAllQueue] = useState(false);
   const [hideSynced, setHideSynced] = useState(false);
 
@@ -91,7 +102,12 @@ export const FieldInspectionScreen: React.FC = () => {
     setDesc('');
     setPhotoUri(null);
     setIsSubmitting(false);
-    showTempBanner('success', isOnline ? 'Report uploaded and synced with Naga City Command Center.' : 'Saved to local SQLite outbox. Will sync when online.');
+    showTempBanner(
+      'success',
+      isOnline
+        ? 'Report uploaded and synced with Naga City Command Center.'
+        : 'Saved to local SQLite outbox. Will sync when online.'
+    );
   };
 
   const handleManualSync = async () => {
@@ -100,12 +116,17 @@ export const FieldInspectionScreen: React.FC = () => {
       return;
     }
     const count = await syncOutbox();
-    showTempBanner('info', count > 0 ? `Synchronized ${count} pending report(s) to Command Center.` : 'All queued reports are already synchronized.');
+    showTempBanner(
+      'info',
+      count > 0
+        ? `Synchronized ${count} pending report(s) to Command Center.`
+        : 'All queued reports are already synchronized.'
+    );
   };
 
   const latText = location ? location.coords.latitude.toFixed(5) : '13.62180';
   const lonText = location ? location.coords.longitude.toFixed(5) : '123.19480';
-  
+
   const filteredReports = hideSynced ? queuedReports.filter((r) => !r.isSynced) : queuedReports;
   const visibleReports = showAllQueue ? filteredReports : filteredReports.slice(0, INITIAL_QUEUE_LIMIT);
   const unsyncedCount = queuedReports.filter((r) => !r.isSynced).length;
@@ -134,12 +155,19 @@ export const FieldInspectionScreen: React.FC = () => {
             <View style={styles.cameraBottomBar}>
               <View style={styles.geoPill}>
                 <Ionicons name="location-sharp" size={12} color="#10B981" />
-                <Text style={styles.cameraCoordOverlay}>{selectedBarangay.name} • GPS {latText}N, {lonText}E</Text>
+                <Text style={styles.cameraCoordOverlay}>
+                  {selectedBarangay.name} • GPS {latText}N, {lonText}E
+                </Text>
               </View>
 
               <View style={styles.cameraActionRow}>
                 <View style={{ width: 60 }} />
-                <TouchableOpacity style={[styles.shutterOuter, !isCameraReady && styles.shutterDisabled]} onPress={takePicture} disabled={!isCameraReady} activeOpacity={0.8}>
+                <TouchableOpacity
+                  style={[styles.shutterOuter, !isCameraReady && styles.shutterDisabled]}
+                  onPress={takePicture}
+                  disabled={!isCameraReady}
+                  activeOpacity={0.8}
+                >
                   <View style={[styles.shutterInner, !isCameraReady && { backgroundColor: '#94A3B8' }]} />
                 </TouchableOpacity>
                 <View style={{ width: 60 }} />
@@ -154,8 +182,10 @@ export const FieldInspectionScreen: React.FC = () => {
           <Text style={styles.eyebrow}>FIELD INSPECTION LOG</Text>
           <Text style={styles.screenTitle}>Submit Field Proof</Text>
           <View style={styles.targetMetaRow}>
-            <Ionicons name="location" size={14} color="#2563EB" />
-            <Text style={styles.targetMetaText}>Target: {selectedBarangay.name} ({latText}° N, {lonText}° E)</Text>
+            <Ionicons name="location" size={14} color="#05389F" />
+            <Text style={styles.targetMetaText}>
+              Target: {selectedBarangay.name} ({latText}° N, {lonText}° E)
+            </Text>
             <View style={[styles.inlineTierBadge, { backgroundColor: currentTier.bg, borderColor: currentTier.border }]}>
               <Text style={[styles.inlineTierText, { color: currentTier.text }]}>{currentTier.shortLabel}</Text>
             </View>
@@ -163,9 +193,25 @@ export const FieldInspectionScreen: React.FC = () => {
         </View>
 
         {feedbackBanner && (
-          <View style={[styles.feedbackBanner, feedbackBanner.type === 'success' ? styles.bannerSuccess : styles.bannerInfo]}>
-            <Ionicons name="checkmark-circle" size={18} color={feedbackBanner.type === 'success' ? '#065F46' : '#1D4ED8'} />
-            <Text style={[styles.feedbackText, { color: feedbackBanner.type === 'success' ? '#065F46' : '#1D4ED8' }]}>{feedbackBanner.text}</Text>
+          <View
+            style={[
+              styles.feedbackBanner,
+              feedbackBanner.type === 'success' ? styles.bannerSuccess : styles.bannerInfo,
+            ]}
+          >
+            <Ionicons
+              name="checkmark-circle"
+              size={18}
+              color={feedbackBanner.type === 'success' ? '#047857' : '#05389F'}
+            />
+            <Text
+              style={[
+                styles.feedbackText,
+                { color: feedbackBanner.type === 'success' ? '#047857' : '#05389F' },
+              ]}
+            >
+              {feedbackBanner.text}
+            </Text>
           </View>
         )}
 
@@ -175,7 +221,11 @@ export const FieldInspectionScreen: React.FC = () => {
             {CATEGORIES.map((cat) => {
               const active = reportType === cat;
               return (
-                <TouchableOpacity key={cat} style={[styles.categoryChip, active && styles.categoryChipActive]} onPress={() => setReportType(cat)}>
+                <TouchableOpacity
+                  key={cat}
+                  style={[styles.categoryChip, active && styles.categoryChipActive]}
+                  onPress={() => setReportType(cat)}
+                >
                   <Text style={[styles.categoryChipText, active && styles.categoryChipTextActive]}>{cat}</Text>
                 </TouchableOpacity>
               );
@@ -197,7 +247,7 @@ export const FieldInspectionScreen: React.FC = () => {
           {!photoUri ? (
             <TouchableOpacity style={styles.openCameraCard} onPress={handleOpenCamera} activeOpacity={0.75}>
               <View style={styles.cameraIconCircle}>
-                <Ionicons name="camera" size={22} color="#2563EB" />
+                <Ionicons name="camera" size={20} color="#05389F" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.openCameraTitle}>Capture Geotagged Photo</Text>
@@ -210,17 +260,19 @@ export const FieldInspectionScreen: React.FC = () => {
               <Image source={{ uri: photoUri }} style={styles.photoThumbnail} />
               <View style={styles.photoReviewMeta}>
                 <View style={styles.photoAttachedBadge}>
-                  <Ionicons name="checkmark-circle" size={14} color="#065F46" />
+                  <Ionicons name="checkmark-circle" size={14} color="#047857" />
                   <Text style={styles.photoAttachedText}>Photo Attached</Text>
                 </View>
-                <Text style={styles.photoCoordText}>GPS: {latText}N, {lonText}E</Text>
+                <Text style={styles.photoCoordText}>
+                  GPS: {latText}N, {lonText}E
+                </Text>
                 <View style={styles.photoActionRow}>
                   <TouchableOpacity style={styles.retakeBtn} onPress={handleOpenCamera}>
-                    <Ionicons name="refresh" size={14} color="#2563EB" />
+                    <Ionicons name="refresh" size={13} color="#05389F" />
                     <Text style={styles.retakeBtnText}>Retake</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.removePhotoBtn} onPress={handleRemovePhoto}>
-                    <Ionicons name="trash-outline" size={14} color="#E11D48" />
+                    <Ionicons name="trash-outline" size={13} color="#BE123C" />
                     <Text style={styles.removePhotoText}>Remove</Text>
                   </TouchableOpacity>
                 </View>
@@ -228,9 +280,21 @@ export const FieldInspectionScreen: React.FC = () => {
             </View>
           )}
 
-          <TouchableOpacity style={[styles.submitBtn, isSubmitting && { opacity: 0.6 }]} onPress={handleSubmit} disabled={isSubmitting} activeOpacity={0.8}>
-            <Ionicons name={isOnline ? 'cloud-upload-outline' : 'save-outline'} size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
-            <Text style={styles.submitBtnText}>{isOnline ? 'Submit & Sync Report' : 'Save to Offline Outbox'}</Text>
+          <TouchableOpacity
+            style={[styles.submitBtn, isSubmitting && { opacity: 0.6 }]}
+            onPress={handleSubmit}
+            disabled={isSubmitting}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name={isOnline ? 'cloud-upload-outline' : 'save-outline'}
+              size={17}
+              color="#FFFFFF"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.submitBtnText}>
+              {isOnline ? 'Submit & Sync Report →' : 'Save to Offline Outbox'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -239,14 +303,16 @@ export const FieldInspectionScreen: React.FC = () => {
             <View>
               <Text style={styles.sectionTitle}>Local Outbox Queue ({filteredReports.length})</Text>
               <View style={styles.queueMetaRow}>
-                <Text style={styles.sectionSubtitle}>{unsyncedCount > 0 ? `${unsyncedCount} awaiting connection` : 'All reports synced'}</Text>
+                <Text style={styles.sectionSubtitle}>
+                  {unsyncedCount > 0 ? `${unsyncedCount} awaiting connection` : 'All reports synced'}
+                </Text>
                 <TouchableOpacity onPress={() => setHideSynced(!hideSynced)} style={styles.filterBtn}>
                   <Text style={styles.filterBtnText}>{hideSynced ? 'Show Synced' : 'Hide Synced'}</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <TouchableOpacity style={styles.syncNowBtn} onPress={handleManualSync} activeOpacity={0.8}>
-              <Ionicons name="sync" size={14} color="#FFFFFF" style={{ marginRight: 4 }} />
+              <Ionicons name="sync" size={14} color="#05389F" style={{ marginRight: 4 }} />
               <Text style={styles.syncNowBtnText}>Sync Outbox</Text>
             </TouchableOpacity>
           </View>
@@ -254,12 +320,18 @@ export const FieldInspectionScreen: React.FC = () => {
           {visibleReports.map((rpt) => (
             <View key={rpt.id} style={styles.reportCard}>
               <View style={styles.reportTopRow}>
-                <Text style={styles.reportType} numberOfLines={1}>{rpt.reportType}</Text>
+                <Text style={styles.reportType} numberOfLines={1}>
+                  {rpt.reportType}
+                </Text>
                 <View style={[styles.syncBadge, rpt.isSynced ? styles.badgeSynced : styles.badgePending]}>
-                  <Text style={[styles.syncBadgeText, { color: rpt.isSynced ? '#065F46' : '#B45309' }]}>{rpt.isSynced ? 'SYNCED' : 'QUEUED'}</Text>
+                  <Text style={[styles.syncBadgeText, { color: rpt.isSynced ? '#047857' : '#B45309' }]}>
+                    {rpt.isSynced ? 'Synced' : 'Queued'}
+                  </Text>
                 </View>
               </View>
-              <Text style={styles.reportDesc} numberOfLines={2}>{rpt.description}</Text>
+              <Text style={styles.reportDesc} numberOfLines={2}>
+                {rpt.description}
+              </Text>
               <View style={styles.reportMetaRow}>
                 <Text style={styles.reportMetaText}>{rpt.barangayName}</Text>
                 <Text style={styles.reportMetaText}>•</Text>
@@ -270,8 +342,12 @@ export const FieldInspectionScreen: React.FC = () => {
 
           {filteredReports.length > INITIAL_QUEUE_LIMIT && (
             <TouchableOpacity style={styles.toggleQueueBtn} onPress={() => setShowAllQueue((prev) => !prev)}>
-              <Text style={styles.toggleQueueText}>{showAllQueue ? 'Show Fewer Reports' : `View All ${filteredReports.length} Reports (${filteredReports.length - INITIAL_QUEUE_LIMIT} more)`}</Text>
-              <Ionicons name={showAllQueue ? 'chevron-up' : 'chevron-down'} size={16} color="#2563EB" />
+              <Text style={styles.toggleQueueText}>
+                {showAllQueue
+                  ? 'Show Fewer Reports'
+                  : `View All ${filteredReports.length} Reports (${filteredReports.length - INITIAL_QUEUE_LIMIT} more)`}
+              </Text>
+              <Ionicons name={showAllQueue ? 'chevron-up' : 'chevron-down'} size={15} color="#05389F" />
             </TouchableOpacity>
           )}
         </View>
@@ -283,76 +359,265 @@ export const FieldInspectionScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
   contentContainer: { paddingBottom: 32 },
-  headerSection: { backgroundColor: '#FFFFFF', paddingHorizontal: 16, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#E2E8F0' },
-  eyebrow: { color: '#2563EB', fontSize: 10, fontWeight: '800', letterSpacing: 0.8, marginBottom: 4 },
-  screenTitle: { color: '#0F172A', fontSize: 22, fontWeight: '800', letterSpacing: -0.4 },
+  headerSection: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  eyebrow: { color: '#05389F', fontSize: 10, fontWeight: '700', letterSpacing: 0.6, marginBottom: 4 },
+  screenTitle: { color: '#0F172A', fontSize: 21, fontWeight: '800', letterSpacing: -0.4 },
   targetMetaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 6, flexWrap: 'wrap' },
-  targetMetaText: { color: '#475569', fontSize: 12, fontWeight: '600' },
-  inlineTierBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, borderWidth: 1 },
-  inlineTierText: { fontSize: 10, fontWeight: '800' },
-  feedbackBanner: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 14, padding: 12, borderRadius: 10, borderWidth: 1, gap: 8 },
-  bannerSuccess: { backgroundColor: '#D1FAE5', borderColor: '#A7F3D0' },
+  targetMetaText: { color: '#475569', fontSize: 12, fontWeight: '500' },
+  inlineTierBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, borderWidth: 1 },
+  inlineTierText: { fontSize: 10, fontWeight: '700' },
+  feedbackBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 14,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 8,
+  },
+  bannerSuccess: { backgroundColor: '#ECFDF5', borderColor: '#A7F3D0' },
   bannerInfo: { backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' },
   feedbackText: { flex: 1, fontSize: 13, fontWeight: '600' },
-  formCard: { backgroundColor: '#FFFFFF', margin: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0' },
-  fieldLabel: { color: '#334155', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', marginBottom: 8, letterSpacing: 0.5 },
+
+  formCard: {
+    backgroundColor: '#FFFFFF',
+    margin: 16,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  fieldLabel: {
+    color: '#475569',
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    marginBottom: 8,
+    letterSpacing: 0.4,
+  },
   categoryWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
-  categoryChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: '#F1F5F9', borderWidth: 1, borderColor: '#E2E8F0' },
-  categoryChipActive: { backgroundColor: '#EFF6FF', borderColor: '#2563EB' },
-  categoryChipText: { color: '#475569', fontSize: 12, fontWeight: '600' },
-  categoryChipTextActive: { color: '#2563EB', fontWeight: '700' },
-  textArea: { backgroundColor: '#F8FAFC', color: '#0F172A', borderWidth: 1, borderColor: '#CBD5E1', borderRadius: 10, padding: 12, minHeight: 84, textAlignVertical: 'top', fontSize: 14, marginBottom: 16 },
-  openCameraCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8FAFC', borderWidth: 1, borderStyle: 'dashed', borderColor: '#94A3B8', borderRadius: 10, padding: 12, marginBottom: 16 },
-  cameraIconCircle: { width: 42, height: 42, borderRadius: 21, backgroundColor: '#EFF6FF', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  categoryChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: '#F3F4F6',
+  },
+  categoryChipActive: { backgroundColor: '#05389F' },
+  categoryChipText: { color: '#374151', fontSize: 12, fontWeight: '600' },
+  categoryChipTextActive: { color: '#FFFFFF', fontWeight: '700' },
+  textArea: {
+    backgroundColor: '#F8FAFC',
+    color: '#0F172A',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    padding: 12,
+    minHeight: 84,
+    textAlignVertical: 'top',
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  openCameraCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  cameraIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EFF6FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
   openCameraTitle: { color: '#0F172A', fontSize: 14, fontWeight: '700' },
-  openCameraSub: { color: '#64748B', fontSize: 12, marginTop: 2 },
-  photoReviewCard: { flexDirection: 'row', backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 10, padding: 10, marginBottom: 16, alignItems: 'center' },
-  photoThumbnail: { width: 72, height: 72, borderRadius: 8, backgroundColor: '#CBD5E1', marginRight: 12 },
+  openCameraSub: { color: '#64748B', fontSize: 12, marginTop: 1 },
+  photoReviewCard: {
+    flexDirection: 'row',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  photoThumbnail: { width: 70, height: 70, borderRadius: 10, backgroundColor: '#CBD5E1', marginRight: 12 },
   photoReviewMeta: { flex: 1 },
   photoAttachedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  photoAttachedText: { color: '#065F46', fontSize: 12, fontWeight: '700' },
+  photoAttachedText: { color: '#047857', fontSize: 12, fontWeight: '700' },
   photoCoordText: { color: '#64748B', fontSize: 11, marginTop: 2, marginBottom: 8 },
   photoActionRow: { flexDirection: 'row', gap: 8 },
-  retakeBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#EFF6FF', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6, gap: 4 },
-  retakeBtnText: { color: '#2563EB', fontSize: 12, fontWeight: '700' },
-  removePhotoBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFE4E6', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6, gap: 4 },
-  removePhotoText: { color: '#E11D48', fontSize: 12, fontWeight: '700' },
-  submitBtn: { flexDirection: 'row', backgroundColor: '#2563EB', paddingVertical: 13, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  retakeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    gap: 4,
+  },
+  retakeBtnText: { color: '#05389F', fontSize: 11, fontWeight: '700' },
+  removePhotoBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFE4E6',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    gap: 4,
+  },
+  removePhotoText: { color: '#BE123C', fontSize: 11, fontWeight: '700' },
+  submitBtn: {
+    flexDirection: 'row',
+    backgroundColor: '#05389F',
+    paddingVertical: 13,
+    borderRadius: 999,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   submitBtnText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
+
   outboxSection: { paddingHorizontal: 16 },
-  outboxHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionTitle: { color: '#0F172A', fontSize: 16, fontWeight: '800' },
-  queueMetaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 1, gap: 8 },
-  sectionSubtitle: { color: '#475569', fontSize: 13, fontWeight: '500' },
-  filterBtn: { paddingHorizontal: 6, paddingVertical: 2, backgroundColor: '#F1F5F9', borderRadius: 4, borderWidth: 1, borderColor: '#E2E8F0' },
-  filterBtnText: { color: '#64748B', fontSize: 10, fontWeight: '700' },
-  syncNowBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#10B981', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
-  syncNowBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
-  reportCard: { backgroundColor: '#FFFFFF', padding: 14, borderRadius: 10, borderWidth: 1, borderColor: '#E2E8F0', marginBottom: 8 },
-  reportTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  outboxHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: { color: '#0F172A', fontSize: 16, fontWeight: '700', letterSpacing: -0.3 },
+  queueMetaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 8 },
+  sectionSubtitle: { color: '#64748B', fontSize: 12, fontWeight: '500' },
+  filterBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 999,
+  },
+  filterBtnText: { color: '#4B5563', fontSize: 10, fontWeight: '700' },
+  syncNowBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+  },
+  syncNowBtnText: { color: '#05389F', fontSize: 12, fontWeight: '700' },
+  reportCard: {
+    backgroundColor: '#FFFFFF',
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginBottom: 8,
+  },
+  reportTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   reportType: { color: '#0F172A', fontSize: 14, fontWeight: '700', flex: 1, marginRight: 8 },
-  syncBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  syncBadge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 999 },
   badgeSynced: { backgroundColor: '#D1FAE5' },
-  badgePending: { backgroundColor: '#FEF9E7', borderWidth: 1, borderColor: '#FDE68A' },
-  syncBadgeText: { fontSize: 10, fontWeight: '800' },
+  badgePending: { backgroundColor: '#FEF3C7' },
+  syncBadgeText: { fontSize: 10, fontWeight: '700' },
   reportDesc: { color: '#475569', fontSize: 13, lineHeight: 18, marginBottom: 6 },
   reportMetaRow: { flexDirection: 'row', gap: 6 },
-  reportMetaText: { color: '#94A3B8', fontSize: 11, fontWeight: '600' },
-  toggleQueueBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 12, backgroundColor: '#FFFFFF', borderRadius: 8, borderWidth: 1, borderColor: '#E2E8F0', gap: 6, marginTop: 4 },
-  toggleQueueText: { color: '#2563EB', fontSize: 13, fontWeight: '700' },
+  reportMetaText: { color: '#94A3B8', fontSize: 11, fontWeight: '500' },
+  toggleQueueBtn: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 11,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    gap: 6,
+    marginTop: 4,
+  },
+  toggleQueueText: { color: '#05389F', fontSize: 12, fontWeight: '700' },
+
   cameraContainer: { flex: 1, backgroundColor: '#000000' },
   cameraOverlay: { flex: 1, justifyContent: 'space-between' },
-  cameraTopBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 12 },
-  liveBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(15, 23, 42, 0.75)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20, gap: 6 },
+  cameraTopBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    gap: 6,
+  },
   liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#E11D48' },
-  liveBadgeText: { color: '#FFFFFF', fontSize: 11, fontWeight: '800', letterSpacing: 0.6 },
-  cameraExitBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(15, 23, 42, 0.75)', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, gap: 4 },
+  liveBadgeText: { color: '#FFFFFF', fontSize: 11, fontWeight: '700', letterSpacing: 0.4 },
+  cameraExitBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    gap: 4,
+  },
   cameraExitText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
-  cameraBottomBar: { backgroundColor: 'rgba(15, 23, 42, 0.85)', paddingTop: 14, paddingBottom: 28, paddingHorizontal: 20, alignItems: 'center' },
-  geoPill: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(30, 41, 59, 0.8)', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 14, gap: 6, marginBottom: 16 },
+  cameraBottomBar: {
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    paddingTop: 14,
+    paddingBottom: 28,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  geoPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(30, 41, 59, 0.8)',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 999,
+    gap: 6,
+    marginBottom: 16,
+  },
   cameraCoordOverlay: { color: '#E2E8F0', fontSize: 12, fontWeight: '600' },
-  cameraActionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' },
-  shutterOuter: { width: 72, height: 72, borderRadius: 36, borderWidth: 4, borderColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' },
+  cameraActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  shutterOuter: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 4,
+    borderColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   shutterDisabled: { opacity: 0.5 },
   shutterInner: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#FFFFFF' },
 });
