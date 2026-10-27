@@ -270,6 +270,9 @@ type UserRole =
 interface Proposal {
   id: string;
   barangay: string;
+  assigned_barangay?: string;
+  execution_stage?: string;
+  approved_at?: string;
   office: string;
   title: string;
   problem: string;
@@ -350,6 +353,9 @@ export default function ModernCategorizedCommandCenter() {
   const [crossOfficeSharing, setCrossOfficeSharing] = useState<boolean>(true);
   const [privacyCellThreshold, setPrivacyCellThreshold] = useState<number>(5);
   const [aipBudgetCeiling, setAipBudgetCeiling] = useState<number>(45000000);
+  const [proposalDeckFilter, setProposalDeckFilter] = useState<"all" | "approved" | "barangay">("all");
+  const [aipPage, setAipPage] = useState<number>(1);
+  const aipPageSize = 6;
   const [calamitySimActive, setCalamitySimActive] = useState<boolean>(false);
   const [sidePanelTab, setSidePanelTab] = useState<"intel" | "controls">("intel");
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
@@ -618,6 +624,40 @@ export default function ModernCategorizedCommandCenter() {
     return { lowest: sorted[0], highest: sorted[sorted.length - 1] };
   }, [barangays]);
 
+  const approvedBarangayProjects = useMemo(() => {
+    const bName = (selectedBarangay.realName || "").toLowerCase();
+    const bId = selectedBarangay.id;
+    return proposals.filter((p) => {
+      if (p.status !== "APPROVED" && p.status !== "FUNDED") return false;
+      const target = (p.assigned_barangay || p.barangay || "").toLowerCase();
+      return (
+        target.includes(bName) ||
+        target.includes(`barangay ${bId}`) ||
+        target.includes(`brgy ${bId}`) ||
+        (bId === 3 && target.includes("bagumbayan sur")) ||
+        (bId === 16 && target.includes("mabolo"))
+      );
+    });
+  }, [proposals, selectedBarangay]);
+
+  const filteredDeckProposals = useMemo(() => {
+    if (proposalDeckFilter === "approved") {
+      return proposals.filter((p) => p.status === "APPROVED" || p.status === "FUNDED");
+    }
+    if (proposalDeckFilter === "barangay") {
+      return approvedBarangayProjects;
+    }
+    return proposals;
+  }, [proposals, proposalDeckFilter, approvedBarangayProjects]);
+
+  const totalAipPages = Math.max(1, Math.ceil(filteredDeckProposals.length / aipPageSize));
+  const currentAipPage = Math.min(aipPage, totalAipPages);
+
+  const paginatedDeckProposals = useMemo(() => {
+    const start = (currentAipPage - 1) * aipPageSize;
+    return filteredDeckProposals.slice(start, start + aipPageSize);
+  }, [filteredDeckProposals, currentAipPage, aipPageSize]);
+
   const fetchLiveSyncData = useCallback(async () => {
     try {
       const [rptsRes, propsRes, groqRes] = await Promise.all([
@@ -643,10 +683,13 @@ export default function ModernCategorizedCommandCenter() {
               problem: p.problem_statement || p.problem || "",
               statute: p.statutory_basis?.law || p.statute || "RA 7160",
               section: p.statutory_basis?.section || p.section || "Section 17",
-              sdgs: p.sdgs || ["SDG 11 Sustainable Cities"],
+              sdgs: (p.sdgs && p.sdgs.length >= 3) ? p.sdgs : [...(p.sdgs || []), "SDG 11 Sustainable Cities", "SDG 13 Climate Action", "SDG 9 Resilient Infrastructure"].slice(0, 3),
               budget: p.estimated_budget_php || p.budget || 250000,
               status: p.status === "PROPOSED" ? "PENDING" : p.status,
               confidence: p.confidence_score || p.confidence || 0.94,
+              assigned_barangay: p.assigned_barangay || (p.status === "APPROVED" || p.status === "FUNDED" ? p.barangay : undefined),
+              execution_stage: p.execution_stage || (p.status === "APPROVED" || p.status === "FUNDED" ? "ASSIGNED_TO_BARANGAY_AIP_QUEUE" : undefined),
+              approved_at: p.approved_at,
               createdBy: p.created_by
             }))
           );
@@ -727,7 +770,17 @@ export default function ModernCategorizedCommandCenter() {
       reject: "REJECTED" as const
     };
     setProposals((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, status: statusMap[action] } : p))
+      prev.map((p) => {
+        if (p.id !== id) return p;
+        const newStatus = statusMap[action];
+        return {
+          ...p,
+          status: newStatus,
+          assigned_barangay: action === "approve" || action === "fund" ? (p.assigned_barangay || p.barangay) : p.assigned_barangay,
+          execution_stage: action === "approve" || action === "fund" ? "ASSIGNED_TO_BARANGAY_AIP_QUEUE" : p.execution_stage,
+          approved_at: action === "approve" ? new Date().toISOString() : p.approved_at
+        };
+      })
     );
     try {
       await fetch(`${API_BASE}/api/proposals/${id}/review?role=super_admin`, {
@@ -750,7 +803,7 @@ export default function ModernCategorizedCommandCenter() {
       problem: draft.problem_statement || "Identified physical deficit from 2024 CBMS indicators.",
       statute: draft.statutory_basis?.law || "RA 7160 (Local Government Code)",
       section: draft.statutory_basis?.section || "Section 17",
-      sdgs: draft.sdgs || ["SDG 11 Sustainable Cities"],
+      sdgs: (draft.sdgs && draft.sdgs.length >= 3) ? draft.sdgs : [...(draft.sdgs || []), "SDG 11 Sustainable Cities", "SDG 13 Climate Action", "SDG 9 Resilient Infrastructure"].slice(0, 3),
       budget: draft.estimated_budget_php || 450000,
       status: "PENDING",
       confidence: draft.confidence_score || 0.95,
@@ -833,7 +886,8 @@ export default function ModernCategorizedCommandCenter() {
           query: queryText,
           user_role: role,
           barangay_id: selectedBarangayId,
-          target_office: role === "super_admin" ? "cpdo" : role
+          target_office: role === "super_admin" ? "cpdo" : role,
+          auto_queue_proposal: true
         })
       });
 
@@ -852,6 +906,28 @@ export default function ModernCategorizedCommandCenter() {
             proposalDraft: draft
           }
         ]);
+
+        if (draft) {
+          const synthesizedProp: Proposal = {
+            id: draft.id || `PROP-SYNTH-${Date.now().toString().slice(-4)}`,
+            barangay: draft.barangay || selectedBarangay.realName,
+            assigned_barangay: draft.assigned_barangay || draft.barangay || selectedBarangay.realName,
+            office: draft.office || (role === "super_admin" ? "CPDO" : role.toUpperCase()),
+            title: draft.title || draft.project_title || `AI Priority Capital Intervention for ${selectedBarangay.realName}`,
+            problem: draft.problem_statement || draft.problem || `Empirical 2024 CBMS statutory deficit flagged across ${selectedBarangay.total_households} households.`,
+            statute: draft.statutory_basis?.law || draft.statute || "RA 7160",
+            section: draft.statutory_basis?.section || draft.section || "Section 17",
+            sdgs: (draft.sdgs && draft.sdgs.length >= 3)
+              ? draft.sdgs
+              : [...(draft.sdgs || []), "SDG 11 Sustainable Cities", "SDG 13 Climate Action", "SDG 9 Resilient Infrastructure"].slice(0, 3),
+            budget: Number(draft.estimated_budget_php || draft.budget || 450000),
+            status: "PENDING",
+            confidence: draft.confidence_score || draft.confidence || 0.96,
+            createdBy: draft.created_by || "AI Policy Agent",
+            execution_stage: "QUEUED_FOR_AIP_REVIEW"
+          };
+          setProposals((prev) => [synthesizedProp, ...prev.filter((p) => p.id !== synthesizedProp.id)]);
+        }
       } else {
         throw new Error("Fallback local synthesis");
       }
@@ -879,12 +955,30 @@ export default function ModernCategorizedCommandCenter() {
                 law: "RA 7160 (Local Government Code)",
                 section: "Section 17 (b)"
               },
-              sdgs: ["SDG 6 Clean Water & Sanitation", "SDG 11 Sustainable Cities"],
+              sdgs: ["SDG 6 Clean Water & Sanitation", "SDG 11 Sustainable Cities", "SDG 9 Resilient Infrastructure"],
               estimated_budget_php: 750000,
               confidence_score: 0.94
             }
           }
         ]);
+
+        const fallbackProp: Proposal = {
+          id: `PROP-OFFLINE-${Date.now().toString().slice(-4)}`,
+          barangay: selectedBarangay.displayName,
+          assigned_barangay: selectedBarangay.displayName,
+          office: "CEO",
+          title: `Communal Water & Drainage Upgrade (${selectedBarangay.displayName})`,
+          problem: `Immediate municipal intervention required for ${selectedBarangay.total_households} households in ${selectedBarangay.category.name}.`,
+          statute: "RA 7160",
+          section: "Section 17 (b)",
+          sdgs: ["SDG 6 Clean Water & Sanitation", "SDG 11 Sustainable Cities", "SDG 9 Resilient Infrastructure"],
+          budget: 750000,
+          status: "PENDING",
+          confidence: 0.94,
+          createdBy: "Offline Policy Agent",
+          execution_stage: "QUEUED_FOR_AIP_REVIEW"
+        };
+        setProposals((prev) => [fallbackProp, ...prev.filter((p) => p.id !== fallbackProp.id)]);
       }, 700);
     } finally {
       setIsAiLoading(false);
@@ -1955,6 +2049,18 @@ export default function ModernCategorizedCommandCenter() {
                                 </div>
                                 <div className="text-[11px] font-bold text-slate-900 leading-tight">{prop.title}</div>
                                 <div className="text-[9px] text-slate-400 font-mono">{prop.statute} ({prop.section})</div>
+                                {prop.sdgs && prop.sdgs.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 pt-0.5">
+                                    {prop.sdgs.slice(0, 3).map((sdgTag: string, sIdx: number) => (
+                                      <span
+                                        key={sIdx}
+                                        className="px-1.5 py-0.2 rounded text-[8px] font-bold bg-amber-50 text-amber-800 border border-amber-200"
+                                      >
+                                        {sdgTag.length > 18 ? sdgTag.slice(0, 18) + '...' : sdgTag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                                 <div className="flex items-center justify-between pt-1 border-t border-slate-100">
                                   <span
                                     className={`text-[9px] font-bold px-2 py-0.2 rounded-full ${
@@ -1997,6 +2103,63 @@ export default function ModernCategorizedCommandCenter() {
                               </div>
                             ))}
                           </div>
+                        </div>
+
+                        {/* Approved Project Queue • Assigned to Selected Barangay */}
+                        <div className="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-1.5">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                              <span className="font-bold text-slate-900 text-xs">
+                                Approved Queue • Assigned to {selectedBarangay.realName}
+                              </span>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              {approvedBarangayProjects.length} Active
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-600 leading-relaxed">
+                            Statutory programs approved by Mayor / Sanggunian and queued for {selectedBarangay.realName}&apos;s Barangay AIP implementation.
+                          </p>
+
+                          {approvedBarangayProjects.length === 0 ? (
+                            <div className="p-3 bg-white/80 rounded-lg border border-dashed border-emerald-300 text-center">
+                              <p className="text-[11px] font-semibold text-slate-600">No approved projects currently assigned to this barangay.</p>
+                              <p className="text-[9px] text-slate-400 mt-0.5">Approve a proposal from the deck above or from the Captain mobile app to queue it here.</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                              {approvedBarangayProjects.map((p) => (
+                                <div key={p.id} className="p-2.5 bg-white rounded-lg border border-emerald-200 shadow-2xs space-y-1.5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                                      ✓ ASSIGNED TO {selectedBarangay.realName.toUpperCase()}
+                                    </span>
+                                    <span className="font-mono text-[11px] font-bold text-emerald-700">
+                                      ₱{p.budget.toLocaleString()}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs font-bold text-slate-900 leading-snug">{p.title}</div>
+                                  <p className="text-[10px] text-slate-600 line-clamp-2">{p.problem}</p>
+                                  <div className="text-[9px] text-slate-500 font-mono">
+                                    {p.statute} • {p.section}
+                                  </div>
+                                  {p.sdgs && p.sdgs.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 pt-1 border-t border-slate-100">
+                                      {p.sdgs.map((sdg: string, sIdx: number) => (
+                                        <span
+                                          key={sIdx}
+                                          className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-amber-50 text-amber-800 border border-amber-200"
+                                        >
+                                          {sdg}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         {/* Control 4: RA 10173 Privacy Shield */}
@@ -2971,28 +3134,75 @@ export default function ModernCategorizedCommandCenter() {
                       Ceiling: ₱{(aipBudgetCeiling / 1000000).toFixed(1)}M
                     </span>
                     <button
-                      onClick={() => {
-                        setActiveNavTab("dashboard");
-                        setSidePanelTab("intel");
-                        setIntelSubTab("overview");
-                        executeAiQuery("Synthesize new AIP capital project proposal for high-vulnerability barangay");
+                      onClick={async () => {
+                        await executeAiQuery(`Synthesize comprehensive capital investment proposal for ${selectedBarangay.realName} priority infrastructure under RA 7160`);
+                        setProposalDeckFilter("all");
+                        setAipPage(1);
                       }}
                       className="pill-btn-blue px-4 py-2 text-xs font-bold flex items-center space-x-2 cursor-pointer shadow-xs"
+                      title="Synthesize and queue new proposal directly to AIP Deck"
                     >
                       <Sparkles className="w-3.5 h-3.5 text-[#fccf17]" />
-                      <span>Draft New Proposal</span>
+                      <span>Draft New Proposal ({selectedBarangay.realName})</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Proposals Cards Feed */}
+                {/* Filter Tabs for AIP Queue and Assigned Barangay Queue */}
+                <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
+                  <button
+                    onClick={() => { setProposalDeckFilter("all"); setAipPage(1); }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all border ${
+                      proposalDeckFilter === "all"
+                        ? "bg-[#05389f] text-white border-[#05389f] shadow-xs"
+                        : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                    }`}
+                  >
+                    All City Proposals ({proposals.length})
+                  </button>
+                  <button
+                    onClick={() => { setProposalDeckFilter("approved"); setAipPage(1); }}
+                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all border ${
+                      proposalDeckFilter === "approved"
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                        : "bg-white text-emerald-800 border-emerald-200 hover:bg-emerald-50"
+                    }`}
+                  >
+                    <span>✓ Approved & Assigned Queue</span>
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-800">
+                      {proposals.filter((p) => p.status === "APPROVED" || p.status === "FUNDED").length}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => { setProposalDeckFilter("barangay"); setAipPage(1); }}
+                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all border ${
+                      proposalDeckFilter === "barangay"
+                        ? "bg-[#05389f] text-white border-[#05389f] shadow-xs"
+                        : "bg-white text-[#05389f] border-[#05389f]/30 hover:bg-[#edf3fc]"
+                    }`}
+                  >
+                    <span>Assigned to {selectedBarangay.realName}</span>
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[#edf3fc] text-[#05389f]">
+                      {approvedBarangayProjects.length}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Proposals Cards Feed (Paginated with No Upper Limit) */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {proposals.map((prop) => (
+                  {paginatedDeckProposals.map((prop) => (
                     <div key={prop.id} className="p-4 rounded-2xl bg-[#f7f8fa] border border-[#e5e7eb] space-y-2 text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#05389f] text-white">
-                          {prop.office}
-                        </span>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#05389f] text-white">
+                            {prop.office}
+                          </span>
+                          {(prop.status === "APPROVED" || prop.status === "FUNDED") && (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              ✓ ASSIGNED TO {(prop.assigned_barangay || prop.barangay || "").toUpperCase()}
+                            </span>
+                          )}
+                        </div>
                         <span className="font-mono font-bold text-sm text-[#0a1128]">
                           ₱{prop.budget.toLocaleString()}
                         </span>
@@ -3003,6 +3213,19 @@ export default function ModernCategorizedCommandCenter() {
                         <span>{prop.barangay}</span>
                         <span>{prop.statute} ({prop.section})</span>
                       </div>
+                      {prop.sdgs && prop.sdgs.length > 0 && (
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {prop.sdgs.map((sdgTag: string, sIdx: number) => (
+                            <span
+                              key={sIdx}
+                              className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center space-x-1"
+                            >
+                              <span>🎯</span>
+                              <span>{sdgTag}</span>
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       <div className="pt-2 border-t border-[#e5e7eb] flex items-center justify-between">
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                           prop.status === "APPROVED" ? "bg-emerald-100 text-emerald-800" : prop.status === "FUNDED" ? "bg-[#edf3fc] text-[#05389f]" : prop.status === "REJECTED" ? "bg-rose-100 text-rose-800" : "bg-[#fef9e7] text-[#b45309]"
@@ -3038,6 +3261,48 @@ export default function ModernCategorizedCommandCenter() {
                     </div>
                   ))}
                 </div>
+
+                {/* Pagination Controls for Unlimited Proposals */}
+                {totalAipPages > 1 && (
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[#e5e7eb]">
+                    <div className="text-xs text-slate-500 font-medium">
+                      Showing <span className="font-bold text-slate-900">{(currentAipPage - 1) * aipPageSize + 1}</span> to{" "}
+                      <span className="font-bold text-slate-900">
+                        {Math.min(currentAipPage * aipPageSize, filteredDeckProposals.length)}
+                      </span>{" "}
+                      of <span className="font-bold text-slate-900">{filteredDeckProposals.length}</span> Total Proposals (No Limit)
+                    </div>
+                    <div className="flex items-center space-x-1.5">
+                      <button
+                        disabled={currentAipPage <= 1}
+                        onClick={() => setAipPage((p) => Math.max(1, p - 1))}
+                        className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
+                      >
+                        ‹ Previous
+                      </button>
+                      {Array.from({ length: totalAipPages }, (_, i) => i + 1).map((pg) => (
+                        <button
+                          key={pg}
+                          onClick={() => setAipPage(pg)}
+                          className={`w-8 h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            pg === currentAipPage
+                              ? "bg-[#05389f] text-white shadow-xs"
+                              : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+                          }`}
+                        >
+                          {pg}
+                        </button>
+                      ))}
+                      <button
+                        disabled={currentAipPage >= totalAipPages}
+                        onClick={() => setAipPage((p) => Math.min(totalAipPages, p + 1))}
+                        className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
+                      >
+                        Next ›
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

@@ -26,6 +26,9 @@ export interface QueuedReport {
 export interface MobileProposal {
   id: string;
   barangay: string;
+  assigned_barangay?: string;
+  execution_stage?: string;
+  approved_at?: string;
   office: string;
   title: string;
   problem: string;

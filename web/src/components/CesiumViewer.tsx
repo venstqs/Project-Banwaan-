@@ -311,6 +311,7 @@ export default function CesiumViewer({
     const viewer = new Cesium.Viewer(containerRef.current, {
       sceneMode: Cesium.SceneMode.SCENE3D,
       baseLayer: new Cesium.ImageryLayer(esriWorldImageryProvider),
+      orderIndependentTranslucency: false,
       baseLayerPicker: false,
       geocoder: false,
       homeButton: false,
@@ -329,7 +330,7 @@ export default function CesiumViewer({
     if (viewer.cesiumWidget?.creditContainer) {
       (viewer.cesiumWidget.creditContainer as HTMLElement).style.display = "none";
     }
-    viewer.resolutionScale = 1.0;
+    viewer.resolutionScale = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 2);
     if (viewer.scene?.postProcessStages?.fxaa) {
       viewer.scene.postProcessStages.fxaa.enabled = false;
     }
@@ -577,8 +578,9 @@ export default function CesiumViewer({
           ? "#ffffff"
           : "#64748b";
 
-        const labelLng = p.center ? p.center[0] : 123.185;
-        const labelLat = p.center ? p.center[1] : 13.621;
+        const offset = DOWNTOWN_LABEL_OFFSETS[p.id] || [0, 0];
+        const labelLng = (p.center ? p.center[0] : 123.185) + offset[0];
+        const labelLat = (p.center ? p.center[1] : 13.621) + offset[1];
 
         const entityConfig: any = {
           name: realName,
@@ -610,22 +612,21 @@ export default function CesiumViewer({
           entityConfig.label = {
             text: isSelected ? `★ ${realName.toUpperCase()}` : shortName,
             font: isSelected
-              ? "bold 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+              ? "bold 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
               : "600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-            style: Cesium.LabelStyle.FILL,
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
             fillColor: isSelected
               ? Cesium.Color.fromCssColorString("#fde047")
               : Cesium.Color.WHITE,
-            showBackground: true,
-            backgroundColor: isSelected
-              ? Cesium.Color.fromCssColorString("rgba(5, 56, 159, 0.88)")
-              : Cesium.Color.fromCssColorString("rgba(15, 23, 42, 0.58)"),
-            backgroundPadding: new Cesium.Cartesian2(6, 3),
+            outlineColor: Cesium.Color.fromCssColorString("#0f172a"),
+            outlineWidth: 2,
+            showBackground: false,
             verticalOrigin: Cesium.VerticalOrigin.CENTER,
             horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
             disableDepthTestDistance: Number.POSITIVE_INFINITY,
-            scaleByDistance: new Cesium.NearFarScalar(3000, 1.0, 25000, 0.72),
-            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 42000)
+            eyeOffset: new Cesium.Cartesian3(0, 0, -20),
+            scaleByDistance: new Cesium.NearFarScalar(2500, 1.0, 30000, 0.75),
+            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 45000)
           };
         }
 
