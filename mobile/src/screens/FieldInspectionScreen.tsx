@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,716 +7,617 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  Platform,
+  Image,
+  Modal,
+  SafeAreaView,
 } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as Location from 'expo-location';
+import { Ionicons } from '@expo/vector-icons';
 import { useOffline } from '../context/OfflineContext';
-import { macosColors, sfFont } from '../config/macosTheme';
+import { getMviTier } from './BarangayCaptainScreen';
+
+const CATEGORIES = ['Rapid Damage (RDANA)', 'Project Milestone', 'Sanitation Check'];
+const INITIAL_QUEUE_LIMIT = 3;
 
 export const FieldInspectionScreen: React.FC = () => {
-  const {
-    isOnline,
-    toggleNetwork,
-    queuedReports,
-    submitReport,
-    syncOutbox,
-    selectedBarangay,
-    mobileRole,
-    endorseOrQueueProposal,
-  } = useOffline();
-
-  const isCaptain = mobileRole === 'barangay_captain';
-
-  const defaultCategory = isCaptain
-    ? 'Rapid Damage (RDANA)'
-    : 'Drainage / Flood Clog';
-
-  const [reportType, setReportType] = useState(defaultCategory);
+  const { isOnline, queuedReports, submitReport, syncOutbox, selectedBarangay } = useOffline();
+  const [permission, requestPermission] = useCameraPermissions();
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [reportType, setReportType] = useState(CATEGORIES[0]);
   const [desc, setDesc] = useState('');
-  const [severity, setSeverity] = useState<'Routine' | 'Priority' | 'Critical'>('Priority');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [syncStatus, setSyncStatus] = useState<string | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [isCameraReady, setIsCameraReady] = useState(false);
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [feedbackBanner, setFeedbackBanner] = useState<{ type: 'success' | 'info'; text: string } | null>(null);
 
-  const [longitude, latitude] = selectedBarangay.center;
+  const [showAllQueue, setShowAllQueue] = useState(false);
+  const [hideSynced, setHideSynced] = useState(false);
 
-  const captainCategories = [
-    'Rapid Damage (RDANA)',
-    'Infrastructure / CEO Audit',
-    'Sanitation / WASH Audit',
-    'AIP Project Milestone',
-  ];
+  const cameraRef = useRef<any>(null);
+  const currentTier = getMviTier(selectedBarangay.vulnerability_index);
 
-  const citizenCategories = [
-    'Drainage / Flood Clog',
-    'Broken Streetlight',
-    'Pothole / Road Hazard',
-    'Water Supply Shortage',
-    'Public Health Concern',
-  ];
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        const loc = await Location.getCurrentPositionAsync({});
+        setLocation(loc);
+      }
+    })();
+  }, []);
 
-  const activeCategories = isCaptain ? captainCategories : citizenCategories;
+  const showTempBanner = (type: 'success' | 'info', text: string) => {
+    setFeedbackBanner({ type, text });
+    setTimeout(() => setFeedbackBanner(null), 4000);
+  };
+
+  const handleOpenCamera = async () => {
+    if (!permission?.granted) {
+      const res = await requestPermission();
+      if (!res.granted) {
+        Alert.alert('Camera Permission Required', 'Please grant camera access to capture geotagged field photos.');
+        return;
+      }
+    }
+    setIsCameraReady(false);
+    setShowCamera(true);
+  };
+
+  const handleCloseCamera = () => {
+    setIsCameraReady(false);
+    setShowCamera(false);
+  };
+
+  const takePicture = async () => {
+    if (!isCameraReady || !cameraRef.current) return;
+    try {
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8, skipProcessing: true });
+      if (photo && photo.uri) {
+        setPhotoUri(photo.uri);
+        handleCloseCamera();
+      }
+    } catch (err) {
+      console.warn('Camera capture error:', err);
+    }
+  };
+
+  const handleRemovePhoto = () => setPhotoUri(null);
 
   const handleSubmit = async () => {
     if (!desc.trim()) {
-      Alert.alert(
-        'Required Note',
-        isCaptain
-          ? 'Please enter inspection observations & evidence.'
-          : 'Please describe the community issue or concern.'
-      );
+      Alert.alert('Observation Required', 'Please enter your field findings before submitting.');
       return;
     }
-
     setIsSubmitting(true);
-    const roleTag = isCaptain ? 'Punong Barangay / Field Inspector' : 'Citizen Resident';
-
     await submitReport({
       barangayId: selectedBarangay.id,
-      barangayName: selectedBarangay.displayName,
-      reportType: `[${severity.toUpperCase()}] ${reportType}`,
-      description: desc,
-      latitude: selectedBarangay.center[1],
-      longitude: selectedBarangay.center[0],
-      reporterRole: roleTag,
+      barangayName: selectedBarangay.name,
+      reportType,
+      description: desc.trim() + (photoUri ? `\n[Geotagged Photo Attached]` : ''),
+      latitude: location ? location.coords.latitude : 13.6218,
+      longitude: location ? location.coords.longitude : 123.1948,
     });
-
-    // If Captain logs an infrastructure or damage report, also queue as candidate proposal
-    if (isCaptain && (reportType.includes('Infrastructure') || reportType.includes('RDANA'))) {
-      await endorseOrQueueProposal({
-        barangay: selectedBarangay.displayName,
-        office: reportType.includes('RDANA') ? 'DRRMO' : 'CEO',
-        title: `Field Remediation: ${reportType} (${selectedBarangay.realName})`,
-        problem: desc,
-        statute: reportType.includes('RDANA')
-          ? 'RA 10121 Philippine DRRM Act Sec. 12'
-          : 'RA 7160 Local Government Code Sec. 17',
-        section: 'Engineering Remediation & Rehabilitation',
-        sdgs: ['SDG 9 Industry & Infrastructure', 'SDG 11 Sustainable Cities'],
-        budget: reportType.includes('RDANA') ? 450000 : 350000,
-      });
-    }
-
     setDesc('');
+    setPhotoUri(null);
     setIsSubmitting(false);
-
-    Alert.alert(
-      isOnline ? 'Report Forwarded' : 'Queued in Offline Outbox',
+    showTempBanner(
+      'success',
       isOnline
-        ? `Successfully submitted to the Naga City Command Center (${isCaptain ? 'LGU Executive Deck' : 'Citizen Services'}).`
-        : `Stored in local encrypted outbox. It will auto-sync once connection to LGU server is re-established.`
+        ? 'Report uploaded and synced with Naga City Command Center.'
+        : 'Saved to local SQLite outbox. Will sync when online.'
     );
   };
 
   const handleManualSync = async () => {
     if (!isOnline) {
-      Alert.alert(
-        'Network Offline',
-        'Please toggle to Online Sync mode to transmit pending field outbox reports to the Naga Command Center.'
-      );
+      Alert.alert('Offline Mode Active', 'Switch to Online Mode in the top header to synchronize queued reports.');
       return;
     }
     const count = await syncOutbox();
-    setSyncStatus(`Successfully synchronized ${count} report(s) with Naga City Server.`);
-    setTimeout(() => setSyncStatus(null), 4000);
+    showTempBanner(
+      'info',
+      count > 0
+        ? `Synchronized ${count} pending report(s) to Command Center.`
+        : 'All queued reports are already synchronized.'
+    );
   };
 
+  const latText = location ? location.coords.latitude.toFixed(5) : '13.62180';
+  const lonText = location ? location.coords.longitude.toFixed(5) : '123.19480';
+
+  const filteredReports = hideSynced ? queuedReports.filter((r) => !r.isSynced) : queuedReports;
+  const visibleReports = showAllQueue ? filteredReports : filteredReports.slice(0, INITIAL_QUEUE_LIMIT);
+  const unsyncedCount = queuedReports.filter((r) => !r.isSynced).length;
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* 1. Header Card */}
-      <View style={styles.whiteCard}>
-        <View style={styles.badgeRow}>
-          <View style={styles.badgePill}>
-            <Text style={styles.badgePillText}>
-              {isCaptain ? 'OFFICIAL FIELD AUDIT & RDANA' : 'SUMBONG SA BARANGAY • CITIZEN DESK'}
-            </Text>
-          </View>
+    <>
+      <Modal visible={showCamera} animationType="slide" onRequestClose={handleCloseCamera}>
+        <View style={styles.cameraContainer}>
+          <CameraView
+            style={StyleSheet.absoluteFill}
+            ref={cameraRef}
+            onCameraReady={() => setIsCameraReady(true)}
+          />
+          <SafeAreaView style={styles.cameraOverlay}>
+            <View style={styles.cameraTopBar}>
+              <View style={styles.liveBadge}>
+                <View style={styles.liveDot} />
+                <Text style={styles.liveBadgeText}>LIVE GEOTAG CAMERA</Text>
+              </View>
+              <TouchableOpacity style={styles.cameraExitBtn} onPress={handleCloseCamera} activeOpacity={0.8}>
+                <Ionicons name="close-circle" size={18} color="#FFFFFF" />
+                <Text style={styles.cameraExitText}>Exit</Text>
+              </TouchableOpacity>
+            </View>
 
-          <TouchableOpacity
-            style={styles.netToggle}
-            onPress={toggleNetwork}
-            activeOpacity={0.75}
-          >
-            <View
-              style={[
-                styles.netDot,
-                { backgroundColor: isOnline ? macosColors.appleGreen : macosColors.appleYellow },
-              ]}
-            />
-            <Text style={styles.netText}>{isOnline ? 'Online Sync' : 'Simulated Offline'}</Text>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.cameraBottomBar}>
+              <View style={styles.geoPill}>
+                <Ionicons name="location-sharp" size={12} color="#10B981" />
+                <Text style={styles.cameraCoordOverlay}>
+                  {selectedBarangay.name} • GPS {latText}N, {lonText}E
+                </Text>
+              </View>
 
-        <Text style={styles.title}>
-          {isCaptain ? 'Barangay Inspector Console' : 'Community Resident Feedback'}
-        </Text>
-        <Text style={styles.subtitle}>
-          Active Barangay: <Text style={{ fontWeight: '700', color: macosColors.appleBlue }}>{selectedBarangay.displayName}</Text> • Centroid {latitude.toFixed(4)}°N, {longitude.toFixed(4)}°E
-        </Text>
-
-        {!isCaptain && (
-          <View style={styles.privacyBanner}>
-            <Text style={styles.privacyIcon}>🔒</Text>
-            <Text style={styles.privacyText}>
-              <Text style={{ fontWeight: '700' }}>RA 10173 Protected:</Text> Individual household identity is confidential. Only empirical issues & geotags are forwarded to Sangguniang Barangay.
-            </Text>
-          </View>
-        )}
-      </View>
-
-      {/* 2. Report Composer Card */}
-      <View style={styles.whiteCard}>
-        <View style={styles.composerHeader}>
-          <Text style={styles.composerIcon}>{isCaptain ? '📋' : '📢'}</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.composerTitle}>
-              {isCaptain ? 'Log Formal Field Verification & Evidence' : 'Report Community Issue / Hazard'}
-            </Text>
-            <Text style={styles.composerSub}>
-              {isCaptain
-                ? 'Creates statutory record for AIP 2026 project monitoring & damage claims.'
-                : 'Alerts Punong Barangay and City Hall engineers for swift repair.'}
-            </Text>
-          </View>
-        </View>
-
-        {/* Severity Selector */}
-        <Text style={styles.inputLabel}>PRIORITY / SEVERITY LEVEL</Text>
-        <View style={styles.severityRow}>
-          {(['Routine', 'Priority', 'Critical'] as const).map((sev) => {
-            const isSelected = severity === sev;
-            const color =
-              sev === 'Critical' ? '#dc2626' : sev === 'Priority' ? '#d97706' : '#16a34a';
-            return (
-              <TouchableOpacity
-                key={sev}
-                style={[
-                  styles.severityBtn,
-                  isSelected && { backgroundColor: color, borderColor: color },
-                ]}
-                onPress={() => setSeverity(sev)}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    styles.severityBtnText,
-                    isSelected && styles.severityBtnTextActive,
-                  ]}
+              <View style={styles.cameraActionRow}>
+                <View style={{ width: 60 }} />
+                <TouchableOpacity
+                  style={[styles.shutterOuter, !isCameraReady && styles.shutterDisabled]}
+                  onPress={takePicture}
+                  disabled={!isCameraReady}
+                  activeOpacity={0.8}
                 >
-                  {sev === 'Critical' ? '🚨 ' : sev === 'Priority' ? '⚡ ' : '🌱 '}
-                  {sev}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+                  <View style={[styles.shutterInner, !isCameraReady && { backgroundColor: '#94A3B8' }]} />
+                </TouchableOpacity>
+                <View style={{ width: 60 }} />
+              </View>
+            </View>
+          </SafeAreaView>
         </View>
+      </Modal>
 
-        {/* Category Selector */}
-        <Text style={styles.inputLabel}>
-          {isCaptain ? 'AUDIT CLASSIFICATION' : 'ISSUE TYPE'}
-        </Text>
-        <View style={styles.typeRow}>
-          {activeCategories.map((t) => {
-            const isSelected = reportType === t;
-            return (
-              <TouchableOpacity
-                key={t}
-                style={[styles.typeBtn, isSelected && styles.typeBtnActive]}
-                onPress={() => setReportType(t)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.typeBtnText, isSelected && styles.typeBtnTextActive]}>
-                  {t}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {/* Description / Findings Input */}
-        <Text style={styles.inputLabel}>
-          {isCaptain ? 'OBSERVATION FINDINGS & STATUTORY EVIDENCE' : 'ISSUE DETAILS & SPECIFIC LOCATION'}
-        </Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder={
-            isCaptain
-              ? 'e.g. Conducted ocular inspection of Zone 3 river embankment. 15 light-roof households exposed to flash flooding. Recommended retaining wall repair.'
-              : 'e.g. Clogged culvert along Zone 4 causing knee-deep water after 30 minutes of rain. Affecting around 20 families.'
-          }
-          placeholderTextColor={macosColors.textTertiary}
-          multiline
-          numberOfLines={4}
-          value={desc}
-          onChangeText={setDesc}
-        />
-
-        {/* Geotag & Metadata Card */}
-        <View style={styles.metaBox}>
-          <View style={styles.metaRow}>
-            <Text style={styles.metaKey}>Barangay Centroid</Text>
-            <Text style={styles.metaVal}>
-              {selectedBarangay.realName} ({latitude.toFixed(4)}°N, {longitude.toFixed(4)}°E)
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.headerSection}>
+          <Text style={styles.eyebrow}>FIELD INSPECTION LOG</Text>
+          <Text style={styles.screenTitle}>Submit Field Proof</Text>
+          <View style={styles.targetMetaRow}>
+            <Ionicons name="location" size={14} color="#05389F" />
+            <Text style={styles.targetMetaText}>
+              Target: {selectedBarangay.name} ({latText}° N, {lonText}° E)
             </Text>
-          </View>
-          <View style={styles.metaRow}>
-            <Text style={styles.metaKey}>Reporter Persona</Text>
-            <Text style={styles.metaVal}>
-              {isCaptain ? '🏛️ Punong Barangay' : '👥 Verified Citizen'}
-            </Text>
-          </View>
-          <View style={styles.metaRow}>
-            <Text style={styles.metaKey}>Transmission Channel</Text>
-            <Text style={styles.metaVal}>
-              {isOnline ? 'Direct HTTPS API' : 'Local SQLite / Outbox Queue'}
-            </Text>
+            <View style={[styles.inlineTierBadge, { backgroundColor: currentTier.bg, borderColor: currentTier.border }]}>
+              <Text style={[styles.inlineTierText, { color: currentTier.text }]}>{currentTier.shortLabel}</Text>
+            </View>
           </View>
         </View>
 
-        {/* Submit Button */}
-        <TouchableOpacity
-          style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.submitBtnText}>
-            {isSubmitting
-              ? 'TRANSMITTING...'
-              : isCaptain
-              ? '📝 Log Formal Audit & Geotag'
-              : '🚀 Isumbong sa Barangay (Submit)'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* 3. Outbox & Sync Manager Card */}
-      <View style={styles.whiteCard}>
-        <View style={styles.sectionHeader}>
-          <View>
-            <Text style={styles.sectionTitle}>Field Reports & Outbox</Text>
-            <Text style={styles.sectionSub}>
-              {queuedReports.length} queued item(s) awaiting cloud transmission
-            </Text>
-          </View>
-
-          <TouchableOpacity
+        {feedbackBanner && (
+          <View
             style={[
-              styles.syncBtn,
-              (!isOnline || queuedReports.length === 0) && styles.syncBtnDisabled,
+              styles.feedbackBanner,
+              feedbackBanner.type === 'success' ? styles.bannerSuccess : styles.bannerInfo,
             ]}
-            onPress={handleManualSync}
-            disabled={!isOnline || queuedReports.length === 0}
-            activeOpacity={0.8}
           >
-            <Text style={styles.syncBtnText}>Sync Outbox ↗</Text>
-          </TouchableOpacity>
-        </View>
-
-        {syncStatus && (
-          <View style={styles.syncAlert}>
-            <Text style={styles.syncAlertText}>{syncStatus}</Text>
+            <Ionicons
+              name="checkmark-circle"
+              size={18}
+              color={feedbackBanner.type === 'success' ? '#047857' : '#05389F'}
+            />
+            <Text
+              style={[
+                styles.feedbackText,
+                { color: feedbackBanner.type === 'success' ? '#047857' : '#05389F' },
+              ]}
+            >
+              {feedbackBanner.text}
+            </Text>
           </View>
         )}
 
-        {queuedReports.length === 0 ? (
-          <View style={styles.emptyBox}>
-            <Text style={styles.emptyIcon}>✅</Text>
-            <Text style={styles.emptyText}>All field reports synchronized with Naga Command Center.</Text>
+        <View style={styles.formCard}>
+          <Text style={styles.fieldLabel}>1. Inspection Category</Text>
+          <View style={styles.categoryWrap}>
+            {CATEGORIES.map((cat) => {
+              const active = reportType === cat;
+              return (
+                <TouchableOpacity
+                  key={cat}
+                  style={[styles.categoryChip, active && styles.categoryChipActive]}
+                  onPress={() => setReportType(cat)}
+                >
+                  <Text style={[styles.categoryChipText, active && styles.categoryChipTextActive]}>{cat}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
-        ) : (
-          <View style={styles.outboxList}>
-            {queuedReports.map((item) => (
-              <View key={item.id} style={styles.outboxItem}>
-                <View style={styles.outboxTop}>
-                  <Text style={styles.outboxType}>{item.reportType}</Text>
-                  <View
-                    style={[
-                      styles.outboxBadge,
-                      item.isSynced ? styles.outboxBadgeSynced : styles.outboxBadgePending,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.outboxBadgeText,
-                        item.isSynced ? styles.badgeTextSynced : styles.badgeTextPending,
-                      ]}
-                    >
-                      {item.isSynced ? 'SYNCED' : 'QUEUED OFFLINE'}
-                    </Text>
-                  </View>
+
+          <Text style={styles.fieldLabel}>2. Field Findings & Observation Notes</Text>
+          <TextInput
+            style={styles.textArea}
+            placeholder="Describe household impact, infrastructure status, or relief progress..."
+            placeholderTextColor="#94A3B8"
+            multiline
+            numberOfLines={3}
+            value={desc}
+            onChangeText={setDesc}
+          />
+
+          <Text style={styles.fieldLabel}>3. Geotagged Photo Evidence</Text>
+          {!photoUri ? (
+            <TouchableOpacity style={styles.openCameraCard} onPress={handleOpenCamera} activeOpacity={0.75}>
+              <View style={styles.cameraIconCircle}>
+                <Ionicons name="camera" size={20} color="#05389F" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.openCameraTitle}>Capture Geotagged Photo</Text>
+                <Text style={styles.openCameraSub}>Stamps GPS coordinates onto report</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.photoReviewCard}>
+              <Image source={{ uri: photoUri }} style={styles.photoThumbnail} />
+              <View style={styles.photoReviewMeta}>
+                <View style={styles.photoAttachedBadge}>
+                  <Ionicons name="checkmark-circle" size={14} color="#047857" />
+                  <Text style={styles.photoAttachedText}>Photo Attached</Text>
                 </View>
-                <Text style={styles.outboxDesc}>{item.description}</Text>
-                <View style={styles.outboxFoot}>
-                  <Text style={styles.outboxMeta}>
-                    📍 {item.barangayName} • {new Date(item.timestamp).toLocaleTimeString()}
-                  </Text>
-                  <Text style={styles.outboxRole}>{item.reporterRole}</Text>
+                <Text style={styles.photoCoordText}>
+                  GPS: {latText}N, {lonText}E
+                </Text>
+                <View style={styles.photoActionRow}>
+                  <TouchableOpacity style={styles.retakeBtn} onPress={handleOpenCamera}>
+                    <Ionicons name="refresh" size={13} color="#05389F" />
+                    <Text style={styles.retakeBtnText}>Retake</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.removePhotoBtn} onPress={handleRemovePhoto}>
+                    <Ionicons name="trash-outline" size={13} color="#BE123C" />
+                    <Text style={styles.removePhotoText}>Remove</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-            ))}
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={[styles.submitBtn, isSubmitting && { opacity: 0.6 }]}
+            onPress={handleSubmit}
+            disabled={isSubmitting}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name={isOnline ? 'cloud-upload-outline' : 'save-outline'}
+              size={17}
+              color="#FFFFFF"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.submitBtnText}>
+              {isOnline ? 'Submit & Sync Report →' : 'Save to Offline Outbox'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.outboxSection}>
+          <View style={styles.outboxHeaderRow}>
+            <View>
+              <Text style={styles.sectionTitle}>Local Outbox Queue ({filteredReports.length})</Text>
+              <View style={styles.queueMetaRow}>
+                <Text style={styles.sectionSubtitle}>
+                  {unsyncedCount > 0 ? `${unsyncedCount} awaiting connection` : 'All reports synced'}
+                </Text>
+                <TouchableOpacity onPress={() => setHideSynced(!hideSynced)} style={styles.filterBtn}>
+                  <Text style={styles.filterBtnText}>{hideSynced ? 'Show Synced' : 'Hide Synced'}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.syncNowBtn} onPress={handleManualSync} activeOpacity={0.8}>
+              <Ionicons name="sync" size={14} color="#05389F" style={{ marginRight: 4 }} />
+              <Text style={styles.syncNowBtnText}>Sync Outbox</Text>
+            </TouchableOpacity>
           </View>
-        )}
-      </View>
-    </ScrollView>
+
+          {visibleReports.map((rpt) => (
+            <View key={rpt.id} style={styles.reportCard}>
+              <View style={styles.reportTopRow}>
+                <Text style={styles.reportType} numberOfLines={1}>
+                  {rpt.reportType}
+                </Text>
+                <View style={[styles.syncBadge, rpt.isSynced ? styles.badgeSynced : styles.badgePending]}>
+                  <Text style={[styles.syncBadgeText, { color: rpt.isSynced ? '#047857' : '#B45309' }]}>
+                    {rpt.isSynced ? 'Synced' : 'Queued'}
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.reportDesc} numberOfLines={2}>
+                {rpt.description}
+              </Text>
+              <View style={styles.reportMetaRow}>
+                <Text style={styles.reportMetaText}>{rpt.barangayName}</Text>
+                <Text style={styles.reportMetaText}>•</Text>
+                <Text style={styles.reportMetaText}>{rpt.timestamp}</Text>
+              </View>
+            </View>
+          ))}
+
+          {filteredReports.length > INITIAL_QUEUE_LIMIT && (
+            <TouchableOpacity style={styles.toggleQueueBtn} onPress={() => setShowAllQueue((prev) => !prev)}>
+              <Text style={styles.toggleQueueText}>
+                {showAllQueue
+                  ? 'Show Fewer Reports'
+                  : `View All ${filteredReports.length} Reports (${filteredReports.length - INITIAL_QUEUE_LIMIT} more)`}
+              </Text>
+              <Ionicons name={showAllQueue ? 'chevron-up' : 'chevron-down'} size={15} color="#05389F" />
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: macosColors.windowBackground,
+  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  contentContainer: { paddingBottom: 32 },
+  headerSection: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
-  contentContainer: {
-    padding: 14,
-    gap: 12,
-    paddingBottom: 28,
-  },
-  whiteCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: macosColors.cardBorder,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  badgeRow: {
+  eyebrow: { color: '#05389F', fontSize: 10, fontWeight: '700', letterSpacing: 0.6, marginBottom: 4 },
+  screenTitle: { color: '#0F172A', fontSize: 21, fontWeight: '800', letterSpacing: -0.4 },
+  targetMetaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 6, flexWrap: 'wrap' },
+  targetMetaText: { color: '#475569', fontSize: 12, fontWeight: '500' },
+  inlineTierBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, borderWidth: 1 },
+  inlineTierText: { fontSize: 10, fontWeight: '700' },
+  feedbackBanner: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
-  },
-  badgePill: {
-    backgroundColor: macosColors.appleBlueSubtle,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
+    marginHorizontal: 16,
+    marginTop: 14,
+    padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: macosColors.appleBlueBorder,
-  },
-  badgePillText: {
-    fontFamily: sfFont,
-    fontSize: 10,
-    fontWeight: '800',
-    color: macosColors.appleBlue,
-  },
-  netToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: '#f1f5f9',
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  netDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  netText: {
-    fontFamily: sfFont,
-    fontSize: 10,
-    fontWeight: '600',
-    color: macosColors.textSecondary,
-  },
-  title: {
-    fontFamily: sfFont,
-    fontSize: 20,
-    fontWeight: '800',
-    color: macosColors.textPrimary,
-    letterSpacing: -0.4,
-  },
-  subtitle: {
-    fontFamily: sfFont,
-    fontSize: 12,
-    color: macosColors.textSecondary,
-    marginTop: 2,
-  },
-  privacyBanner: {
-    marginTop: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#eff6ff',
-    borderRadius: 10,
-    padding: 8,
-    borderWidth: 1,
-    borderColor: '#bfdbfe',
-    gap: 6,
-  },
-  privacyIcon: {
-    fontSize: 13,
-  },
-  privacyText: {
-    fontFamily: sfFont,
-    fontSize: 10.5,
-    color: '#1e40af',
-    flex: 1,
-    lineHeight: 15,
-  },
-  composerHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    marginBottom: 12,
-  },
-  composerIcon: {
-    fontSize: 22,
-    marginTop: 1,
-  },
-  composerTitle: {
-    fontFamily: sfFont,
-    fontSize: 15,
-    fontWeight: '800',
-    color: macosColors.textPrimary,
-  },
-  composerSub: {
-    fontFamily: sfFont,
-    fontSize: 11,
-    color: macosColors.textSecondary,
-    marginTop: 1,
-  },
-  inputLabel: {
-    fontFamily: sfFont,
-    fontSize: 10,
-    fontWeight: '800',
-    color: macosColors.textSecondary,
-    marginBottom: 6,
-    marginTop: 10,
-    letterSpacing: 0.3,
-  },
-  severityRow: {
-    flexDirection: 'row',
     gap: 8,
-    marginBottom: 4,
   },
-  severityBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderRadius: 10,
+  bannerSuccess: { backgroundColor: '#ECFDF5', borderColor: '#A7F3D0' },
+  bannerInfo: { backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' },
+  feedbackText: { flex: 1, fontSize: 13, fontWeight: '600' },
+
+  formCard: {
+    backgroundColor: '#FFFFFF',
+    margin: 16,
+    padding: 16,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#f8fafc',
+    borderColor: '#E5E7EB',
   },
-  severityBtnText: {
-    fontFamily: sfFont,
+  fieldLabel: {
+    color: '#475569',
     fontSize: 11,
     fontWeight: '700',
-    color: macosColors.textSecondary,
-  },
-  severityBtnTextActive: {
-    color: '#ffffff',
-  },
-  typeRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
+    textTransform: 'uppercase',
     marginBottom: 8,
+    letterSpacing: 0.4,
   },
-  typeBtn: {
-    paddingHorizontal: 10,
+  categoryWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  categoryChip: {
+    paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: 10,
-    backgroundColor: '#f8fafc',
+    borderRadius: 999,
+    backgroundColor: '#F3F4F6',
+  },
+  categoryChipActive: { backgroundColor: '#05389F' },
+  categoryChipText: { color: '#374151', fontSize: 12, fontWeight: '600' },
+  categoryChipTextActive: { color: '#FFFFFF', fontWeight: '700' },
+  textArea: {
+    backgroundColor: '#F8FAFC',
+    color: '#0F172A',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  typeBtnActive: {
-    backgroundColor: macosColors.appleBlue,
-    borderColor: macosColors.appleBlue,
-  },
-  typeBtnText: {
-    fontFamily: sfFont,
-    fontSize: 11,
-    fontWeight: '600',
-    color: macosColors.textSecondary,
-  },
-  typeBtnTextActive: {
-    color: '#ffffff',
-    fontWeight: '700',
-  },
-  textInput: {
-    backgroundColor: '#f8fafc',
+    borderColor: '#E2E8F0',
     borderRadius: 12,
     padding: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    fontFamily: sfFont,
-    fontSize: 12,
-    color: macosColors.textPrimary,
-    minHeight: 80,
+    minHeight: 84,
     textAlignVertical: 'top',
+    fontSize: 14,
+    marginBottom: 16,
   },
-  metaBox: {
-    marginTop: 10,
-    backgroundColor: '#f8fafc',
-    borderRadius: 10,
-    padding: 10,
+  openCameraCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  cameraIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EFF6FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  openCameraTitle: { color: '#0F172A', fontSize: 14, fontWeight: '700' },
+  openCameraSub: { color: '#64748B', fontSize: 12, marginTop: 1 },
+  photoReviewCard: {
+    flexDirection: 'row',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  photoThumbnail: { width: 70, height: 70, borderRadius: 10, backgroundColor: '#CBD5E1', marginRight: 12 },
+  photoReviewMeta: { flex: 1 },
+  photoAttachedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  photoAttachedText: { color: '#047857', fontSize: 12, fontWeight: '700' },
+  photoCoordText: { color: '#64748B', fontSize: 11, marginTop: 2, marginBottom: 8 },
+  photoActionRow: { flexDirection: 'row', gap: 8 },
+  retakeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
     gap: 4,
   },
-  metaRow: {
+  retakeBtnText: { color: '#05389F', fontSize: 11, fontWeight: '700' },
+  removePhotoBtn: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  metaKey: {
-    fontFamily: sfFont,
-    fontSize: 10.5,
-    color: macosColors.textSecondary,
-  },
-  metaVal: {
-    fontFamily: sfFont,
-    fontSize: 10.5,
-    fontWeight: '600',
-    color: macosColors.textPrimary,
-  },
-  submitBtn: {
-    marginTop: 12,
-    backgroundColor: macosColors.appleBlue,
-    paddingVertical: 11,
-    borderRadius: 12,
     alignItems: 'center',
-  },
-  submitBtnDisabled: {
-    opacity: 0.6,
-  },
-  submitBtnText: {
-    fontFamily: sfFont,
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#ffffff',
-    letterSpacing: 0.3,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  sectionTitle: {
-    fontFamily: sfFont,
-    fontSize: 15,
-    fontWeight: '800',
-    color: macosColors.textPrimary,
-  },
-  sectionSub: {
-    fontFamily: sfFont,
-    fontSize: 11,
-    color: macosColors.textSecondary,
-    marginTop: 1,
-  },
-  syncBtn: {
-    backgroundColor: '#16a34a',
+    backgroundColor: '#FFE4E6',
     paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingVertical: 5,
+    borderRadius: 999,
+    gap: 4,
   },
-  syncBtnDisabled: {
-    backgroundColor: '#cbd5e1',
+  removePhotoText: { color: '#BE123C', fontSize: 11, fontWeight: '700' },
+  submitBtn: {
+    flexDirection: 'row',
+    backgroundColor: '#05389F',
+    paddingVertical: 13,
+    borderRadius: 999,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  syncBtnText: {
-    fontFamily: sfFont,
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#ffffff',
+  submitBtnText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
+
+  outboxSection: { paddingHorizontal: 16 },
+  outboxHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  syncAlert: {
-    backgroundColor: '#ecfdf5',
-    padding: 8,
-    borderRadius: 8,
+  sectionTitle: { color: '#0F172A', fontSize: 16, fontWeight: '700', letterSpacing: -0.3 },
+  queueMetaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 8 },
+  sectionSubtitle: { color: '#64748B', fontSize: 12, fontWeight: '500' },
+  filterBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 999,
+  },
+  filterBtnText: { color: '#4B5563', fontSize: 10, fontWeight: '700' },
+  syncNowBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
     borderWidth: 1,
-    borderColor: '#a7f3d0',
+    borderColor: '#BFDBFE',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+  },
+  syncNowBtnText: { color: '#05389F', fontSize: 12, fontWeight: '700' },
+  reportCard: {
+    backgroundColor: '#FFFFFF',
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     marginBottom: 8,
   },
-  syncAlertText: {
-    fontFamily: sfFont,
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#065f46',
-  },
-  emptyBox: {
-    padding: 16,
-    alignItems: 'center',
-    gap: 4,
-  },
-  emptyIcon: {
-    fontSize: 20,
-  },
-  emptyText: {
-    fontFamily: sfFont,
-    fontSize: 11,
-    color: macosColors.textSecondary,
-  },
-  outboxList: {
-    gap: 8,
-  },
-  outboxItem: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 12,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  outboxTop: {
+  reportTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 4,
   },
-  outboxType: {
-    fontFamily: sfFont,
-    fontSize: 12,
-    fontWeight: '700',
-    color: macosColors.textPrimary,
-    flex: 1,
+  reportType: { color: '#0F172A', fontSize: 14, fontWeight: '700', flex: 1, marginRight: 8 },
+  syncBadge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 999 },
+  badgeSynced: { backgroundColor: '#D1FAE5' },
+  badgePending: { backgroundColor: '#FEF3C7' },
+  syncBadgeText: { fontSize: 10, fontWeight: '700' },
+  reportDesc: { color: '#475569', fontSize: 13, lineHeight: 18, marginBottom: 6 },
+  reportMetaRow: { flexDirection: 'row', gap: 6 },
+  reportMetaText: { color: '#94A3B8', fontSize: 11, fontWeight: '500' },
+  toggleQueueBtn: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 11,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    gap: 6,
+    marginTop: 4,
   },
-  outboxBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  outboxBadgePending: {
-    backgroundColor: '#fef3c7',
-  },
-  outboxBadgeSynced: {
-    backgroundColor: '#dcfce7',
-  },
-  outboxBadgeText: {
-    fontFamily: sfFont,
-    fontSize: 8.5,
-    fontWeight: '800',
-  },
-  badgeTextPending: {
-    color: '#b45309',
-  },
-  badgeTextSynced: {
-    color: '#15803d',
-  },
-  outboxDesc: {
-    fontFamily: sfFont,
-    fontSize: 11,
-    color: macosColors.textSecondary,
-    marginBottom: 6,
-    lineHeight: 16,
-  },
-  outboxFoot: {
+  toggleQueueText: { color: '#05389F', fontSize: 12, fontWeight: '700' },
+
+  cameraContainer: { flex: 1, backgroundColor: '#000000' },
+  cameraOverlay: { flex: 1, justifyContent: 'space-between' },
+  cameraTopBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 12,
   },
-  outboxMeta: {
-    fontFamily: sfFont,
-    fontSize: 9.5,
-    color: macosColors.textTertiary,
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    gap: 6,
   },
-  outboxRole: {
-    fontFamily: sfFont,
-    fontSize: 9.5,
-    fontWeight: '600',
-    color: macosColors.appleBlue,
+  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#E11D48' },
+  liveBadgeText: { color: '#FFFFFF', fontSize: 11, fontWeight: '700', letterSpacing: 0.4 },
+  cameraExitBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    gap: 4,
   },
+  cameraExitText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
+  cameraBottomBar: {
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    paddingTop: 14,
+    paddingBottom: 28,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  geoPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(30, 41, 59, 0.8)',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 999,
+    gap: 6,
+    marginBottom: 16,
+  },
+  cameraCoordOverlay: { color: '#E2E8F0', fontSize: 12, fontWeight: '600' },
+  cameraActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  shutterOuter: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 4,
+    borderColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shutterDisabled: { opacity: 0.5 },
+  shutterInner: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#FFFFFF' },
 });

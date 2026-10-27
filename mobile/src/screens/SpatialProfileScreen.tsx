@@ -81,7 +81,7 @@ export const SpatialProfileScreen: React.FC = () => {
                   styles.catBtn,
                   active && { backgroundColor: cat.color, borderColor: cat.color },
                 ]}
-                onPress={() => handleSelectCategory(cat.id)}
+                onPress={() => handleSelectCategory?.(cat.id)}
                 activeOpacity={0.75}
               >
                 <Text style={[styles.catBtnText, active && styles.catBtnTextActive]}>
