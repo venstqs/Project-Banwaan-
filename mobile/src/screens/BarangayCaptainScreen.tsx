@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useOffline } from '../context/OfflineContext';
 
@@ -86,14 +86,12 @@ export const getClupCategory = (name: string) => {
   };
 };
 
-// Standardizes any SDG input into discrete "SDG #" badges
 export const parseSdgBadges = (rawSdg: string): string[] => {
   if (!rawSdg) return ['SDG'];
   const matches = rawSdg.match(/\d+/g);
   if (!matches || matches.length === 0) {
     return [rawSdg.trim()];
   }
-  // De-duplicate in case of repeated references
   const uniqueNums = Array.from(new Set(matches.map(Number)));
   return uniqueNums.map((num) => `SDG ${num}`);
 };
@@ -101,6 +99,8 @@ export const parseSdgBadges = (rawSdg: string): string[] => {
 export const BarangayCaptainScreen: React.FC = () => {
   const { selectedBarangay, setSelectedBarangayId, allBarangays, queuedReports, submitReport } = useOffline();
   const [endorsedKeys, setEndorsedKeys] = useState<string[]>([]);
+  const [selectedProgram, setSelectedProgram] = useState<any>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const isProgramEndorsed = (programTitle: string) => {
     const key = `${selectedBarangay.id}::${programTitle}`;
@@ -128,6 +128,11 @@ export const BarangayCaptainScreen: React.FC = () => {
     });
   };
 
+  const handleProgramPress = (program: any) => {
+    setSelectedProgram(program);
+    setModalVisible(true);
+  };
+
   const currentTier = getMviTier(selectedBarangay.vulnerability_index);
   const category = getClupCategory(selectedBarangay.name);
   const endorsedCountForBarangay = selectedBarangay.recommended_programs.filter((p) =>
@@ -135,181 +140,271 @@ export const BarangayCaptainScreen: React.FC = () => {
   ).length;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* Top Barangay Filter Strip */}
-      <View style={styles.filterBarContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillScrollContent}>
-          {allBarangays.map((b) => {
-            const active = selectedBarangay.id === b.id;
-            const bTier = getMviTier(b.vulnerability_index);
+    <>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        {/* Top Barangay Filter Strip */}
+        <View style={styles.filterBarContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillScrollContent}>
+            {allBarangays.map((b) => {
+              const active = selectedBarangay.id === b.id;
+              const bTier = getMviTier(b.vulnerability_index);
+              return (
+                <TouchableOpacity
+                  key={b.id}
+                  style={[styles.pill, active && styles.pillActive]}
+                  onPress={() => setSelectedBarangayId(b.id)}
+                  activeOpacity={0.75}
+                >
+                  <View style={[styles.pillDot, { backgroundColor: active ? '#FFFFFF' : bTier.accent }]} />
+                  <Text style={[styles.pillText, active && styles.pillTextActive]}>{b.name}</Text>
+                  <View style={[styles.pillScoreTag, active && styles.pillScoreTagActive]}>
+                    <Text style={[styles.pillScoreText, active && styles.pillScoreTextActive]}>
+                      {b.vulnerability_index}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        {/* Main Inspector Card */}
+        <View style={styles.inspectorCard}>
+          <View style={styles.inspectorHeaderRow}>
+            <View style={[styles.numberBadge, { backgroundColor: category.badgeBg }]}>
+              <Text style={styles.numberBadgeText}>{selectedBarangay.id}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={styles.nameRow}>
+                <Text style={styles.screenTitle}>{selectedBarangay.name}</Text>
+                <Text style={styles.idSubText}>#{selectedBarangay.id}</Text>
+              </View>
+              <Text style={[styles.sectorSubtitle, { color: category.text }]}>{category.full}</Text>
+            </View>
+            <View style={[styles.categoryPastelPill, { backgroundColor: category.bg }]}>
+              <Text style={styles.categoryEmoji}>{category.icon}</Text>
+              <Text style={[styles.categoryPastelText, { color: category.text }]}>{category.short}</Text>
+            </View>
+          </View>
+
+          {/* Risk & Empirical MVI Row */}
+          <View style={styles.statusBadgesRow}>
+            <View style={[styles.riskBadge, { backgroundColor: currentTier.bg, borderColor: currentTier.border }]}>
+              <View style={[styles.riskDot, { backgroundColor: currentTier.accent }]} />
+              <Text style={[styles.riskBadgeText, { color: currentTier.text }]}>{currentTier.shortLabel}</Text>
+            </View>
+
+            <View style={styles.empiricalMviBadge}>
+              <Text style={styles.empiricalMviText}>Empirical MVI: {selectedBarangay.vulnerability_index}</Text>
+            </View>
+          </View>
+
+          {/* 2-Column Households & Population Boxes */}
+          <View style={styles.statsRow}>
+            <View style={styles.statCard}>
+              <Text style={styles.statLabel}>HOUSEHOLDS</Text>
+              <Text style={styles.statValue}>{selectedBarangay.total_households.toLocaleString()} HHs</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statLabel}>POPULATION</Text>
+              <Text style={styles.statValue}>{selectedBarangay.total_population.toLocaleString()} Pop</Text>
+            </View>
+          </View>
+
+          {/* Priority Barangay Deficits */}
+          <View style={styles.deficitsSection}>
+            <Text style={styles.subSectionLabel}>DETECTED CBMS SIGNALS & DEFICITS</Text>
+            {selectedBarangay.top_needs.map((need, idx) => (
+              <View
+                key={idx}
+                style={[styles.needRow, idx === selectedBarangay.top_needs.length - 1 && { borderBottomWidth: 0 }]}
+              >
+                <View style={styles.needLeft}>
+                  <View
+                    style={[
+                      styles.signalDot,
+                      { backgroundColor: idx === 0 ? '#E11D48' : idx === 1 ? '#05389F' : '#EA580C' },
+                    ]}
+                  />
+                  <Text style={styles.needText}>{need}</Text>
+                </View>
+                <Text
+                  style={[
+                    styles.signalPriorityTag,
+                    { color: idx === 0 ? '#BE123C' : idx === 1 ? '#05389F' : '#C2410C' },
+                  ]}
+                >
+                  Priority #{idx + 1}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Recommended Action Plans */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.sectionTitle}>Recommended Action Plans</Text>
+              <Text style={styles.sectionDesc}>Tap to view details • Statutory programs aligned with 2026 City AIP</Text>
+            </View>
+            {endorsedCountForBarangay > 0 && (
+              <View style={styles.endorsedCounterBadge}>
+                <Text style={styles.endorsedCounterText}>
+                  {endorsedCountForBarangay}/{selectedBarangay.recommended_programs.length} Endorsed
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {selectedBarangay.recommended_programs.map((prog, idx) => {
+            const endorsed = isProgramEndorsed(prog.program);
+            const sdgBadges = parseSdgBadges(prog.sdg);
+
             return (
               <TouchableOpacity
-                key={b.id}
-                style={[styles.pill, active && styles.pillActive]}
-                onPress={() => setSelectedBarangayId(b.id)}
-                activeOpacity={0.75}
+                key={idx}
+                style={[styles.progCard, endorsed && styles.progCardEndorsed]}
+                onPress={() => handleProgramPress(prog)}
+                activeOpacity={0.7}
               >
-                <View style={[styles.pillDot, { backgroundColor: active ? '#FFFFFF' : bTier.accent }]} />
-                <Text style={[styles.pillText, active && styles.pillTextActive]}>{b.name}</Text>
-                <View style={[styles.pillScoreTag, active && styles.pillScoreTagActive]}>
-                  <Text style={[styles.pillScoreText, active && styles.pillScoreTextActive]}>
-                    {b.vulnerability_index}
-                  </Text>
+                <View style={styles.progTopRow}>
+                  <View style={styles.officeBadge}>
+                    <Text style={styles.officeBadgeText}>{prog.office}</Text>
+                  </View>
+
+                  <View style={styles.sdgContainer}>
+                    {sdgBadges.map((sdgLabel, sIdx) => (
+                      <View key={sIdx} style={styles.sdgBadge}>
+                        <Text style={styles.sdgText}>{sdgLabel}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                <Text style={styles.progTitle}>{prog.program}</Text>
+
+                <View style={styles.statutePill}>
+                  <Ionicons name="scale-outline" size={12} color="#05389F" />
+                  <Text style={styles.progStatute}>{prog.statute}</Text>
+                </View>
+
+                <View style={styles.progFooter}>
+                  <View>
+                    <Text style={styles.budgetLabel}>ESTIMATED BUDGET</Text>
+                    <Text style={styles.budgetValue}>{prog.estimated_budget}</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.endorseBtn, endorsed && styles.endorseBtnDone]}
+                    onPress={() => handleEndorseProgram(prog.program)}
+                    disabled={endorsed}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons
+                      name={endorsed ? 'checkmark-circle' : 'sparkles'}
+                      size={15}
+                      color={endorsed ? '#047857' : '#FFFFFF'}
+                      style={{ marginRight: 6 }}
+                    />
+                    <Text style={[styles.endorseBtnText, endorsed && styles.endorseBtnTextDone]}>
+                      {endorsed ? 'Endorsed' : 'Endorse Plan →'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
-      </View>
+        </View>
+      </ScrollView>
 
-      {/* Main Inspector Card */}
-      <View style={styles.inspectorCard}>
-        <View style={styles.inspectorHeaderRow}>
-          <View style={[styles.numberBadge, { backgroundColor: category.badgeBg }]}>
-            <Text style={styles.numberBadgeText}>{selectedBarangay.id}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <View style={styles.nameRow}>
-              <Text style={styles.screenTitle}>{selectedBarangay.name}</Text>
-              <Text style={styles.idSubText}>#{selectedBarangay.id}</Text>
+      {/* Program Details Modal */}
+      <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{selectedProgram?.program}</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#0F172A" />
+              </TouchableOpacity>
             </View>
-            <Text style={[styles.sectorSubtitle, { color: category.text }]}>{category.full}</Text>
-          </View>
-          <View style={[styles.categoryPastelPill, { backgroundColor: category.bg }]}>
-            <Text style={styles.categoryEmoji}>{category.icon}</Text>
-            <Text style={[styles.categoryPastelText, { color: category.text }]}>{category.short}</Text>
-          </View>
-        </View>
 
-        {/* Risk & Empirical MVI Row */}
-        <View style={styles.statusBadgesRow}>
-          <View style={[styles.riskBadge, { backgroundColor: currentTier.bg, borderColor: currentTier.border }]}>
-            <View style={[styles.riskDot, { backgroundColor: currentTier.accent }]} />
-            <Text style={[styles.riskBadgeText, { color: currentTier.text }]}>{currentTier.shortLabel}</Text>
-          </View>
-
-          <View style={styles.empiricalMviBadge}>
-            <Text style={styles.empiricalMviText}>Empirical MVI: {selectedBarangay.vulnerability_index}</Text>
-          </View>
-        </View>
-
-        {/* 2-Column Households & Population Boxes */}
-        <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Text style={styles.statLabel}>HOUSEHOLDS</Text>
-            <Text style={styles.statValue}>{selectedBarangay.total_households.toLocaleString()} HHs</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statLabel}>POPULATION</Text>
-            <Text style={styles.statValue}>{selectedBarangay.total_population.toLocaleString()} Pop</Text>
-          </View>
-        </View>
-
-        {/* Priority Barangay Deficits */}
-        <View style={styles.deficitsSection}>
-          <Text style={styles.subSectionLabel}>DETECTED CBMS SIGNALS & DEFICITS</Text>
-          {selectedBarangay.top_needs.map((need, idx) => (
-            <View
-              key={idx}
-              style={[styles.needRow, idx === selectedBarangay.top_needs.length - 1 && { borderBottomWidth: 0 }]}
-            >
-              <View style={styles.needLeft}>
-                <View
-                  style={[
-                    styles.signalDot,
-                    { backgroundColor: idx === 0 ? '#E11D48' : idx === 1 ? '#05389F' : '#EA580C' },
-                  ]}
-                />
-                <Text style={styles.needText}>{need}</Text>
-              </View>
-              <Text
-                style={[
-                  styles.signalPriorityTag,
-                  { color: idx === 0 ? '#BE123C' : idx === 1 ? '#05389F' : '#C2410C' },
-                ]}
-              >
-                Priority #{idx + 1}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </View>
-
-      {/* Recommended Action Plans */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeaderRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.sectionTitle}>Recommended Action Plans</Text>
-            <Text style={styles.sectionDesc}>Statutory programs aligned with 2026 City AIP</Text>
-          </View>
-          {endorsedCountForBarangay > 0 && (
-            <View style={styles.endorsedCounterBadge}>
-              <Text style={styles.endorsedCounterText}>
-                {endorsedCountForBarangay}/{selectedBarangay.recommended_programs.length} Endorsed
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {selectedBarangay.recommended_programs.map((prog, idx) => {
-          const endorsed = isProgramEndorsed(prog.program);
-          const sdgBadges = parseSdgBadges(prog.sdg);
-
-          return (
-            <View key={idx} style={[styles.progCard, endorsed && styles.progCardEndorsed]}>
-              <View style={styles.progTopRow}>
-                <View style={styles.officeBadge}>
-                  <Text style={styles.officeBadgeText}>{prog.office}</Text>
+            <ScrollView contentContainerStyle={styles.modalScrollContent}>
+              {/* Office & Statute */}
+              <View style={styles.modalSection}>
+                <Text style={styles.modalSectionTitle}>OFFICE & LEGAL BASIS</Text>
+                <View style={styles.modalOfficeRow}>
+                  <View style={styles.officeBadge}>
+                    <Text style={styles.officeBadgeText}>{selectedProgram?.office}</Text>
+                  </View>
+                  <View style={styles.statutePill}>
+                    <Ionicons name="scale-outline" size={14} color="#05389F" />
+                    <Text style={styles.progStatute}>{selectedProgram?.statute}</Text>
+                  </View>
                 </View>
+              </View>
 
-                {/* Standardized Discrete SDG Pills */}
-                <View style={styles.sdgContainer}>
-                  {sdgBadges.map((sdgLabel, sIdx) => (
-                    <View key={sIdx} style={styles.sdgBadge}>
-                      <Text style={styles.sdgText}>{sdgLabel}</Text>
+              {/* Short Description */}
+              <View style={styles.modalSection}>
+                <Text style={styles.modalSectionTitle}>DESCRIPTION</Text>
+                <Text style={styles.modalDescText}>
+                  {selectedProgram?.description || 'No description available.'}
+                </Text>
+              </View>
+
+              {/* SDG Alignment */}
+              <View style={styles.modalSection}>
+                <Text style={styles.modalSectionTitle}>SDG ALIGNMENT</Text>
+                <View style={styles.modalSdgContainer}>
+                  {parseSdgBadges(selectedProgram?.sdg).map((sdgLabel, idx) => (
+                    <View key={idx} style={styles.modalSdgBadge}>
+                      <Text style={styles.modalSdgText}>{sdgLabel}</Text>
                     </View>
                   ))}
                 </View>
               </View>
 
-              <Text style={styles.progTitle}>{prog.program}</Text>
-
-              <View style={styles.statutePill}>
-                <Ionicons name="scale-outline" size={12} color="#05389F" />
-                <Text style={styles.progStatute}>{prog.statute}</Text>
+              {/* Budget */}
+              <View style={styles.modalSection}>
+                <Text style={styles.modalSectionTitle}>ESTIMATED BUDGET</Text>
+                <Text style={styles.modalBudgetValue}>{selectedProgram?.estimated_budget}</Text>
               </View>
+            </ScrollView>
 
-              <View style={styles.progFooter}>
-                <View>
-                  <Text style={styles.budgetLabel}>ESTIMATED BUDGET</Text>
-                  <Text style={styles.budgetValue}>{prog.estimated_budget}</Text>
-                </View>
-                <TouchableOpacity
-                  style={[styles.endorseBtn, endorsed && styles.endorseBtnDone]}
-                  onPress={() => handleEndorseProgram(prog.program)}
-                  disabled={endorsed}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons
-                    name={endorsed ? 'checkmark-circle' : 'sparkles'}
-                    size={15}
-                    color={endorsed ? '#047857' : '#FFFFFF'}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={[styles.endorseBtnText, endorsed && styles.endorseBtnTextDone]}>
-                    {endorsed ? 'Endorsed' : 'Endorse Plan →'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+            {/* Modal Footer - Endorse Button */}
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[
+                  styles.endorseBtn,
+                  isProgramEndorsed(selectedProgram?.program) && styles.endorseBtnDone,
+                ]}
+                onPress={() => {
+                  handleEndorseProgram(selectedProgram?.program);
+                  setModalVisible(false);
+                }}
+                disabled={isProgramEndorsed(selectedProgram?.program)}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name={isProgramEndorsed(selectedProgram?.program) ? 'checkmark-circle' : 'sparkles'}
+                  size={18}
+                  color={isProgramEndorsed(selectedProgram?.program) ? '#047857' : '#FFFFFF'}
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={[styles.endorseBtnText, isProgramEndorsed(selectedProgram?.program) && styles.endorseBtnTextDone]}>
+                  {isProgramEndorsed(selectedProgram?.program) ? 'Endorsed' : 'Endorse This Plan'}
+                </Text>
+              </TouchableOpacity>
             </View>
-          );
-        })}
-      </View>
-    </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
+  // ... all existing styles ...
   container: { flex: 1, backgroundColor: '#F8FAFC' },
   contentContainer: { paddingBottom: 32 },
   filterBarContainer: {
@@ -549,4 +644,54 @@ const styles = StyleSheet.create({
   endorseBtnDone: { backgroundColor: '#D1FAE5', borderWidth: 1, borderColor: '#A7F3D0' },
   endorseBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
   endorseBtnTextDone: { color: '#047857' },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '90%',
+    paddingTop: 16,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  modalTitle: { color: '#0F172A', fontSize: 18, fontWeight: '800', flex: 1, letterSpacing: -0.3 },
+  modalScrollContent: { paddingHorizontal: 20, paddingBottom: 100 },
+  modalSection: { marginTop: 20 },
+  modalSectionTitle: { color: '#64748B', fontSize: 11, fontWeight: '700', letterSpacing: 0.5, marginBottom: 10 },
+  modalOfficeRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
+  modalDescText: { color: '#334155', fontSize: 14, fontWeight: '500', lineHeight: 21 },
+  modalSdgContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  modalSdgBadge: {
+    backgroundColor: '#FEF9C3',
+    borderWidth: 1,
+    borderColor: '#FDE047',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  modalSdgText: { color: '#854D0E', fontSize: 12, fontWeight: '700' },
+  modalBudgetValue: { color: '#0F172A', fontSize: 20, fontWeight: '800' },
+  modalFooter: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
 });

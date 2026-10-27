@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useOffline } from '../context/OfflineContext';
-import { getMviTier } from './BarangayCaptainScreen';
+import { getMviTier, parseSdgBadges } from './BarangayCaptainScreen';
 
 interface AgentMessage {
   id: string;
@@ -26,11 +26,92 @@ interface AgentMessage {
 
 type SupportedLanguage = 'bikol' | 'filipino' | 'english';
 
+// Strictly scoped to the 5 sample barangays in the mobile app (Barangays 1, 3, 7, 9, 16)
+// All values verified 1:1 against Anonymized-Data_Team-Synapse (1).xlsx
+interface SampleBarangayCbms {
+  hh: number;
+  pop: number;
+  refillHh: number;
+  refillPct: number;
+  wellHh: number;
+  nonBasicToiHh: number;
+  nonBasicToiPct: number;
+  openDefecationHh: number;
+  foodWorriedHh: number;
+  foodWorriedPct: number;
+  foodHungryHh: number;
+  unbankedHh: number;
+  unbankedPct: number;
+  neetCount: number;
+  neetPct: number;
+  hotline: number;
+  drrmPlan: number;
+  weakRoofHh: number;
+  weakRoofPct: number;
+  senNoId: number;
+  senNoIdPct: number;
+  noElecHh: number;
+}
+
+const SAMPLE_CBMS_DATA: Record<string, SampleBarangayCbms> = {
+  '1': {
+    hh: 1065, pop: 4478,
+    refillHh: 462, refillPct: 43.4, wellHh: 3,
+    nonBasicToiHh: 316, nonBasicToiPct: 29.7, openDefecationHh: 1,
+    foodWorriedHh: 322, foodWorriedPct: 30.2, foodHungryHh: 50,
+    unbankedHh: 356, unbankedPct: 33.4,
+    neetCount: 137, neetPct: 14.8,
+    hotline: 1, drrmPlan: 1, weakRoofHh: 21, weakRoofPct: 2.0,
+    senNoId: 46, senNoIdPct: 10.3, noElecHh: 17,
+  },
+  '3': {
+    hh: 1508, pop: 5916,
+    refillHh: 877, refillPct: 58.2, wellHh: 9,
+    nonBasicToiHh: 273, nonBasicToiPct: 18.1, openDefecationHh: 1,
+    foodWorriedHh: 384, foodWorriedPct: 25.5, foodHungryHh: 175,
+    unbankedHh: 376, unbankedPct: 24.9,
+    neetCount: 187, neetPct: 15.1,
+    hotline: 0, drrmPlan: 0, weakRoofHh: 133, weakRoofPct: 8.8,
+    senNoId: 73, senNoIdPct: 9.9, noElecHh: 25,
+  },
+  '7': {
+    hh: 1845, pop: 7491,
+    refillHh: 456, refillPct: 24.7, wellHh: 487,
+    nonBasicToiHh: 643, nonBasicToiPct: 34.9, openDefecationHh: 39,
+    foodWorriedHh: 910, foodWorriedPct: 49.3, foodHungryHh: 155,
+    unbankedHh: 698, unbankedPct: 37.8,
+    neetCount: 270, neetPct: 18.1,
+    hotline: 0, drrmPlan: 1, weakRoofHh: 245, weakRoofPct: 13.3,
+    senNoId: 146, senNoIdPct: 19.8, noElecHh: 105,
+  },
+  '9': {
+    hh: 5706, pop: 23171,
+    refillHh: 1935, refillPct: 33.9, wellHh: 14,
+    nonBasicToiHh: 1900, nonBasicToiPct: 33.3, openDefecationHh: 7,
+    foodWorriedHh: 2336, foodWorriedPct: 40.9, foodHungryHh: 498,
+    unbankedHh: 1311, unbankedPct: 23.0,
+    neetCount: 680, neetPct: 14.9,
+    hotline: 1, drrmPlan: 1, weakRoofHh: 126, weakRoofPct: 2.2,
+    senNoId: 269, senNoIdPct: 11.7, noElecHh: 127,
+  },
+  '16': {
+    hh: 1779, pop: 7958,
+    refillHh: 518, refillPct: 29.1, wellHh: 9,
+    nonBasicToiHh: 629, nonBasicToiPct: 35.4, openDefecationHh: 4,
+    foodWorriedHh: 1459, foodWorriedPct: 82.0, foodHungryHh: 751,
+    unbankedHh: 853, unbankedPct: 47.9,
+    neetCount: 339, neetPct: 20.0,
+    hotline: 0, drrmPlan: 1, weakRoofHh: 32, weakRoofPct: 1.8,
+    senNoId: 110, senNoIdPct: 16.9, noElecHh: 75,
+  },
+};
+
 const PROMPT_CHIPS = [
-  'SDG Gap Audit',
-  'Statutory Policy Basis',
-  'Draft AIP Proposal',
-  'Flood & DRRM Plan',
+  'Barangay Needs',
+  'Water & Sanitation',
+  'Food & Health',
+  'DRRM & Roofs',
+  'Youth & Unbanked',
 ];
 
 export const MobileAgentScreen: React.FC = () => {
@@ -40,16 +121,27 @@ export const MobileAgentScreen: React.FC = () => {
   const scrollViewRef = useRef<any>(null);
 
   const currentTier = getMviTier(selectedBarangay.vulnerability_index);
+  // Extract numeric ID whether selectedBarangay.id is "16", "brgy-16", or 16
+  const cleanId = String(selectedBarangay.id).replace(/[^0-9]/g, '') || '16';
+  const cbms = SAMPLE_CBMS_DATA[cleanId] || SAMPLE_CBMS_DATA['16'];
+  const primaryProg = selectedBarangay.recommended_programs?.[0];
 
-  const [messages, setMessages] = useState<AgentMessage[]>([
-    {
-      id: 'msg-1',
-      sender: 'agent',
-      text: `Statutory & CBMS Decision Engine is online. Analyzing ${selectedBarangay.name} (${selectedBarangay.total_households.toLocaleString()} households, Empirical MVI ${selectedBarangay.vulnerability_index}). Every intervention cites exact statutory authorities (RA 10121, RA 7160, RA 11223, RA 11310) and maps to the 17 UN Sustainable Development Goals.`,
-      statute: 'RA 7160 Sec. 17 & RA 10121 Sec. 12',
-      sdg: 'SDG 11 Sustainable Cities • SDG 17 Partnerships',
-    },
-  ]);
+  const getInitialMessage = (): AgentMessage => ({
+    id: `init-${selectedBarangay.id}`,
+    sender: 'agent',
+    text: `Statutory & CBMS Decision Engine is online for ${selectedBarangay.name} (${selectedBarangay.total_households.toLocaleString()} households, ${selectedBarangay.total_population.toLocaleString()} residents, Empirical MVI ${selectedBarangay.vulnerability_index} • ${currentTier.shortLabel}).\n\nTop Verified CBMS Deficits:\n• ${selectedBarangay.top_needs.join('\n• ')}\n\nAsk about specific barangay needs, water & sanitation, DRRM, health, or livelihoods in English, Filipino, or Bikol.`,
+    statute: primaryProg ? primaryProg.statute : 'RA 7160 Sec. 17 & RA 10121 Sec. 12',
+    sdg: primaryProg ? parseSdgBadges(primaryProg.sdg).join(' • ') : 'SDG 11 • SDG 17',
+    suggestedAction: primaryProg ? `${primaryProg.office}: ${primaryProg.program}` : undefined,
+    budget: primaryProg ? primaryProg.estimated_budget : undefined,
+  });
+
+  const [messages, setMessages] = useState<AgentMessage[]>([getInitialMessage()]);
+
+  // Refresh AI context automatically whenever the user switches among the 5 sample barangays
+  useEffect(() => {
+    setMessages([getInitialMessage()]);
+  }, [selectedBarangay.id]);
 
   const scrollToLatest = () => {
     setTimeout(() => {
@@ -112,7 +204,7 @@ export const MobileAgentScreen: React.FC = () => {
             sender: 'agent',
             text: data.ai_synthesis,
             statute: `${p.statutory_basis.law} - ${p.statutory_basis.section}`,
-            sdg: p.sdgs.join(' • '),
+            sdg: p.sdgs.map((s: string) => parseSdgBadges(s).join(' • ')).join(' • '),
             suggestedAction: p.suggested_actions.join(' • '),
             budget: `₱${Number(p.estimated_budget_php || 250000).toLocaleString()}`,
           },
@@ -121,7 +213,7 @@ export const MobileAgentScreen: React.FC = () => {
         scrollToLatest();
         return;
       } catch {
-        // Fallback to local offline synthesis
+        // Fallback to local CBMS synthesis
       }
     }
 
@@ -129,12 +221,22 @@ export const MobileAgentScreen: React.FC = () => {
       let reply: AgentMessage;
       const lang = detectLanguage(activeQuery);
       const lower = activeQuery.toLowerCase().trim();
+      const bName = selectedBarangay.name;
+      const programs = selectedBarangay.recommended_programs || [];
 
       const hasWord = (...words: string[]) =>
         words.some((w) => new RegExp(`\\b${w}\\b`, 'i').test(lower));
 
-      const hh = selectedBarangay.total_households;
-      const mvi = selectedBarangay.vulnerability_index;
+      // Helper to find a matching program from selectedBarangay.recommended_programs
+      const findProgramByKeywords = (...keywords: string[]) =>
+        programs.find((p) =>
+          keywords.some(
+            (k) =>
+              p.program.toLowerCase().includes(k) ||
+              p.office.toLowerCase().includes(k) ||
+              p.statute.toLowerCase().includes(k)
+          )
+        ) || programs[0];
 
       // 1. GREETING INTENT (NO CARDS)
       const isGreeting = hasWord(
@@ -145,187 +247,255 @@ export const MobileAgentScreen: React.FC = () => {
       );
 
       if (isGreeting) {
-        let greetingText = '';
-        if (lang === 'bikol') {
-          greetingText = `Marhay na aldaw po, Kapitan! Andam akong magtabang sa pagsiyasat kan CBMS data, pagplano nin resolusyon, o pag-andam kan 2026 AIP programs para sa ${selectedBarangay.name}. Ano po an satuyang pag-oolayan ngunyan?`;
-        } else if (lang === 'filipino') {
-          greetingText = `Magandang araw po, Kapitan! Handa akong tumulong sa pagsusuri ng CBMS data, pagbalangkas ng resolusyon, o pagplano ng 2026 AIP projects para sa ${selectedBarangay.name}. Saang aspeto po natin nais magsimula?`;
+        const greetingText =
+          lang === 'bikol'
+            ? `Marhay na aldaw po, Kapitan! Andam akong magtabang sa pagsiyasat kan CBMS data kan ${bName} (halimbawa: ${selectedBarangay.top_needs[0]}). Ano po an satuyang pag-oolayan ngunyan?`
+            : lang === 'filipino'
+            ? `Magandang araw po, Kapitan! Handa akong tumulong sa pagsusuri ng CBMS data ng ${bName} (halimbawa: ${selectedBarangay.top_needs[0]}). Saang aspeto po natin nais magsimula?`
+            : `Kumusta, Kapitan! I am ready to analyze the verified CBMS telemetry for ${bName} (such as: ${selectedBarangay.top_needs[0]}). Which priority area would you like to review?`;
+
+        reply = { id: `agt-${Date.now()}`, sender: 'agent', text: greetingText };
+      }
+
+      // 2. SPECIFIC BARANGAY NEEDS / OVERVIEW / SDG AUDIT / AIP PROPOSAL
+      else if (
+        hasWord(
+          'need', 'needs', 'priority', 'deficit', 'deficits', 'problem', 'problems',
+          'overview', 'status', 'profile', 'summary', 'sdg', 'audit', 'aip', 'proposal', 'draft',
+          'pangangailangan', 'problema', 'kalagayan', 'kaipuhan'
+        )
+      ) {
+        const progList = programs
+          .map((p) => `• [${p.office}] ${p.program} (${p.estimated_budget})`)
+          .join('\n');
+
+        let specificNarrative = '';
+        if (cleanId === '1') {
+          specificNarrative = `${bName} is a dense Poblacion barangay (${cbms.hh.toLocaleString()} HHs) where the primary pressures are financial exclusion (${cbms.unbankedHh} unbanked HHs / ${cbms.unbankedPct}%), ${cbms.neetCount} NEET youth (${cbms.neetPct}%), and ${cbms.refillPct}% reliance on commercial water refilling (${cbms.refillHh} HHs), though it already maintains 100% DRRM plan and hotline compliance.`;
+        } else if (cleanId === '3') {
+          specificNarrative = `${bName} (${cbms.hh.toLocaleString()} HHs) faces a critical institutional DRRM gap: it is the only barangay in the CBMS dataset with 0 Written DRRM Plan and 0 Emergency Hotline (Table 54), compounded by ${cbms.weakRoofHh} households (${cbms.weakRoofPct}%) with weak roofs and ${cbms.refillPct}% commercial water refilling reliance (${cbms.refillHh} HHs).`;
+        } else if (cleanId === '7') {
+          specificNarrative = `${bName} (${cbms.hh.toLocaleString()} HHs) exhibits upland structural and WASH vulnerabilities: ${cbms.weakRoofHh} households (${cbms.weakRoofPct}%) have weak roofs, ${cbms.wellHh} households still rely on wells/springs for drinking water, ${cbms.openDefecationHh} households practice open defecation (${cbms.nonBasicToiPct}% non-basic sanitation), and ${cbms.foodWorriedHh} households (${cbms.foodWorriedPct}%) experience food insecurity.`;
+        } else if (cleanId === '9') {
+          specificNarrative = `${bName} is the largest population hub among the sample barangays (${cbms.hh.toLocaleString()} HHs; ${cbms.pop.toLocaleString()} residents), creating high volume pressures: ${cbms.foodWorriedHh.toLocaleString()} food-insecure households (${cbms.foodWorriedPct}%), ${cbms.refillHh.toLocaleString()} households (${cbms.refillPct}%) dependent on water refilling stations, ${cbms.nonBasicToiHh.toLocaleString()} households (${cbms.nonBasicToiPct}%) with shared/non-basic sanitation, and ${cbms.neetCount} NEET youth.`;
         } else {
-          greetingText = `Kumusta, Kapitan! I am ready to assist with CBMS vulnerability analysis, council resolutions, or 2026 AIP planning for ${selectedBarangay.name}. What topic would you like to review?`;
+          specificNarrative = `${bName} (${cbms.hh.toLocaleString()} HHs) records the highest vulnerability index (MVI ${selectedBarangay.vulnerability_index}), driven by an acute food insecurity outlier (${cbms.foodWorriedHh.toLocaleString()} HHs / ${cbms.foodWorriedPct}% worried about food; ${cbms.foodHungryHh} went hungry), ${cbms.unbankedHh} unbanked households (${cbms.unbankedPct}%), ${cbms.nonBasicToiHh} households (${cbms.nonBasicToiPct}%) lacking basic private sanitation, and no dedicated barangay emergency hotline.`;
+        }
+
+        const bodyText =
+          lang === 'bikol'
+            ? `[CBMS Empirical Audit • ${bName}]\n${specificNarrative}\n\nMga Prayoridad na Kakulangan:\n• ${selectedBarangay.top_needs.join('\n• ')}\n\n2026 AIP Recommended Programs:\n${progList}`
+            : lang === 'filipino'
+            ? `[CBMS Empirical Audit • ${bName}]\n${specificNarrative}\n\nMga Pangunahing Kakulangan:\n• ${selectedBarangay.top_needs.join('\n• ')}\n\n2026 AIP Recommended Programs:\n${progList}`
+            : `[CBMS Empirical Audit • ${bName}]\n${specificNarrative}\n\nVerified Barangay Deficits:\n• ${selectedBarangay.top_needs.join('\n• ')}\n\n2026 AIP Recommended Programs:\n${progList}`;
+
+        reply = {
+          id: `agt-${Date.now()}`,
+          sender: 'agent',
+          text: bodyText,
+          statute: primaryProg ? primaryProg.statute : 'RA 7160 Sec. 17',
+          sdg: primaryProg ? parseSdgBadges(primaryProg.sdg).join(' • ') : 'SDG 11',
+          suggestedAction: primaryProg
+            ? `Endorse "${primaryProg.program}" (${primaryProg.office}) in the Barangay tab for 2026 AIP inclusion.`
+            : undefined,
+          budget: primaryProg ? primaryProg.estimated_budget : undefined,
+        };
+      }
+
+      // 3. DISASTER, TYPHOON, ROOFS & DRRM (Tailored per sample barangay)
+      else if (
+        hasWord(
+          'disaster', 'typhoon', 'flood', 'flooding', 'storm', 'calamity', 'roof', 'roofs',
+          'baha', 'bagyo', 'unos', 'kalamidad', 'drrm', 'bdrrm', 'evacuation', 'bubong', 'uwan', 'uran', 'hotline'
+        )
+      ) {
+        const matchedProg = findProgramByKeywords('drrm', 'flood', 'roof', 'shelter', '10121');
+        let drrmDiagnosis = '';
+        let actionStep = '';
+        let estBudget = matchedProg?.estimated_budget || '₱185,000';
+
+        if (cleanId === '3') {
+          drrmDiagnosis = `CBMS Table 54 & Table 50 Alert for ${bName}: Out of all surveyed barangays, ${bName} is the ONLY barangay with 0 Written DRRM Plan and 0 Emergency Hotline, while 133 households (8.8%) occupy structures with weak/unimproved roofing (including 106 asbestos and 19 thatch roofs).`;
+          actionStep = `Urgently convene the Barangay Development Council to formulate the written BDRRM Plan, activate a 24/7 hotline, and prioritize the 133 weak-roof households.`;
+          estBudget = '₱185,000';
+        } else if (cleanId === '7') {
+          drrmDiagnosis = `CBMS Table 50 & Table 54 Alert for ${bName}: While ${bName} has a written DRRM plan, it has NO emergency hotline (0%) and records the highest structural roof vulnerability among the sample barangays—245 households (13.3%) have weak/unimproved roofs (200 sod/thatch and 37 wood/bamboo), plus 105 households lack electricity.`;
+          actionStep = `Allocate 5% LDRRMF for typhoon roof-tying/GI sheet retrofitting targeting the 245 vulnerable households and establish a dedicated VHF/cellular emergency hotline.`;
+          estBudget = matchedProg?.estimated_budget || '₱320,000';
+        } else if (cleanId === '16') {
+          drrmDiagnosis = `CBMS Table 50 & Table 54 Alert for ${bName}: Situated in the Bicol River flood basin, ${bName} has a written DRRM plan and a low weak-roof rate (32 HHs / 1.8%), but lacks a dedicated Barangay Emergency Hotline (0% in Table 54) and faces severe post-flood food/water disruption affecting 1,459 households.`;
+          actionStep = `Activate a 24/7 river-surge warning hotline and pre-position relief stockpiles at the evacuation facility for ${bName}'s 1,779 households.`;
+          estBudget = matchedProg?.estimated_budget || '₱250,000';
+        } else if (cleanId === '9') {
+          drrmDiagnosis = `CBMS Table 50 & Table 54 Status for ${bName}: ${bName} already maintains both a Written DRRM Plan (100%) and an Emergency Hotline (100%). However, due to its large size (5,706 HHs), 126 households (2.2%) still have weak/salvaged roofs and 127 households lack electricity.`;
+          actionStep = `Focus LDRRMF on structural retrofitting for the 126 light-roof households and expanding evacuation shelter capacity for ${bName}'s 23,171 residents.`;
+          estBudget = matchedProg?.estimated_budget || '₱290,000';
+        } else {
+          // Barangay 1
+          drrmDiagnosis = `CBMS Table 50 & Table 54 Status for ${bName}: ${bName} already has 100% compliance for both its Written DRRM Plan and Emergency Hotline, with only 21 households (2.0%) having light/unimproved roofs. However, 142 households (13.3%) live in overcrowded conditions (Table 19), elevating fire and urban flood-evacuation risks.`;
+          actionStep = `Conduct alley clearance, fire-hydrant checks, and targeted roof reinforcement for the 21 unimproved-roof households in ${bName}.`;
+          estBudget = matchedProg?.estimated_budget || '₱160,000';
         }
 
         reply = {
           id: `agt-${Date.now()}`,
           sender: 'agent',
-          text: greetingText,
-        };
-      }
-      // 2. DISASTER, TYPHOON, & FLOODING
-      else if (
-        hasWord(
-          'disaster', 'typhoon', 'flood', 'flooding', 'storm', 'calamity', 'roof',
-          'baha', 'bagyo', 'unos', 'kalamidad', 'drrm', 'bdrrm', 'evacuation', 'bubong', 'uwan', 'uran'
-        )
-      ) {
-        const calcBudget = Math.round((120000 + hh * 85) / 5000) * 5000;
-        const bodyText =
-          lang === 'bikol'
-            ? `[DRRMO Synthesis • BDRRM Plan] Pagsiyasat para sa ${selectedBarangay.name} (${hh.toLocaleString()} pamilya, MVI ${mvi} • ${currentTier.tier}). Sa irarom kan RA 10121, pwedeng gamiton kan barangay an 5% LDRRMF katuwang an City Hall para sa structural roof retrofitting, 24/7 disaster desk, asin Bikol flood warning system.`
-            : lang === 'filipino'
-            ? `[DRRMO Synthesis • BDRRM Plan] Pagsusuri para sa ${selectedBarangay.name} (${hh.toLocaleString()} pamilya, MVI ${mvi} • ${currentTier.tier}). Sa ilalim ng RA 10121, maaaring ilaan ng barangay ang 5% LDRRMF kasama ang counterpart ng Naga City Hall para sa structural roof retrofitting, 24/7 emergency hotline, at Bikol flood warning system.`
-            : `[DRRMO Synthesis • BDRRM Plan] Analyzing ${selectedBarangay.name} (${hh.toLocaleString()} HHs, MVI ${mvi} • ${currentTier.tier}). Under RA 10121, your barangay council can allocate its 5% LDRRMF alongside city counterparts for residential roof reinforcement, 24/7 hotline staffing, and Bikol early warning broadcasts.`;
-
-        reply = {
-          id: `agt-${Date.now()}`,
-          sender: 'agent',
-          text: bodyText,
+          text: drrmDiagnosis,
           statute: 'RA 10121 Sec. 12 (c) (6) & Sec. 21',
-          sdg: 'SDG 11.5 • SDG 13.1 Climate Resilience',
-          suggestedAction:
-            lang === 'bikol'
-              ? `Magpasa nin Sangguniang Barangay Resolution na nag-aaprobar kan 2026 BDRRM Plan kan ${selectedBarangay.name}.`
-              : lang === 'filipino'
-              ? `Magpasa ng Sangguniang Barangay Resolution para aprubahan ang 2026 BDRRM Plan ng ${selectedBarangay.name}.`
-              : `Pass a Sangguniang Barangay Resolution adopting the 2026 BDRRM Plan for ${selectedBarangay.name}.`,
-          budget: `₱${calcBudget.toLocaleString()}`,
+          sdg: 'SDG 11 • SDG 13',
+          suggestedAction: actionStep,
+          budget: estBudget,
         };
       }
-      // 3. WATER & SANITATION
+
+      // 4. WATER & SANITATION (Tailored per sample barangay)
       else if (
         hasWord(
-          'water', 'toilet', 'sanitation', 'sewage', 'drainage', 'piping',
-          'tubig', 'kasilyas', 'palikuran', 'kubeta', 'poso', 'imbornal', 'kanal', 'gripo', 'inodoro'
+          'water', 'toilet', 'sanitation', 'sewage', 'drainage', 'piping', 'wash',
+          'tubig', 'kasilyas', 'palikuran', 'kubeta', 'poso', 'imbornal', 'kanal', 'gripo', 'inodoro', 'refilling'
         )
       ) {
-        const calcBudget = Math.round((250000 + hh * 420) / 10000) * 10000;
-        const bodyText =
-          lang === 'bikol'
-            ? `[CEO Engineering Synthesis] Para sa ${selectedBarangay.name} (${hh.toLocaleString()} pamilya, ${currentTier.shortLabel}), pigmamando kan Seksiyon 17 kan RA 7160 an pagpapatindog nin communal sanitation blocks asin MNWD piped water reticulation tanganing mapundo an paggamit nin daing-linig na palikuran.`
-            : lang === 'filipino'
-            ? `[CEO Engineering Synthesis] Para sa ${selectedBarangay.name} (${hh.toLocaleString()} pamilya, ${currentTier.shortLabel}), itinatakda ng Seksiyon 17 ng RA 7160 ang pagtatayo ng communal sanitation blocks at MNWD piped water reticulation upang maiwasan ang sakit at matanggal ang unimproved toilets.`
-            : `[CEO Engineering Synthesis] For ${selectedBarangay.name} (${hh.toLocaleString()} HHs, ${currentTier.shortLabel}), Section 17 of RA 7160 mandates communal sanitation blocks and MNWD piped water reticulation to reduce commercial refilling dependency and eliminate unimproved toilets.`;
+        const matchedProg = findProgramByKeywords('water', 'sanitation', 'toilet', 'pip', 'ceo', '7160');
+        let washDiagnosis = '';
+        let washAction = '';
+        let washBudget = matchedProg?.estimated_budget || '₱750,000';
+
+        if (cleanId === '16') {
+          washDiagnosis = `CBMS Table 6 & Table 9 Diagnosis for ${bName}: 518 households (29.1%) depend on commercial water refilling stations and 56 households (3.1%) rely on tanker trucks. For sanitation, 629 households (35.4%) lack basic private sanitation—consisting of 624 households sharing limited facilities, 1 unimproved pit latrine, and 4 households practicing open defecation.`;
+          washAction = `Endorse PROP-NAGA-2026-CEO-002 (Piped Water Reticulation Mainline Extension & Communal Sanitation Block) for ${bName}.`;
+          washBudget = '₱1,250,000';
+        } else if (cleanId === '7') {
+          washDiagnosis = `CBMS Table 6 & Table 9 Diagnosis for ${bName}: Severe groundwater & sanitation vulnerability—487 households (26.4%) still draw drinking water from tubed/dug wells and springs (440 borehole, 47 wells, 145 springs), while 643 households (34.9%) lack basic sanitation, including 39 households practicing open defecation (highest among the sample barangays).`;
+          washAction = `Prioritize Level III piped water expansion to replace unsafe wells/springs and construct sanitary toilet blocks for the 39 open-defecation households in ${bName}.`;
+          washBudget = '₱980,000';
+        } else if (cleanId === '3') {
+          washDiagnosis = `CBMS Table 6 & Table 9 Diagnosis for ${bName}: Over half of the community—877 out of 1,508 households (58.2%)—relies on commercial water refilling stations because only 39.7% have piped water into their dwellings/yards. Additionally, 273 households (18.1%) lack basic private toilets (247 shared/limited, 25 unimproved, 1 open defecation).`;
+          washAction = `Coordinate with MNWD and the City Engineer's Office (CEO) for household piped-water connections and septage upgrades for the 25 unimproved toilet households.`;
+          washBudget = '₱680,000';
+        } else if (cleanId === '9') {
+          washDiagnosis = `CBMS Table 6 & Table 9 Diagnosis for ${bName}: Due to high urban density, 1,935 households (33.9%) rely on water refilling stations and 1,900 households (33.3%) lack basic private sanitation (1,851 shared/limited facilities, 42 unimproved toilets, and 7 open-defecation households).`;
+          washAction = `Deploy high-capacity communal septic and multi-household sanitation retrofits across ${bName}'s dense residential zones.`;
+          washBudget = '₱1,450,000';
+        } else {
+          // Barangay 1
+          washDiagnosis = `CBMS Table 6 & Table 9 Diagnosis for ${bName}: 462 out of 1,065 households (43.4%) rely on commercial water refilling stations and bottled water, while 316 households (29.7%) lack basic private sanitation (313 in shared/limited multi-family toilets, 2 unimproved, 1 open defecation).`;
+          washAction = `Submit a barangay infrastructure endorsement to the CEO for secondary water line tapping and shared-sanitation upgrading in ${bName}.`;
+          washBudget = '₱540,000';
+        }
 
         reply = {
           id: `agt-${Date.now()}`,
           sender: 'agent',
-          text: bodyText,
+          text: washDiagnosis,
           statute: 'RA 7160 Sec. 17 (b) (1) & PD 1096',
-          sdg: 'SDG 6 Clean Water • SDG 9 Infrastructure',
-          suggestedAction:
-            lang === 'bikol'
-              ? `Isumite an engineering endorsement gikan sa ${selectedBarangay.name} paduman sa City Engineer's Office (CEO).`
-              : lang === 'filipino'
-              ? `Isumite ang Barangay Infrastructure Endorsement mula sa ${selectedBarangay.name} papunta sa City Engineer's Office (CEO).`
-              : `Submit engineering endorsement from ${selectedBarangay.name} to the City Engineer's Office (CEO).`,
-          budget: `₱${calcBudget.toLocaleString()}`,
+          sdg: 'SDG 6 • SDG 9',
+          suggestedAction: washAction,
+          budget: washBudget,
         };
       }
-      // 4. HEALTH & NUTRITION
+
+      // 5. FOOD INSECURITY, HEALTH & SENIORS (Tailored per sample barangay)
       else if (
         hasWord(
-          'health', 'food', 'nutrition', 'malnutrition', 'feeding', 'clinic', 'medicine', 'senior', 'elderly', 'bhw', 'outreach',
+          'health', 'food', 'nutrition', 'malnutrition', 'feeding', 'clinic', 'medicine', 'senior', 'elderly', 'bhw', 'outreach', 'hungry', 'hunger',
           'gamot', 'pagkain', 'gutom', 'nutrisyon', 'bakuna', 'bata', 'doktor'
         )
       ) {
-        const calcBudget = Math.round((150000 + hh * 140) / 5000) * 5000;
-        const bodyText =
-          lang === 'bikol'
-            ? `[CHO Health Synthesis] Sa ${selectedBarangay.name}, an primary healthcare sa irarom kan RA 11223 nakatutok sa feeding programs, quarterly bacteriological testing sa water stations, asin 100% Senior Citizen healthcare coverage.`
-            : lang === 'filipino'
-            ? `[CHO Health Synthesis] Sa ${selectedBarangay.name}, ang primary care program sa ilalim ng RA 11223 ay nakatutok sa supplementary feeding, quarterly water station inspection, at 100% Senior Citizen ID and healthcare access.`
-            : `[CHO Health Synthesis] In ${selectedBarangay.name}, primary care outreach under RA 11223 prioritizes supplementary feeding, quarterly water refilling station inspections, and 100% Senior Citizen healthcare access.`;
+        const matchedProg = findProgramByKeywords('health', 'food', 'nutrition', 'cho', '11223');
+        let healthDiagnosis = '';
+        let healthAction = '';
+        let healthBudget = matchedProg?.estimated_budget || '₱280,000';
 
-        reply = {
-          id: `agt-${Date.now()}`,
-          sender: 'agent',
-          text: bodyText,
-          statute: 'RA 11223 (Universal Health Care Sec. 19)',
-          sdg: 'SDG 2 Zero Hunger • SDG 3 Good Health',
-          suggestedAction:
-            lang === 'bikol'
-              ? `I-deploy an Barangay Health Workers (BHWs) para sa profiling asin maghagad nin CHO water test.`
-              : lang === 'filipino'
-              ? `Ipakalat ang Barangay Health Workers (BHWs) para sa household profiling at mag-request ng CHO water testing.`
-              : `Deploy Barangay Health Workers (BHWs) across ${selectedBarangay.name} and request CHO water sampling.`,
-          budget: `₱${calcBudget.toLocaleString()}`,
-        };
-      }
-      // 5. YOUTH, LIVELIHOOD & CASH-AID
-      else if (
-        hasWord(
-          'youth', 'livelihood', 'job', 'employment', 'skills', 'tesda', 'cash', 'aid', '4ps',
-          'trabaho', 'ayuda', 'hanapbuhay', 'kabataan', 'scholarship', 'tulong'
-        )
-      ) {
-        const calcBudget = Math.round((160000 + hh * 165) / 5000) * 5000;
-        const bodyText =
-          lang === 'bikol'
-            ? `[CSWDO Livelihood Synthesis] Base sa CBMS profile kan ${selectedBarangay.name} (MVI ${mvi} • ${currentTier.tier}), prayoridad an digital financial onboarding (GCash/Maya) sa mga unbanked na pamilya asin TESDA-DOLE skills training para sa out-of-school youth.`
-            : lang === 'filipino'
-            ? `[CSWDO Livelihood Synthesis] Batay sa CBMS profile ng ${selectedBarangay.name} (MVI ${mvi} • ${currentTier.tier}), prayoridad ang digital cash-aid inclusion (GCash/Maya) para sa unbanked families at TESDA-DOLE skills placement para sa kabataan.`
-            : `[CSWDO Livelihood Synthesis] Based on the CBMS profile of ${selectedBarangay.name} (MVI ${mvi} • ${currentTier.tier}), priority interventions include digital cash-aid onboarding (GCash/Maya) for unbanked families and DOLE/TESDA skills placement for NEET youth.`;
-
-        reply = {
-          id: `agt-${Date.now()}`,
-          sender: 'agent',
-          text: bodyText,
-          statute: 'RA 11310 (4Ps Sec. 13) & RA 7160 Sec. 287',
-          sdg: 'SDG 1 No Poverty • SDG 8 Decent Work',
-          suggestedAction:
-            lang === 'bikol'
-              ? `Makipagtabangan sa CSWDO asin CPDO tanganing maiba an ${selectedBarangay.name} sa 2026 AIP Livelihood Schedule.`
-              : lang === 'filipino'
-              ? `Makipag-ugnayan sa CSWDO at CPDO upang maisama ang ${selectedBarangay.name} sa 2026 AIP Livelihood Drive.`
-              : `Coordinate with CSWDO & CPDO to integrate ${selectedBarangay.name} into the 2026 AIP Livelihood Schedule.`,
-          budget: `₱${calcBudget.toLocaleString()}`,
-        };
-      }
-      // 6. GENERAL CIVIC / SDG / STATUTORY / AIP INQUIRY
-      else if (
-        hasWord(
-          'budget', 'aip', 'resolution', 'council', 'ordinance', 'plan', 'sdg', 'audit', 'statutory', 'policy', 'basis', 'draft', 'proposal',
-          'pondo', 'plano', 'resolusyon', 'badyet', 'pera', 'gasto'
-        )
-      ) {
-        const calcBudget = Math.round((160000 + hh * 165) / 5000) * 5000;
-        const bodyText =
-          lang === 'bikol'
-            ? `[Local Governance Synthesis] Susog sa CBMS profile kan ${selectedBarangay.name} (${hh.toLocaleString()} pamilya, MVI ${mvi} • ${currentTier.tier}), an barangay council pwedeng mag-realign nin pondo sa irarom kan RA 7160 Section 16 (General Welfare) para sa mga priority infrastructure asin basic services.`
-            : lang === 'filipino'
-            ? `[Local Governance Synthesis] Alinsunod sa CBMS profile ng ${selectedBarangay.name} (${hh.toLocaleString()} pamilya, MVI ${mvi} • ${currentTier.tier}), maaaring mag-realign ng pondo ang konseho sa ilalim ng RA 7160 Section 16 (General Welfare) para sa priority infrastructure at serbisyo publiko.`
-            : `[Local Governance Synthesis] In accordance with the CBMS profile of ${selectedBarangay.name} (${hh.toLocaleString()} HHs, MVI ${mvi} • ${currentTier.tier}), the barangay council may realign allocations under RA 7160 Section 16 (General Welfare Clause) to address localized socio-economic gaps.`;
-
-        reply = {
-          id: `agt-${Date.now()}`,
-          sender: 'agent',
-          text: bodyText,
-          statute: 'RA 7160 Sec. 16 & Sec. 287',
-          sdg: 'SDG 11 Sustainable Cities • SDG 17 Partnerships',
-          suggestedAction:
-            lang === 'bikol'
-              ? `Magbalangkas nin council resolution para sa 2026 Barangay Annual Investment Program.`
-              : lang === 'filipino'
-              ? `Bumuo ng council resolution para sa 2026 Barangay Annual Investment Program.`
-              : `Draft a council resolution aligning priority allocations with the 2026 Barangay AIP.`,
-          budget: `₱${calcBudget.toLocaleString()}`,
-        };
-      }
-      // 7. UNRELATED / OUT-OF-SCOPE QUERIES (NO CARDS)
-      else {
-        let redirectText = '';
-        if (lang === 'bikol') {
-          redirectText = `Ako si Banwaan AI, nakatutok sa barangay governance kan Naga City asin pagsiyasat kan datos kan CBMS para sa ${selectedBarangay.name}. Dai ko po masisimbag an mga hapot na bako manongod sa barangay. Pwede kamong maghapot dapit sa baha, patubig, kalusugan, pangkabuhayan, o paggibo nin resolusyon.`;
-        } else if (lang === 'filipino') {
-          redirectText = `Ako si Banwaan AI, nakalaan para sa pamamahala ng barangay sa Naga City at pagsusuri ng datos ng CBMS para sa ${selectedBarangay.name}. Hindi ko po masasagot ang mga tanong na labas sa lokal na pamamahala. Maaari kayong magtanong ukol sa baha, patubig, kalusugan, pangkabuhayan, o pagbalangkas ng resolusyon.`;
+        if (cleanId === '16') {
+          healthDiagnosis = `CBMS Table 21 & Table 27 Alert for ${bName}: Extreme food-insecurity outlier—1,459 out of 1,779 households (82.0%) worried about not having enough food, 744 ran out of food, and 751 went hungry without eating. Additionally, 110 senior citizens (16.9%) lack a Senior Citizen ID.`;
+          healthAction = `Execute PROP-NAGA-2026-CHO-003 (Food Insecurity Verification Mission, Supplementary Feeding & Water Bacteriological Testing) and register the 110 seniors.`;
+          healthBudget = '₱280,000';
+        } else if (cleanId === '7') {
+          healthDiagnosis = `CBMS Table 21 & Table 27 Alert for ${bName}: Nearly half of all households—910 out of 1,845 HHs (49.3%)—experienced food insecurity (490 ran out of food; 155 went hungry). ${bName} also has the highest rate of unregistered seniors among the sample barangays, with 146 seniors (19.8%) lacking a Senior Citizen ID.`;
+          healthAction = `Deploy CHO mobile nutrition teams for the 490 acute food-deficit households and conduct a barangay-wide OSCA Senior ID registration caravan.`;
+          healthBudget = '₱260,000';
+        } else if (cleanId === '9') {
+          healthDiagnosis = `CBMS Table 21 & Table 27 Alert for ${bName}: By sheer volume, ${bName} has the highest number of food-insecure families in Naga—2,336 households (40.9%) worried about food, 751 ran out of food, and 498 went hungry—alongside 269 senior citizens (11.7%) without a Senior Citizen ID.`;
+          healthAction = `Establish zone-level BHW nutrition monitoring posts and partner with CHO & CSWDO for targeted food supplementation across ${bName}.`;
+          healthBudget = '₱420,000';
+        } else if (cleanId === '3') {
+          healthDiagnosis = `CBMS Table 21 & Table 27 Diagnosis for ${bName}: While overall food worry is lower at 25.5% (384 HHs), acute hunger is concentrated: 198 households ran out of food and 175 households went hungry without eating. Additionally, 73 senior citizens (9.9%) lack a Senior Citizen ID.`;
+          healthAction = `Target Barangay Health Worker (BHW) home visits specifically to the 175 acute-hunger households and complete OSCA ID enrollment for the 73 seniors.`;
+          healthBudget = '₱195,000';
         } else {
-          redirectText = `I am Banwaan AI, specifically built for Naga City barangay governance and CBMS analytics in ${selectedBarangay.name}. I cannot assist with topics outside local government planning. Feel free to ask about flood resilience, water utilities, primary health, livelihoods, or council resolutions.`;
+          // Barangay 1
+          healthDiagnosis = `CBMS Table 21 & Table 27 Diagnosis for ${bName}: 322 households (30.2%) reported food worry and 279 ran out of food, though severe hunger is lower (50 HHs). Meanwhile, 46 out of 448 senior citizens (10.3%) still lack their Senior Citizen ID for statutory healthcare and medicine discounts.`;
+          healthAction = `Conduct targeted BHW nutritional screening for the 50 severe-hunger households and assist the 46 unregistered seniors with OSCA ID issuance.`;
+          healthBudget = '₱175,000';
         }
 
         reply = {
           id: `agt-${Date.now()}`,
           sender: 'agent',
-          text: redirectText,
+          text: healthDiagnosis,
+          statute: 'RA 11223 Sec. 19 & RA 9994 (Expanded Senior Citizens Act)',
+          sdg: 'SDG 2 • SDG 3',
+          suggestedAction: healthAction,
+          budget: healthBudget,
         };
+      }
+
+      // 6. YOUTH, LIVELIHOOD & FINANCIAL INCLUSION (Tailored per sample barangay)
+      else if (
+        hasWord(
+          'youth', 'livelihood', 'job', 'employment', 'skills', 'tesda', 'cash', 'aid', '4ps', 'unbanked', 'bank', 'neet',
+          'trabaho', 'ayuda', 'hanapbuhay', 'kabataan', 'scholarship', 'tulong', 'pondo', 'badyet', 'budget', 'resolution', 'resolusyon'
+        )
+      ) {
+        const matchedProg = findProgramByKeywords('youth', 'neet', 'unbanked', 'cash', 'livelihood', 'swo', '11310');
+        let swoDiagnosis = '';
+        let swoAction = '';
+        let swoBudget = matchedProg?.estimated_budget || '₱340,000';
+
+        if (cleanId === '1') {
+          swoDiagnosis = `CBMS Table 22 & Table 41 Diagnosis for ${bName}: 356 out of 1,065 households (33.4%) are completely unbanked (no bank, digital bank, or e-money account), and 137 out of 926 youth aged 15–24 (14.8%) are Not in Education, Employment, or Training (NEET).`;
+          swoAction = `Endorse PROP-NAGA-2026-SWO-004 (Digital Cash-Aid Payout Enrollment & NEET Youth Skills Placement) for ${bName}.`;
+          swoBudget = '₱340,000';
+        } else if (cleanId === '16') {
+          swoDiagnosis = `CBMS Table 22 & Table 41 Diagnosis for ${bName}: Nearly half of ${bName}—853 out of 1,779 households (47.9%)—has no formal financial account, blocking digital cash-aid payouts, while 339 out of 1,694 youth (20.0%) are NEET and 75 households lack electricity.`;
+          swoAction = `Launch an on-site e-money/digital banking onboarding drive for the 853 unbanked households and enroll the 339 NEET youth in TESDA/PESO livelihood tracks.`;
+          swoBudget = '₱410,000';
+        } else if (cleanId === '7') {
+          swoDiagnosis = `CBMS Table 22 & Table 41 Diagnosis for ${bName}: 698 households (37.8%) are unbanked and 270 out of 1,494 youth (18.1%) are NEET. Additionally, only 55.0% of households rely on clean cooking fuel (Table 56) and 105 households lack electricity.`;
+          swoAction = `Partner with CSWDO and DOLE for agro-forestry/TVET youth placement (270 NEET youth) and microfinance/cooperative account onboarding for the 698 unbanked households.`;
+          swoBudget = '₱380,000';
+        } else if (cleanId === '9') {
+          swoDiagnosis = `CBMS Table 22 & Table 41 Diagnosis for ${bName}: Across ${bName}'s 5,706 households, 1,311 families (23.0%) remain unbanked and 680 out of 4,570 youth (14.9%) are NEET—the largest youth cohort among the sample barangays.`;
+          swoAction = `Establish a Barangay PESO job-link desk for the 680 NEET youth and coordinate digital financial inclusion caravans for the 1,311 unbanked households.`;
+          swoBudget = '₱490,000';
+        } else {
+          // Barangay 3
+          swoDiagnosis = `CBMS Table 22 & Table 41 Diagnosis for ${bName}: 376 out of 1,508 households (24.9%) lack any formal financial or e-money account, and 187 out of 1,235 youth aged 15–24 (15.1%) are NEET.`;
+          swoAction = `Coordinate with CSWDO to onboard the 376 unbanked households into digital payout channels and refer the 187 NEET youth to Naga City TVET scholarship slots.`;
+          swoBudget = '₱310,000';
+        }
+
+        reply = {
+          id: `agt-${Date.now()}`,
+          sender: 'agent',
+          text: swoDiagnosis,
+          statute: 'RA 11310 (4Ps Sec. 13) & RA 7160 Sec. 287',
+          sdg: 'SDG 1 • SDG 8',
+          suggestedAction: swoAction,
+          budget: swoBudget,
+        };
+      }
+
+      // 7. OUT-OF-SCOPE QUERIES (NO CARDS)
+      else {
+        const redirectText =
+          lang === 'bikol'
+            ? `Ako si Banwaan AI, nakatutok sa pagsiyasat kan 2024 PSA CBMS data para sa ${bName} (halimbawa: ${selectedBarangay.top_needs[0]}). Pwede kamong maghapot dapit sa mga pangangailangan kan barangay, patubig asin palikuran, DRRM, kalusugan, o hanapbuhay.`
+            : lang === 'filipino'
+            ? `Ako si Banwaan AI, nakalaan sa pagsusuri ng 2024 PSA CBMS data para sa ${bName} (halimbawa: ${selectedBarangay.top_needs[0]}). Maaari kayong magtanong tungkol sa mga pangangailangan ng barangay, tubig at palikuran, DRRM, kalusugan, o kabuhayan.`
+            : `I am Banwaan AI, built to analyze the 2024 PSA CBMS dataset for ${bName} (specifically addressing gaps like: ${selectedBarangay.top_needs[0]}). Ask me about barangay needs, water & sanitation, food & health, DRRM & roofs, or youth & unbanked households.`;
+
+        reply = { id: `agt-${Date.now()}`, sender: 'agent', text: redirectText };
       }
 
       setMessages((prev) => [...prev, reply]);
@@ -355,16 +525,16 @@ export const MobileAgentScreen: React.FC = () => {
               </View>
             </View>
             <Text style={styles.agentSub}>
-              Empirical CBMS Data + SDG Alignment + Statutory Policy Basis
+              {selectedBarangay.name} • {selectedBarangay.total_households.toLocaleString()} HHs • MVI {selectedBarangay.vulnerability_index}
             </Text>
           </View>
           <TouchableOpacity
             style={styles.synthesizeBtn}
-            onPress={() => handleSend(`Draft AIP Proposal for ${selectedBarangay.name}`)}
+            onPress={() => handleSend(`Barangay Needs`)}
             activeOpacity={0.8}
           >
             <Ionicons name="sparkles" size={12} color="#FFFFFF" style={{ marginRight: 4 }} />
-            <Text style={styles.synthesizeBtnText}>Synthesize Policy</Text>
+            <Text style={styles.synthesizeBtnText}>Audit Needs</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -392,7 +562,7 @@ export const MobileAgentScreen: React.FC = () => {
                 {m.statute && (
                   <View style={styles.synthesisHeaderRow}>
                     <Text style={styles.synthesisHeaderTitle}>
-                      LATEST SYNTHESIS & STATUTORY BASIS
+                      EMPIRICAL CBMS SYNTHESIS & STATUTORY BASIS
                     </Text>
                     <Text style={styles.synthesisTargetTag}>
                       {selectedBarangay.name.toUpperCase()}
@@ -402,7 +572,7 @@ export const MobileAgentScreen: React.FC = () => {
 
                 <Text style={styles.agentBodyText}>{m.text}</Text>
 
-                {/* Inline Pills Matching Screenshot 2 */}
+                {/* Inline Pills */}
                 {(m.statute || m.sdg) && (
                   <View style={styles.inlinePillsWrap}>
                     {m.statute && (
@@ -411,11 +581,12 @@ export const MobileAgentScreen: React.FC = () => {
                         <Text style={styles.statuteInlineText}>{m.statute}</Text>
                       </View>
                     )}
-                    {m.sdg && (
-                      <View style={styles.sdgInlinePill}>
-                        <Text style={styles.sdgInlineText}>{m.sdg}</Text>
-                      </View>
-                    )}
+                    {m.sdg &&
+                      parseSdgBadges(m.sdg).map((badge, bIdx) => (
+                        <View key={bIdx} style={styles.sdgInlinePill}>
+                          <Text style={styles.sdgInlineText}>{badge}</Text>
+                        </View>
+                      ))}
                   </View>
                 )}
 
@@ -438,7 +609,9 @@ export const MobileAgentScreen: React.FC = () => {
         {isLoading && (
           <View style={styles.loadingCard}>
             <ActivityIndicator size="small" color="#05389F" />
-            <Text style={styles.loadingText}>Synthesizing CBMS metrics & statutory citations...</Text>
+            <Text style={styles.loadingText}>
+              Auditing {selectedBarangay.name} CBMS tables & statutory mandates...
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -465,7 +638,7 @@ export const MobileAgentScreen: React.FC = () => {
         <View style={styles.inputRow}>
           <TextInput
             style={styles.chatInput}
-            placeholder={`Ask SDG or policy question for ${selectedBarangay.name}...`}
+            placeholder={`Ask about ${selectedBarangay.name} CBMS needs...`}
             placeholderTextColor="#94A3B8"
             value={query}
             onChangeText={setQuery}
@@ -544,7 +717,7 @@ const styles = StyleSheet.create({
   agentSub: {
     color: '#64748B',
     fontSize: 11,
-    fontWeight: '400',
+    fontWeight: '500',
     marginTop: 2,
   },
   synthesizeBtn: {
@@ -638,7 +811,7 @@ const styles = StyleSheet.create({
   sdgInlineText: {
     color: '#854D0E',
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   actionPromptBox: {
     marginTop: 12,

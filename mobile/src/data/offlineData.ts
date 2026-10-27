@@ -14,6 +14,7 @@ export interface OfflineBarangay {
     statute: string;
     sdg: string;
     estimated_budget: string;
+    description: string;
   }[];
   emergency_hotlines: {
     service: string;
@@ -54,14 +55,16 @@ export const SAMPLE_BARANGAYS_OFFLINE: OfflineBarangay[] = [
         program: "GCash/Maya Cash-Aid Distribution Integration",
         statute: "RA 11310 (4Ps Act)",
         sdg: "SDG 1 No Poverty",
-        estimated_budget: "₱150,000"
+        estimated_budget: "₱150,000",
+        description: "Enrolls households without accounts into GCash, Maya or bank accounts so cash aid can be paid digitally, with barangay hall payout kept as a fallback where signal or accounts are lacking."
       },
       {
         office: "DRRMO",
         program: "BDRRMC Early Warning Channel Upgrades",
         statute: "RA 10121 Sec 12",
         sdg: "SDG 11 Sustainable Cities",
-        estimated_budget: "₱220,000"
+        estimated_budget: "₱220,000",
+        description: "Upgrades the barangay's warning channels, such as SMS, social media, loudspeakers and house-to-house relay, so alerts in Filipino and Bikol reach households before a typhoon or flood."
       }
     ],
     emergency_hotlines: NAGA_EMERGENCY_HOTLINES
@@ -79,14 +82,16 @@ export const SAMPLE_BARANGAYS_OFFLINE: OfflineBarangay[] = [
         program: "Comprehensive BDRRMP Workshop & 24/7 Hotline Installation",
         statute: "RA 10121 Sec 12(c)(6)",
         sdg: "SDG 11 & SDG 13",
-        estimated_budget: "₱185,000"
+        estimated_budget: "₱185,000",
+        description: "Helps the barangay council draft and adopt a written BDRRM plan with the DRRMO, and sets up a 24/7 emergency hotline so residents and responders have one clear contact."
       },
       {
         office: "CEO",
         program: "Light Roofing Disaster Mitigation Subsidy",
         statute: "PD 1096 National Building Code",
         sdg: "SDG 11 Sustainable Cities",
-        estimated_budget: "₱450,000"
+        estimated_budget: "₱450,000",
+        description: "Provides materials support to strengthen light or makeshift roofing on the most exposed homes, reducing wind damage and the number of families who must evacuate."
       }
     ],
     emergency_hotlines: NAGA_EMERGENCY_HOTLINES
@@ -104,14 +109,16 @@ export const SAMPLE_BARANGAYS_OFFLINE: OfflineBarangay[] = [
         program: "Targeted Nutrition Intervention & Water Quality Testing",
         statute: "RA 11223 UHC Act",
         sdg: "SDG 2 Zero Hunger & SDG 3",
-        estimated_budget: "₱380,000"
+        estimated_budget: "₱380,000",
+        description: "Verifies the barangay's food-insecurity readings through household checks first, then provides targeted nutrition support and bacteriological water testing for affected areas."
       },
       {
         office: "CEO",
         program: "Communal Piped Water Mains Expansion",
         statute: "RA 7160 Sec 17",
         sdg: "SDG 6 Clean Water & Sanitation",
-        estimated_budget: "₱1,200,000"
+        estimated_budget: "₱1,200,000",
+        description: "Extends communal piped water lines to households that depend on refilling stations or unsafe sources, lowering water costs and health risk."
       }
     ],
     emergency_hotlines: NAGA_EMERGENCY_HOTLINES
@@ -129,14 +136,16 @@ export const SAMPLE_BARANGAYS_OFFLINE: OfflineBarangay[] = [
         program: "Typhoon Shelter & Light Roof Reinforcement Grant",
         statute: "RA 10121 Sec 21",
         sdg: "SDG 11 & SDG 13",
-        estimated_budget: "₱420,000"
+        estimated_budget: "₱420,000",
+        description: "Reinforces light roofs on identified homes and prepares the barangay shelter so families have a safer place to stay during typhoons."
       },
       {
         office: "CEO",
         program: "Sanitary Bio-Digester Toilet Units",
         statute: "RA 7160 Sec 17",
         sdg: "SDG 6 Clean Water & Sanitation",
-        estimated_budget: "₱680,000"
+        estimated_budget: "₱680,000",
+        description: "Installs bio-digester toilet units in areas without safe sanitation, reducing open defecation and contamination of water sources."
       }
     ],
     emergency_hotlines: NAGA_EMERGENCY_HOTLINES
@@ -154,14 +163,16 @@ export const SAMPLE_BARANGAYS_OFFLINE: OfflineBarangay[] = [
         program: "Digital Financial Inclusion & TESDA Youth Training",
         statute: "RA 11310 Sec 13",
         sdg: "SDG 1 No Poverty & SDG 8",
-        estimated_budget: "₱540,000"
+        estimated_budget: "₱540,000",
+        description: "Brings households into digital payment channels and links out-of-school and NEET youth to TESDA skills training for jobs."
       },
       {
         office: "CEO",
         program: "Cluster Materials Recovery Facility (MRF)",
         statute: "RA 9003 Sec 32",
         sdg: "SDG 11 & SDG 12",
-        estimated_budget: "₱750,000"
+        estimated_budget: "₱750,000",
+        description: "Builds a cluster Materials Recovery Facility to sort and process the barangay's waste, reducing uncollected garbage."
       }
     ],
     emergency_hotlines: NAGA_EMERGENCY_HOTLINES
