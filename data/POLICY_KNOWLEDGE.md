@@ -56,3 +56,42 @@ GROQ_MODEL=llama-3.3-70b-versatile
 - **WASH & Water Security Rule**: Any barangay with commercial water refilling station dependence > 60% or unimproved sanitation > 10% must be prioritized for MNWD Level III piped reticulation and bio-digester communal/household toilet blocks (SDG 6.1 & 6.2).
 - **Food Security & Nutrition Rule**: Flagged food-insecurity outliers (such as Mabolo with 1,459 food-insecure households) require joint CHO-CSWDO verification missions and supplemental feeding under RA 11223 Sec. 19 (SDG 2.1).
 - **Climate & Typhoon Resilience Rule**: Barangays lacking a written BDRRMP or having > 8% weak/salvaged roof structures must receive LDRRMF shelter retrofitting and Bikol-language SMS early warning coverage under RA 10121 (SDG 11.5 & 13.1).
+
+---
+
+## 5. Data Science, Privacy Knowledge & AI Innovation Framework
+
+### A. The Core Innovation
+Project Banwaan is an applied **Data Science & AI Governance Platform** for Naga City. It ingests official **Philippine Statistics Authority (PSA) Community-Based Monitoring System (CBMS)** multi-dimensional datasets and interprets them into clear, evidence-based recommendations so city planners, department heads, barangay captains, and citizens can allocate and track public funds (specifically the **20% Local Development Fund** under RA 7160 Sec. 287) with maximum accountability and measurable impact.
+
+### B. Privacy-Preserving Architecture & Anonymization
+To balance total transparency with statutory data protection, the AI system adheres strictly to:
+1. **Republic Act No. 10173 (Data Privacy Act of 2012)**:
+   - Zero disclosure of Personal Identifiable Information (PII), respondent household names, phone numbers, or micro-level residential addresses.
+   - All models operate strictly on **anonymized, aggregated distributions** derived from `Anonymized-Data_Team-Synapse.xlsx` and `Banwaan_Full_Dataset_Map_And_AI.csv`.
+2. **Republic Act No. 11315 (CBMS Act) Section 10 (Confidentiality of Information)**:
+   - Mandatory confidentiality safeguards ensuring that raw household responses collected during CBMS enumerations are used exclusively for aggregate statistical tabulation and socio-economic profiling.
+3. **Micro-Cell Spatial Suppression**:
+   - For all public citizen portals and transparency scorecards, any demographic cell representing fewer than 5 households (`n < 5`) is automatically suppressed to prevent re-identification through demographic deduction.
+4. **Differential-Privacy Statistical Feature Vectors**:
+   - When communicating with the Groq LLM (`llama-3.3-70b-versatile`), only high-level percentage vectors, master vulnerability indices, and departmental role subsets are passed into the context window.
+
+### C. Automated Departmental Trigger Thresholds
+The AI engine automatically classifies which municipal office is primarily responsible for the flagged crisis:
+- **City Social Welfare and Development Office (SWO)**:
+  - *Trigger*: Master Vulnerability Index (`MVI > 70.0`) OR 4Ps dependency (`> 50.0%`).
+  - *Focus*: Food insecurity alleviation, digital financial onboarding for unbanked households, and NEET youth employment placement.
+- **Disaster Risk Reduction and Management Office (DRRMO)**:
+  - *Trigger*: Vulnerable roof / outer wall material percentage (`> 40.0%`).
+  - *Focus*: Emergency shelter retrofitting, 24/7 localized early warning hotlines, and BDRRM plan completion.
+- **City Planning and Development Office (CPDO)**:
+  - *Trigger*: General composite infrastructure and development backlog.
+  - *Focus*: 20% Local Development Fund (LDF) allocation, Level III potable water reticulation, and CLUP zoning synchronization.
+
+### D. Strict 4-Part Output Structure
+When synthesizing policy for any of the 27 barangays, the AI engine enforces the following structure:
+1. **`### 1. Overview`**: Concise empirical summary of the barangay's current situation based on CBMS metrics (strictly maximum 150 words).
+2. **`### 2. Policy`**: Exactly 5 distinct, actionable policies, programs, or local ordinances (numbered 1 to 5) citing specific Republic Acts and sections.
+3. **`### 3. SDG Alignment`**: Detail at least 3 UN Sustainable Development Goals (e.g., SDG 1, SDG 6, SDG 11) with localized explanations.
+4. **`### 4. Impact`**: Expected changes in indicators, estimated cost and budget source (20% LDF or LDRRMF), and targeted improvement for the barangay.
+

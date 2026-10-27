@@ -30,7 +30,8 @@ SDG_DATA_PATH = os.path.join(DATA_DIR, "sdg_dataset.json")
 LEGAL_DATA_PATH = os.path.join(DATA_DIR, "legal_corpus.json")
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_GROQ_MODEL = "qwen/qwen3.8-27b"
+FALLBACK_GROQ_MODELS = ["qwen/qwen3.8-27b", "openai/gpt-oss-20b", "openai/gpt-oss-120b", "llama-3.3-70b-versatile"]
 
 
 def load_text_file(filepath: str) -> str:
@@ -47,37 +48,144 @@ def load_json_file(filepath: str) -> Dict[str, Any]:
     return {}
 
 
+def safe_parse_budget(val: Any, default: float = 450000.0) -> float:
+    if val is None:
+        return default
+    if isinstance(val, (int, float)):
+        return float(val)
+    if isinstance(val, str):
+        cleaned = re.sub(r"[^\d.]", "", val)
+        try:
+            return float(cleaned)
+        except Exception:
+            return default
+    return default
+
+
+def safe_parse_confidence(val: Any, default: float = 0.96) -> float:
+    if val is None:
+        return default
+    if isinstance(val, (int, float)):
+        return float(val)
+    if isinstance(val, str):
+        cleaned = re.sub(r"[^\d.]", "", val)
+        try:
+            score = float(cleaned)
+            return score if score <= 1.0 else score / 100.0
+        except Exception:
+            return default
+    return default
+
+
+def extract_json_from_llm(content_str: str) -> Dict[str, Any]:
+    text = (content_str or "").strip()
+    if "```" in text:
+        match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text, flags=re.IGNORECASE)
+        if match:
+            text = match.group(1).strip()
+    try:
+        return json.loads(text)
+    except Exception:
+        match = re.search(r"(\{[\s\S]*\})", text)
+        if match:
+            return json.loads(match.group(1))
+        raise
+
+
 def resolve_groq_credentials() -> Tuple[Optional[str], str]:
     """
     Extracts GROQ_API_KEY and GROQ_MODEL from:
       1. Environment variable `GROQ_API_KEY`
-      2. `GROQ_API_KEY.md` in project root
-      3. `data/POLICY_KNOWLEDGE.md`
+      2. Root `.env` or `web/.env.local`
+      3. `GROQ_API_KEY.md` in project root
+      4. `data/POLICY_KNOWLEDGE.md`
     Supports either `GROQ_API_KEY=gsk_...` or pasting a raw `gsk_...` token anywhere in the file.
     """
     env_key = os.environ.get("GROQ_API_KEY", "").strip()
     env_model = os.environ.get("GROQ_MODEL", "").strip()
 
-    combined_md = "\n".join([
+    dot_env_path = os.path.join(ROOT_DIR, ".env")
+    web_env_path = os.path.join(ROOT_DIR, "web", ".env.local")
+
+    combined_sources = "\n".join([
+        load_text_file(dot_env_path),
+        load_text_file(web_env_path),
         load_text_file(GROQ_KEY_MD_PATH),
         load_text_file(POLICY_MD_PATH),
     ])
 
-    # Extract model if specified in markdown
+    # Extract model if specified
     model = env_model or DEFAULT_GROQ_MODEL
-    model_match = re.search(r"GROQ_MODEL\s*=\s*([A-Za-z0-9._-]+)", combined_md)
+    model_match = re.search(r"GROQ_MODEL\s*=\s*([A-Za-z0-9._/-]+)", combined_sources)
     if model_match and not env_model:
         model = model_match.group(1).strip()
 
     if env_key and env_key.startswith("gsk_"):
         return env_key, model
 
-    # Look for explicit GROQ_API_KEY=gsk_... or any raw gsk_... key in the markdown files
-    key_match = re.search(r"(gsk_[A-Za-z0-9_-]{20,})", combined_md)
+    # Look for explicit GROQ_API_KEY=gsk_... or any raw gsk_... key in the source files
+    key_match = re.search(r"(gsk_[A-Za-z0-9_-]{20,})", combined_sources)
     if key_match:
         return key_match.group(1).strip(), model
 
     return None, model
+
+
+def verify_groq_key(api_key: str) -> Tuple[bool, str]:
+    """
+    Validates a Groq API Key against the official Groq Models API endpoint.
+    """
+    clean_key = (api_key or "").strip()
+    if not clean_key or not clean_key.startswith("gsk_"):
+        return False, "Groq API key must begin with 'gsk_'"
+
+    req = urllib.request.Request(
+        "https://api.groq.com/openai/v1/models",
+        headers={
+            "Authorization": f"Bearer {clean_key}",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ProjectBanwaan/2.6",
+        },
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            if resp.status == 200:
+                return True, "Key is valid and active"
+            return False, f"Groq returned HTTP status {resp.status}"
+    except urllib.error.HTTPError as e:
+        err_msg = e.read().decode("utf-8", errors="ignore")
+        return False, f"Groq authorization failed ({e.code}): {err_msg[:120]}"
+    except Exception as e:
+        return False, f"Connection error: {str(e)}"
+
+
+def save_groq_key(api_key: str, model: str = DEFAULT_GROQ_MODEL) -> bool:
+    """
+    Saves the key to `GROQ_API_KEY.md` and applies to the current OS process environment.
+    """
+    clean_key = api_key.strip()
+    clean_model = model.strip() or DEFAULT_GROQ_MODEL
+    os.environ["GROQ_API_KEY"] = clean_key
+    os.environ["GROQ_MODEL"] = clean_model
+    content = f"""# Groq API Configuration — Project Banwaan
+
+Paste your Groq API Key below (starts with `gsk_...`).
+The Python backend (`server/groq_policy_agent.py`) automatically reads this file on every query—no server restart required.
+
+```env
+GROQ_API_KEY={clean_key}
+GROQ_MODEL={clean_model}
+```
+
+> **Note:** This file (`GROQ_API_KEY.md`) is listed in `.gitignore` so your secret key will never be leaked when pushing to GitHub.
+> For the AI's SDG & Statutory Policy Knowledge Base (which IS tracked in GitHub), see [`data/POLICY_KNOWLEDGE.md`](data/POLICY_KNOWLEDGE.md).
+"""
+    try:
+        with open(GROQ_KEY_MD_PATH, "w", encoding="utf-8") as f:
+            f.write(content)
+        return True
+    except Exception:
+        return False
 
 
 def query_chroma_legal_kb(query: str, limit: int = 4) -> str:
@@ -259,80 +367,93 @@ Respond ONLY with a valid JSON object matching this exact schema:
   }}
 }}"""
 
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_query},
-        ],
-        "temperature": 0.25,
-        "max_tokens": 900,
-        "response_format": {"type": "json_object"},
+    # Candidate model queue (gracefully tries requested model first, then auto-fallbacks)
+    models_to_try = [model] + [m for m in FALLBACK_GROQ_MODELS if m != model]
+    last_error = ""
+
+    for target_model in models_to_try:
+        payload = {
+            "model": target_model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_query},
+            ],
+            "temperature": 0.25,
+            "max_tokens": 2048,
+            "response_format": {"type": "json_object"},
+        }
+
+        req = urllib.request.Request(
+            GROQ_API_URL,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ProjectBanwaan/2.6",
+            },
+            method="POST",
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                resp_body = json.loads(resp.read().decode("utf-8"))
+                content_str = (
+                    resp_body.get("choices", [{}])[0]
+                    .get("message", {})
+                    .get("content", "{}")
+                )
+                parsed = extract_json_from_llm(content_str)
+
+                draft_raw = parsed.get("proposal_draft", {})
+                statutory = parsed.get("statutory_basis") or fallback_proposal["statutory_basis"]
+                sdgs = parsed.get("sdgs") or fallback_proposal["sdgs"]
+                actions = parsed.get("suggested_actions") or fallback_proposal["suggested_actions"]
+
+                merged_proposal = {
+                    **fallback_proposal,
+                    "title": draft_raw.get("project_title") or fallback_proposal["title"],
+                    "project_title": draft_raw.get("project_title") or fallback_proposal["title"],
+                    "office": (draft_raw.get("office") or domain).upper(),
+                    "barangay": draft_raw.get("barangay") or barangay_display_name,
+                    "problem_statement": draft_raw.get("problem_statement") or fallback_proposal["problem_statement"],
+                    "statutory_basis": statutory,
+                    "sdgs": sdgs,
+                    "suggested_actions": actions,
+                    "estimated_budget_php": safe_parse_budget(
+                        draft_raw.get("estimated_budget_php"),
+                        fallback_proposal["estimated_budget_php"]
+                    ),
+                    "confidence_score": safe_parse_confidence(
+                        draft_raw.get("confidence_score"),
+                        0.96
+                    ),
+                    "created_by": f"Groq Policy Agent ({target_model})",
+                }
+
+                return {
+                    "groq_active": True,
+                    "model": f"groq/{target_model}",
+                    "response_text": parsed.get("response_text") or fallback_proposal["problem_statement"],
+                    "statutory_basis": statutory,
+                    "sdgs": sdgs,
+                    "suggested_actions": actions,
+                    "proposal_draft": merged_proposal,
+                }
+        except urllib.error.HTTPError as e:
+            err_text = e.read().decode("utf-8", errors="ignore")
+            last_error = f"Groq HTTP {e.code} on {target_model}: {err_text[:180]}"
+            # If model not found (404) or rate limited (429), try next model in queue
+            if e.code in (404, 429, 400):
+                continue
+            break
+        except Exception as e:
+            last_error = f"Groq connection error: {str(e)}"
+            break
+
+    return {
+        "groq_active": False,
+        "reason": last_error or "Groq failed to return a response.",
     }
-
-    req = urllib.request.Request(
-        GROQ_API_URL,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": "ProjectBanwaan-PolicyEngine/2.6",
-        },
-        method="POST",
-    )
-
-    try:
-        with urllib.request.urlopen(req, timeout=18) as resp:
-            resp_body = json.loads(resp.read().decode("utf-8"))
-            content_str = (
-                resp_body.get("choices", [{}])[0]
-                .get("message", {})
-                .get("content", "{}")
-            )
-            parsed = json.loads(content_str)
-
-            draft_raw = parsed.get("proposal_draft", {})
-            statutory = parsed.get("statutory_basis") or fallback_proposal["statutory_basis"]
-            sdgs = parsed.get("sdgs") or fallback_proposal["sdgs"]
-            actions = parsed.get("suggested_actions") or fallback_proposal["suggested_actions"]
-
-            merged_proposal = {
-                **fallback_proposal,
-                "title": draft_raw.get("project_title") or fallback_proposal["title"],
-                "project_title": draft_raw.get("project_title") or fallback_proposal["title"],
-                "office": (draft_raw.get("office") or domain).upper(),
-                "barangay": draft_raw.get("barangay") or barangay_display_name,
-                "problem_statement": draft_raw.get("problem_statement") or fallback_proposal["problem_statement"],
-                "statutory_basis": statutory,
-                "sdgs": sdgs,
-                "suggested_actions": actions,
-                "estimated_budget_php": float(
-                    draft_raw.get("estimated_budget_php") or fallback_proposal["estimated_budget_php"]
-                ),
-                "confidence_score": float(draft_raw.get("confidence_score") or 0.96),
-                "created_by": f"Groq Policy Agent ({model})",
-            }
-
-            return {
-                "groq_active": True,
-                "model": f"groq/{model}",
-                "response_text": parsed.get("response_text") or fallback_proposal["problem_statement"],
-                "statutory_basis": statutory,
-                "sdgs": sdgs,
-                "suggested_actions": actions,
-                "proposal_draft": merged_proposal,
-            }
-    except urllib.error.HTTPError as e:
-        err_text = e.read().decode("utf-8", errors="ignore")
-        return {
-            "groq_active": False,
-            "reason": f"Groq HTTP {e.code}: {err_text[:200]}",
-        }
-    except Exception as e:
-        return {
-            "groq_active": False,
-            "reason": f"Groq connection error: {str(e)}",
-        }
 
 
 if __name__ == "__main__":

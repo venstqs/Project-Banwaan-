@@ -4,6 +4,8 @@ import {
   FIELD_REPORT_ENDPOINT,
   FIELD_REPORTS_LIST_ENDPOINT,
   PROPOSALS_ENDPOINT,
+  PROPOSAL_REVIEW_ENDPOINT,
+  FIELD_REPORT_VERIFY_ENDPOINT,
 } from '../config/api';
 
 export type MobileRole = 'barangay_captain' | 'citizen';
@@ -62,6 +64,8 @@ interface OfflineContextType {
     sdgs: string[];
     budget: number;
   }) => Promise<void>;
+  verifyProposal: (propId: string, action?: 'approve' | 'reject' | 'fund') => Promise<void>;
+  verifyReport: (reportId: string) => Promise<void>;
   refreshLiveSync: () => Promise<void>;
   selectedBarangay: OfflineBarangay;
   setSelectedBarangayId: (id: number) => void;
@@ -381,6 +385,52 @@ export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const verifyProposal = async (propId: string, action: 'approve' | 'reject' | 'fund' = 'approve') => {
+    setProposals((prev) =>
+      prev.map((p) =>
+        p.id === propId
+          ? { ...p, status: action === 'approve' ? 'APPROVED' : action === 'fund' ? 'FUNDED' : 'REJECTED' }
+          : p
+      )
+    );
+
+    if (isOnline) {
+      try {
+        await fetch(
+          `${PROPOSAL_REVIEW_ENDPOINT(propId)}?role=${mobileRole === 'barangay_captain' ? 'punong_barangay' : 'super_admin'}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action,
+              reviewer_comments: `Verified & approved via Project Banwaan Mobile App by ${mobileRole === 'barangay_captain' ? 'Punong Barangay' : 'LGU Desk'}.`,
+            }),
+          }
+        );
+        await refreshLiveSync();
+      } catch {
+        // Optimistic local update retained
+      }
+    }
+  };
+
+  const verifyReport = async (reportId: string) => {
+    setQueuedReports((prev) =>
+      prev.map((r) => (r.id === reportId ? { ...r, isSynced: true } : r))
+    );
+
+    if (isOnline) {
+      try {
+        await fetch(FIELD_REPORT_VERIFY_ENDPOINT(reportId), {
+          method: 'POST',
+        });
+        await refreshLiveSync();
+      } catch {
+        // Fallback
+      }
+    }
+  };
+
   const syncOutbox = async () => {
     if (!isOnline) return 0;
     let syncedCount = 0;
@@ -434,6 +484,8 @@ export const OfflineProvider: React.FC<{ children: React.ReactNode }> = ({ child
         syncOutbox,
         proposals,
         endorseOrQueueProposal,
+        verifyProposal,
+        verifyReport,
         refreshLiveSync,
         selectedBarangay,
         setSelectedBarangayId,

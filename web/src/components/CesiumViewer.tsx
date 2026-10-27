@@ -223,7 +223,6 @@ export default function CesiumViewer({
   const [isTelemetryMinimized, setIsTelemetryMinimized] = useState<boolean>(false);
   const [isLayersMinimized, setIsLayersMinimized] = useState<boolean>(true);
   const [isCameraControlsMinimized, setIsCameraControlsMinimized] = useState<boolean>(false);
-  const [isTwinMinimized, setIsTwinMinimized] = useState<boolean>(false);
 
   // 2D GeoJSON Layer Toggles (Defaulting to clean 2D Administrative Map on Esri World Imagery)
   const [showBarangayZones, setShowBarangayZones] = useState<boolean>(true);
@@ -578,10 +577,10 @@ export default function CesiumViewer({
           ? "#ffffff"
           : "#64748b";
 
-        const labelLng = p.center[0];
-        const labelLat = p.center[1];
+        const labelLng = p.center ? p.center[0] : 123.185;
+        const labelLat = p.center ? p.center[1] : 13.621;
 
-        viewer.entities.add({
+        const entityConfig: any = {
           name: realName,
           barangayId: p.id,
           featureSubtitle: `${catMeta.name} • ${p.households.toLocaleString()} Households`,
@@ -595,7 +594,42 @@ export default function CesiumViewer({
             width: isSelected ? 3.5 : matchesCategory ? 1.8 : 1.0,
             material: Cesium.Color.fromCssColorString(outlineColor).withAlpha(matchesCategory ? 0.95 : 0.35)
           }
-        });
+        };
+
+        // Clean, subtle cartographic label (pure FILL, no noisy outlines or heavy blocks)
+        if (showBarangayLabels && matchesCategory) {
+          const shortName =
+            realName === "Bagumbayan Norte" ? "Bagumbayan N."
+            : realName === "Bagumbayan Sur" ? "Bagumbayan S."
+            : realName === "Concepcion Pequeña" ? "Concepcion Peq."
+            : realName === "Concepcion Grande" ? "Concepcion Grd."
+            : realName === "Igualdad Interior" ? "Igualdad"
+            : realName === "Santa Cruz" ? "Sta. Cruz"
+            : realName;
+
+          entityConfig.label = {
+            text: isSelected ? `★ ${realName.toUpperCase()}` : shortName,
+            font: isSelected
+              ? "bold 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+              : "600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            style: Cesium.LabelStyle.FILL,
+            fillColor: isSelected
+              ? Cesium.Color.fromCssColorString("#fde047")
+              : Cesium.Color.WHITE,
+            showBackground: true,
+            backgroundColor: isSelected
+              ? Cesium.Color.fromCssColorString("rgba(5, 56, 159, 0.88)")
+              : Cesium.Color.fromCssColorString("rgba(15, 23, 42, 0.58)"),
+            backgroundPadding: new Cesium.Cartesian2(6, 3),
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            scaleByDistance: new Cesium.NearFarScalar(3000, 1.0, 25000, 0.72),
+            distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 42000)
+          };
+        }
+
+        viewer.entities.add(entityConfig);
       });
     }
 
@@ -877,40 +911,21 @@ export default function CesiumViewer({
             {!isLayersMinimized ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
           </button>
 
-          {/* Minimize / Collapse 2D Satellite Map Viewport */}
+          {/* Reset Map View to City Overview */}
           <button
-            onClick={() => {
-              if (isExpanded) setIsExpanded(false);
-              setIsTwinMinimized(!isTwinMinimized);
-            }}
-            className={`flex items-center space-x-1 px-2.5 py-1 rounded-xl text-[10px] font-bold cursor-pointer transition-all border ${
-              isTwinMinimized
-                ? "bg-amber-100 text-amber-900 border-amber-300"
-                : "bg-white text-slate-700 hover:bg-slate-50 border-slate-200 shadow-2xs"
-            }`}
-            title={isTwinMinimized ? "Restore 2D Map" : "Minimize 2D Map"}
+            onClick={() => flyToPreset("overview")}
+            className="flex items-center space-x-1.5 px-3 py-1 rounded-xl text-[10px] font-bold bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-2xs cursor-pointer transition-all hover:border-[#05389f]/40 active:scale-95"
+            title="Reset 3D Map to Naga City Overview"
           >
-            {isTwinMinimized ? (
-              <>
-                <ChevronDown className="w-3.5 h-3.5" />
-                <span>Restore Map</span>
-              </>
-            ) : (
-              <>
-                <ChevronUp className="w-3.5 h-3.5" />
-                <span>Minimize</span>
-              </>
-            )}
+            <Compass className="w-3.5 h-3.5 text-[#05389f]" />
+            <span>Reset View</span>
           </button>
 
           {/* Expand / Fullscreen Map */}
           <button
-            onClick={() => {
-              if (isTwinMinimized) setIsTwinMinimized(false);
-              setIsExpanded(!isExpanded);
-            }}
-            className="p-1.5 rounded-xl bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-2xs cursor-pointer"
-            title={isExpanded ? "Exit Fullscreen" : "Fullscreen 2D Satellite Map"}
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1.5 rounded-xl bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-2xs cursor-pointer transition-all hover:border-[#05389f]/40 active:scale-95"
+            title={isExpanded ? "Exit Fullscreen" : "Fullscreen 3D Satellite Map"}
           >
             {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
@@ -918,11 +933,11 @@ export default function CesiumViewer({
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          2. MAIN 2D SATELLITE MAP VIEWPORT
+          2. MAIN 3D SATELLITE MAP VIEWPORT
          ───────────────────────────────────────────────────────────── */}
       <div
         className={`relative w-full ${
-          isTwinMinimized ? "h-0 overflow-hidden" : isExpanded ? "flex-1" : "flex-1 min-h-[580px]"
+          isExpanded ? "flex-1" : "flex-1 min-h-[580px]"
         } bg-[#0a1128] overflow-hidden transition-all duration-300`}
       >
         {!isCesiumLoaded && (
@@ -1164,7 +1179,7 @@ export default function CesiumViewer({
       {/* ─────────────────────────────────────────────────────────────
           4. BOTTOM 2D GEOJSON LAYER DOCK (MINIMIZABLE APPLE STYLE)
          ───────────────────────────────────────────────────────────── */}
-      {!isTwinMinimized && !isLayersMinimized && (
+      {!isLayersMinimized && (
         <div className="px-4 py-2 bg-white border-t border-slate-200/90 flex flex-wrap items-center justify-between gap-2 text-xs z-30 select-none">
           <div className="flex flex-wrap items-center gap-1.5">
             <button
@@ -1179,7 +1194,7 @@ export default function CesiumViewer({
 
             {[
               { label: "27 Brgy Polygons", state: showBarangayZones, toggle: () => setShowBarangayZones(!showBarangayZones) },
-              { label: "Names", state: showBarangayLabels, toggle: () => setShowBarangayLabels(!showBarangayLabels) },
+              { label: "Labels", state: showBarangayLabels, toggle: () => setShowBarangayLabels(!showBarangayLabels) },
               { label: "River & Roads", state: showRiverAndRoads, toggle: () => setShowRiverAndRoads(!showRiverAndRoads) },
               { label: "2D Hex Grid", state: showHexHotspots, toggle: () => setShowHexHotspots(!showHexHotspots) },
               { label: "2D Footprints", state: show3DBuildings, toggle: () => setShow3DBuildings(!show3DBuildings) },

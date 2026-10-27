@@ -30,6 +30,7 @@ export const BarangayCaptainScreen: React.FC = () => {
     submitReport,
     proposals,
     endorseOrQueueProposal,
+    verifyProposal,
   } = useOffline();
 
   const [intelSubTab, setIntelSubTab] = useState<IntelSubTab>('overview');
@@ -627,6 +628,15 @@ export const BarangayCaptainScreen: React.FC = () => {
                         <Text style={styles.progStatute}>
                           ₱{prop.budget.toLocaleString()} • {prop.statute} ({prop.section})
                         </Text>
+                        {prop.status === 'PENDING' && (
+                          <TouchableOpacity
+                            style={styles.verifyActionBtn}
+                            onPress={() => verifyProposal(prop.id, 'approve')}
+                            activeOpacity={0.75}
+                          >
+                            <Text style={styles.verifyActionBtnText}>✓ Verify & Endorse to Mayor</Text>
+                          </TouchableOpacity>
+                        )}
                       </View>
                     );
                   })}
@@ -1730,6 +1740,21 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: '#ffffff',
+  },
+  verifyActionBtn: {
+    marginTop: 8,
+    backgroundColor: '#05389f',
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  verifyActionBtnText: {
+    fontFamily: sfFont,
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#ffffff',
+    letterSpacing: 0.3,
   },
   surgeBtn: {
     backgroundColor: '#fef2f2',

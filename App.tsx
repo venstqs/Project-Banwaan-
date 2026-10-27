@@ -59,7 +59,7 @@ function MainContent() {
         icon: '📋',
       },
       { id: 'safety' as Tab, label: 'Safety', icon: '🚨' },
-      { id: 'agent' as Tab, label: 'AI Copilot', icon: '✨' },
+      { id: 'agent' as Tab, label: 'AI Agent', icon: '✨' },
     ],
     [mobileRole]
   );

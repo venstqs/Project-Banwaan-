@@ -45,9 +45,9 @@ export const MobileAgentScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [endorsedId, setEndorsedId] = useState<string | null>(null);
 
-  const captainInitialText = `Kumusta, Kapitan! I am your Banwaan Statutory Legislative Copilot. Analyzing ${selectedBarangay.displayName} (${selectedBarangay.total_households.toLocaleString()} HHs, ${selectedBarangay.total_population.toLocaleString()} residents, MVI ${selectedBarangay.vulnerability_index}). I can draft Sangguniang Barangay resolutions, justify AIP 2026 allocations under RA 7160 / RA 10121, and align programs with the 17 UN SDGs.`;
+  const captainInitialText = `Kumusta, Kapitan! I am your Banwaan Statutory & SDG Policy AI Agent. Analyzing ${selectedBarangay.displayName} (${selectedBarangay.total_households.toLocaleString()} HHs, ${selectedBarangay.total_population.toLocaleString()} residents, MVI ${selectedBarangay.vulnerability_index}). Grounded in 2024 PSA CBMS data, RA 7160, RA 10121, and the 17 UN SDGs. I can audit SDG gaps, draft Sangguniang Barangay ordinances, and calculate AIP 2026 20% LDF budgets.`;
 
-  const citizenInitialText = `Kumusta, Kababayan! I am Banwaan Resident Assistant. Welcome to the ${selectedBarangay.displayName} Community Desk. I can help you find barangay services, senior / PWD assistance (RA 9994), emergency food aid, health center schedules, and disaster safety instructions in English, Filipino, or Bikol Naga.`;
+  const citizenInitialText = `Kumusta, Kababayan! I am Banwaan Resident Assistant. Welcome to the ${selectedBarangay.displayName} Community Desk. I can help you find barangay services, senior / PWD assistance (RA 9994), emergency 911 dispatch, health center schedules, and disaster safety instructions in English, Filipino, or Bikol Naga.`;
 
   const [messages, setMessages] = useState<AgentMessage[]>([
     {
@@ -80,24 +80,28 @@ export const MobileAgentScreen: React.FC = () => {
 
   const captainPrompts = [
     {
-      label: '📜 Draft AIP 2026 20% LDF Ordinance',
-      query: `Draft an AIP 2026 20% Local Development Fund ordinance for ${selectedBarangay.realName} prioritizing infrastructure and health.`,
+      label: '🎯 UN SDG Gap Audit',
+      query: `Audit ${selectedBarangay.realName} CBMS deficits against the 17 UN SDGs and identify top statutory priorities.`,
     },
     {
-      label: '🛡️ RA 10121 BDRRM Evacuation Plan',
-      query: `Formulate a DRRMO flood disaster shelter and weak roof mitigation plan for ${selectedBarangay.realName}.`,
+      label: '⚖️ Statutory Policy Basis',
+      query: `Cite exact RA 7160, RA 10121, and RA 11223 statutory mandates applicable to ${selectedBarangay.realName}'s highest household deficits.`,
     },
     {
-      label: '💧 Safe Water Refilling Station (CEO)',
-      query: `Draft a CEO infrastructure proposal for communal water refilling in ${selectedBarangay.realName}.`,
+      label: '📜 Draft AIP 2026 Ordinance',
+      query: `Draft an AIP 2026 20% Local Development Fund project ordinance for ${selectedBarangay.realName} with budget allocation.`,
     },
     {
-      label: '💼 NEET Youth Livelihood Ordinance',
-      query: `Formulate CSWDO technical livelihood training and youth entrepreneurship resolution for ${selectedBarangay.realName}.`,
+      label: '🛡️ RA 10121 Shelter & Roof Plan',
+      query: `Formulate a DRRMO disaster evacuation and weak roof retrofitting mitigation plan for ${selectedBarangay.realName}.`,
     },
   ];
 
   const citizenPrompts = [
+    {
+      label: '🚨 Emergency 911 Hotlines',
+      query: `What are the verified emergency contact numbers for CDRRMO Naga 911, BFP Fire, PNP Police, and BMC Hospital?`,
+    },
     {
       label: '👵 Senior Citizen Pension & Benefits',
       query: `How can senior citizens and PWDs apply for social pension and healthcare discounts in ${selectedBarangay.realName}?`,
@@ -107,12 +111,8 @@ export const MobileAgentScreen: React.FC = () => {
       query: `What are the requirements for getting a Barangay Clearance or Certificate of Indigency in ${selectedBarangay.realName}?`,
     },
     {
-      label: '🏥 Free Health Center Consultations',
+      label: '🏥 Free Health Center & UHC',
       query: `What free medical services and vaccination schedules are available at our barangay health station under Universal Health Care?`,
-    },
-    {
-      label: '🆘 Emergency Food & Cash Assistance',
-      query: `Where do residents go for CSWDO food packs or AICS medical cash aid during emergencies?`,
     },
   ];
 
@@ -163,11 +163,11 @@ export const MobileAgentScreen: React.FC = () => {
               budget: p.estimated_budget_php
                 ? `₱${Number(p.estimated_budget_php).toLocaleString()}`
                 : undefined,
-              proposalDraft: p.title
+              proposalDraft: (p.title || p.project_title)
                 ? {
-                    title: p.title,
+                    title: p.title || p.project_title,
                     office: p.office || 'CPDO',
-                    problem: p.problem || activeQuery,
+                    problem: p.problem_statement || p.problem || activeQuery,
                     statute: basis.law || 'RA 7160',
                     sdgs: sdgs.length ? sdgs : ['SDG 11 Sustainable Cities'],
                     budget: p.estimated_budget_php || 350000,
@@ -271,7 +271,7 @@ export const MobileAgentScreen: React.FC = () => {
           reply = {
             id: `agt-${Date.now()}`,
             sender: 'agent',
-            text: `[Resident Service Advisor] Kumusta! Sa Brgy ${selectedBarangay.realName}, an Barangay Health Station bukas para sa libreng check-up, bakuna sa mga aki, asin prenatal care sa irarom kan RA 11223 (Universal Health Care Act). Kun igwa kamo nin emergency, mag-dial tulos sa CDRRMO Naga Central 911: (054) 472-3000.`,
+            text: `[Resident Service Advisor] Kumusta! Sa Brgy ${selectedBarangay.realName}, an Barangay Health Station bukas para sa libreng check-up, bakuna sa mga aki, asin prenatal care sa irarom kan RA 11223 (Universal Health Care Act). Kun igwa kamo nin emergency, mag-dial tulos sa CDRRMO Naga Central 911: 911 • (054) 205-2980 (Mobile: 0908-525-3000) o PNP Police: 166.`,
             statute: 'RA 11223 (Universal Health Care Act)',
             sdg: 'SDG 3 Good Health & Well-being',
             suggestedAction: `Coordinate with your Barangay Health Worker (BHW) or visit the Barangay Health Center.`,
@@ -313,7 +313,7 @@ export const MobileAgentScreen: React.FC = () => {
         <View style={styles.badgeRow}>
           <View style={styles.badgePill}>
             <Text style={styles.badgePillText}>
-              {isCaptain ? 'STATUTORY LEGISLATIVE COPILOT' : 'CITIZEN ASSISTANT • BANWAAN AI'}
+              {isCaptain ? 'STATUTORY & SDG POLICY AI AGENT' : 'COMMUNITY SERVICES DESK • BANWAAN AI'}
             </Text>
           </View>
 
@@ -324,15 +324,15 @@ export const MobileAgentScreen: React.FC = () => {
                 { backgroundColor: isOnline ? macosColors.appleGreen : macosColors.appleYellow },
               ]}
             />
-            <Text style={styles.statusText}>{isOnline ? 'Cloud Agent' : 'Offline Engine'}</Text>
+            <Text style={styles.statusText}>{isOnline ? 'Groq Qwen 27B' : 'Offline Rule Engine'}</Text>
           </View>
         </View>
 
         <Text style={styles.title}>
-          {isCaptain ? 'Sangguniang Barangay Copilot' : 'Community Services Assistant'}
+          {isCaptain ? 'Sangguniang Barangay Policy Agent' : 'Community AI Resident Desk'}
         </Text>
         <Text style={styles.subtitle}>
-          Context: <Text style={{ fontWeight: '700', color: macosColors.appleBlue }}>{selectedBarangay.displayName}</Text> • {isCaptain ? 'RA 7160 / RA 10121 Policy Guidance' : 'Resident Welfare & Guidance'}
+          Empirical CBMS Data • UN SDGs • {isCaptain ? 'RA 7160 / RA 10121 Policy Synthesis' : 'Resident Welfare & Services Guidance'}
         </Text>
       </View>
 

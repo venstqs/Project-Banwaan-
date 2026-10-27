@@ -54,7 +54,8 @@ import {
   Copy,
   ExternalLink,
   Command,
-  Target
+  Target,
+  Key
 } from "lucide-react";
 
 import cbmsDataRaw from "../data/processed_cbms_data.json";
@@ -139,8 +140,8 @@ export const NAGA_EMERGENCY_HOTLINES: EmergencyHotline[] = [
     icon: "🚨",
     color: "#dc2626",
     primaryPhone: "911",
-    altPhone: "0908-525-3000 / 0963-220-9700 / 0985-253-3000",
-    landline: "(054) 472-3000 / (054) 205-2980",
+    altPhone: "0908-525-3000 / 0963-220-9700",
+    landline: "(054) 205-2980 / (054) 881-2555",
     location: "City Hall Complex, J. Miranda Ave., Naga City"
   },
   {
@@ -150,20 +151,20 @@ export const NAGA_EMERGENCY_HOTLINES: EmergencyHotline[] = [
     category: "police",
     icon: "👮",
     color: "#1d4ed8",
-    primaryPhone: "0908-325-4787",
-    altPhone: "0908-737-4228 | Station 1: 0918-464-4371",
-    landline: "(054) 881-0112",
+    primaryPhone: "166",
+    altPhone: "0998-598-5969 / (054) 811-0112",
+    landline: "(054) 473-2222",
     location: "Barlin St., Naga City"
   },
   {
     id: "bmc",
-    agency: "BICOL MEDICAL CENTER",
+    agency: "BICOL MEDICAL CENTER (BMC)",
     subtext: "DOH Tertiary Regional Training & Medical Center (ER Complex)",
     category: "medical",
     icon: "🏥",
     color: "#059669",
-    primaryPhone: "0968-291-1125",
-    altPhone: "0927-357-9967 (HEMS Disaster) / 0967-087-0155 (OB-ER)",
+    primaryPhone: "(054) 472-0125",
+    altPhone: "0927-357-9967 (HEMS Disaster) / 0968-291-1125",
     landline: "(054) 472-6125 to 31",
     location: "J. Miranda Ave., Concepcion Pequeña, Naga City"
   },
@@ -174,10 +175,10 @@ export const NAGA_EMERGENCY_HOTLINES: EmergencyHotline[] = [
     category: "fire",
     icon: "🚒",
     color: "#ea580c",
-    primaryPhone: "0923-083-9429",
-    altPhone: "(054) 473-8472 / (054) 473-2633",
-    landline: "(054) 871-6454",
-    location: "City Hall Compound, Naga City"
+    primaryPhone: "160",
+    altPhone: "0915-603-4249 / (054) 881-2244",
+    landline: "(054) 473-8445",
+    location: "City Hall Compound, J. Miranda Ave., Naga City"
   }
 ];
 
@@ -295,11 +296,9 @@ const API_BASE = "http://localhost:8000";
 export default function ModernCategorizedCommandCenter() {
   const [role, setRole] = useState<UserRole>("super_admin");
   const [selectedBarangayId, setSelectedBarangayId] = useState<number>(16); // Default: Mabolo (hotspot)
-  const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
   const [activeNavTab, setActiveNavTab] = useState<string>("dashboard");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
   const [searchFilterQuery, setSearchFilterQuery] = useState<string>("");
-  const [isDigitalTwinSectionMinimized, setIsDigitalTwinSectionMinimized] = useState<boolean>(false);
   const [isMatrixMinimized, setIsMatrixMinimized] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<"id" | "name" | "mvi" | "households" | "category">("id");
   const [sortDesc, setSortDesc] = useState<boolean>(false);
@@ -386,6 +385,20 @@ export default function ModernCategorizedCommandCenter() {
 
   // Backend & Mobile Sync States
   const [backendConnected, setBackendConnected] = useState<boolean>(true);
+  const [groqStatus, setGroqStatus] = useState<{
+    configured: boolean;
+    model: string;
+    maskedKey: string | null;
+  }>({
+    configured: false,
+    model: "qwen/qwen3.8-27b",
+    maskedKey: null,
+  });
+  const [isGroqModalOpen, setIsGroqModalOpen] = useState<boolean>(false);
+  const [groqKeyInput, setGroqKeyInput] = useState<string>("");
+  const [groqModelInput, setGroqModelInput] = useState<string>("qwen/qwen3.8-27b");
+  const [groqSaving, setGroqSaving] = useState<boolean>(false);
+  const [groqFeedback, setGroqFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [fieldReports, setFieldReports] = useState<SyncedFieldReport[]>([
     {
       id: "RPT-NAGA-0001",
@@ -607,9 +620,10 @@ export default function ModernCategorizedCommandCenter() {
 
   const fetchLiveSyncData = useCallback(async () => {
     try {
-      const [rptsRes, propsRes] = await Promise.all([
+      const [rptsRes, propsRes, groqRes] = await Promise.all([
         fetch(`${API_BASE}/api/mobile/field-reports`),
-        fetch(`${API_BASE}/api/proposals`)
+        fetch(`${API_BASE}/api/proposals`),
+        fetch(`${API_BASE}/api/agent/status`).catch(() => null)
       ]);
       if (rptsRes.ok) {
         const rptsData = await rptsRes.json();
@@ -638,11 +652,67 @@ export default function ModernCategorizedCommandCenter() {
           );
         }
       }
+      if (groqRes && groqRes.ok) {
+        const groqData = await groqRes.json();
+        setGroqStatus({
+          configured: Boolean(groqData.groq_configured),
+          model: groqData.model || "llama-3.3-70b-versatile",
+          maskedKey: groqData.masked_key || null,
+        });
+      }
       setBackendConnected(true);
     } catch {
       setBackendConnected(false);
     }
   }, []);
+
+  const handleSaveGroqKey = async () => {
+    if (!groqKeyInput.trim()) {
+      setGroqFeedback({ type: "error", message: "Please paste your Groq API key (starts with 'gsk_')" });
+      return;
+    }
+    setGroqSaving(true);
+    setGroqFeedback(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/agent/key`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          api_key: groqKeyInput.trim(),
+          model: groqModelInput.trim() || "llama-3.3-70b-versatile"
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setGroqFeedback({
+          type: "success",
+          message: data.message || "Groq API key activated successfully!"
+        });
+        setGroqStatus({
+          configured: true,
+          model: data.model || groqModelInput,
+          maskedKey: data.masked_key || null
+        });
+        setGroqKeyInput("");
+        setTimeout(() => {
+          setIsGroqModalOpen(false);
+          setGroqFeedback(null);
+        }, 1500);
+      } else {
+        setGroqFeedback({
+          type: "error",
+          message: data.detail || "Failed to validate Groq key."
+        });
+      }
+    } catch {
+      setGroqFeedback({
+        type: "error",
+        message: "Could not connect to backend at http://localhost:8000. Ensure the Python API is running."
+      });
+    } finally {
+      setGroqSaving(false);
+    }
+  };
 
   useEffect(() => {
     fetchLiveSyncData();
@@ -688,7 +758,6 @@ export default function ModernCategorizedCommandCenter() {
     };
 
     setProposals((prev) => [newProp, ...prev.filter((p) => p.id !== newProp.id)]);
-    setIsAiOpen(false);
 
     try {
       const res = await fetch(`${API_BASE}/api/proposals`, {
@@ -855,14 +924,14 @@ export default function ModernCategorizedCommandCenter() {
       <div className="w-full flex-1 flex flex-col bg-white">
         {/* Top Header Bar (Brand + Live Badge + Cycle Pill + Avatar) */}
         <header className="border-b border-[#eef0f6] px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4 bg-white select-none shrink-0">
-          {/* Left: Brand with Logo */}
+          {/* Left: Brand with Official Logo */}
           <div className="flex items-center space-x-3 shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-[#05389f] text-white flex items-center justify-center font-black text-sm shadow-sm">
-              <div className="flex items-end space-x-0.5">
-                <span className="w-1 h-3.5 bg-white rounded-full inline-block" />
-                <span className="w-1 h-5 bg-[#facc15] rounded-full inline-block" />
-                <span className="w-1 h-2.5 bg-white rounded-full inline-block" />
-              </div>
+            <div className="w-9 h-9 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center p-0.5 overflow-hidden shrink-0">
+              <img
+                src="/logo-square.png"
+                alt="Project Banwaan"
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="flex items-center space-x-2">
               <span className="font-extrabold text-base tracking-tight text-[#0f172a]">Project Banwaan</span>
@@ -1106,22 +1175,18 @@ export default function ModernCategorizedCommandCenter() {
               >
                 <ShieldAlert className="w-4 h-4" />
               </button>
-
-              <button
-                onClick={() => setIsAiOpen(true)}
-                className="w-10 h-10 rounded-2xl text-slate-400 hover:text-[#05389f] hover:bg-blue-50 flex items-center justify-center transition-all cursor-pointer"
-                title="Open Statutory Assistant"
-              >
-                <Sparkles className="w-4 h-4 text-amber-500" />
-              </button>
             </div>
 
             {/* Bottom: Help pinned to bottom with mt-auto */}
             <div className="mt-auto flex flex-col items-center space-y-2">
               <button
-                onClick={() => setIsAiOpen(true)}
+                onClick={() => {
+                  setActiveNavTab("dashboard");
+                  setSidePanelTab("intel");
+                  setIntelSubTab("overview");
+                }}
                 className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer text-xs font-bold"
-                title="Statutory Guidance"
+                title="System Help & Documentation"
               >
                 ?
               </button>
@@ -1252,26 +1317,20 @@ export default function ModernCategorizedCommandCenter() {
               </div>
 
               <button
-                onClick={() => setIsDigitalTwinSectionMinimized(!isDigitalTwinSectionMinimized)}
-                className="flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all cursor-pointer border border-slate-200 shadow-2xs"
-                title={isDigitalTwinSectionMinimized ? "Expand Map View" : "Minimize Map View"}
+                onClick={() => setSelectedCategoryFilter("all")}
+                className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer border shadow-2xs active:scale-95 interactive-pill ${
+                  selectedCategoryFilter !== "all"
+                    ? "bg-[#05389f] text-white border-[#05389f]"
+                    : "bg-white text-slate-700 hover:bg-slate-50 border-slate-200"
+                }`}
+                title="Reset sector filter to show all 27 barangays"
               >
-                {isDigitalTwinSectionMinimized ? (
-                  <>
-                    <ChevronDown className="w-3.5 h-3.5 text-[#05389f]" />
-                    <span>Expand Map</span>
-                  </>
-                ) : (
-                  <>
-                    <ChevronUp className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Minimize</span>
-                  </>
-                )}
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Reset Sectors</span>
               </button>
             </div>
 
-            {!isDigitalTwinSectionMinimized && (
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 p-3 bg-[#f7f8fa] rounded-b-xl items-stretch">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 p-3 bg-[#f7f8fa] rounded-b-xl items-stretch animate-fade-in-up">
                 {/* 3D GIS Map (7 Cols on Desktop) */}
                 <div className="xl:col-span-7 flex flex-col h-full min-h-[660px]">
                   <CesiumViewer
@@ -1485,167 +1544,114 @@ export default function ModernCategorizedCommandCenter() {
                               </div>
                             </div>
 
-                            {/* GROQ SDG & STATUTORY POLICY AI COPILOT FRAME (EXACT SCREENSHOT UI) */}
-                            <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs space-y-3 flex flex-col justify-between">
-                              {/* Card Header: Icon + Title + LIVE Badge + Synthesize Policy Button */}
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center space-x-2.5 min-w-0">
-                                  <div className="w-8 h-8 rounded-full bg-[#05389f] text-white flex items-center justify-center shrink-0 shadow-xs">
-                                    <Sparkles className="w-4 h-4 text-[#facc15]" />
+                            {/* EMPIRICAL SECTOR DEFICITS & STATUTORY MATRIX CARD */}
+                            <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs space-y-3.5 interactive-card">
+                              {/* Header: Title + Sector Badge */}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#05389f] flex items-center justify-center font-bold">
+                                    <BarChart3 className="w-4 h-4 text-[#05389f]" />
                                   </div>
-                                  <div className="min-w-0">
-                                    <div className="flex items-center space-x-1.5">
-                                      <h4 className="text-xs font-bold text-slate-900 truncate">
-                                        Groq SDG &amp; Policy Copilot
-                                      </h4>
-                                      <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                        LIVE
-                                      </span>
-                                    </div>
-                                    <p className="text-[10px] text-slate-500 font-medium truncate">
-                                      Grounded in 17 UN SDGs, RA Corpus &amp; POLICY_KNOWLEDGE.md
+                                  <div>
+                                    <h4 className="text-xs font-bold text-slate-900">
+                                      Sector Deficit &amp; Vulnerability Matrix
+                                    </h4>
+                                    <p className="text-[10px] text-slate-500 font-medium">
+                                      2024 PSA CBMS • PCA Multidimensional Deficits
                                     </p>
                                   </div>
                                 </div>
-
-                                <button
-                                  onClick={() =>
-                                    executeAiQuery(
-                                      `Synthesize an SDG-aligned policy brief and statutory AIP intervention for ${selectedBarangay.displayName} (${selectedBarangay.category.name}) based on its CBMS indicators.`
-                                    )
-                                  }
-                                  disabled={isAiLoading}
-                                  className="px-3.5 py-1.5 rounded-full bg-[#05389f] hover:bg-[#042d82] disabled:opacity-60 text-white text-xs font-bold flex items-center space-x-1.5 shadow-xs transition-all cursor-pointer shrink-0"
-                                >
-                                  <Sparkles className={`w-3.5 h-3.5 text-[#facc15] ${isAiLoading ? "animate-spin" : ""}`} />
-                                  <span>{isAiLoading ? "Synthesizing..." : "Synthesize Policy"}</span>
-                                </button>
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-blue-50 text-[#05389f] border border-blue-200">
+                                  4 SECTORS
+                                </span>
                               </div>
 
-                              {/* Suggestion Chips */}
-                              <div className="flex flex-wrap items-center gap-1.5">
-                                <button
-                                  onClick={() =>
-                                    executeAiQuery(
-                                      `Audit ${selectedBarangay.realName} CBMS deficits against the 17 UN SDGs and recommend top statutory priorities.`
-                                    )
-                                  }
-                                  className="px-3 py-1 rounded-full bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs flex items-center space-x-1.5"
-                                >
-                                  <Target className="w-3.5 h-3.5 text-[#05389f]" />
-                                  <span>SDG Gap Audit ({selectedBarangay.realName})</span>
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    executeAiQuery(
-                                      `Cite exact RA 7160, RA 10121, and RA 11223 statutory mandates applicable to ${selectedBarangay.realName}'s highest household deficits.`
-                                    )
-                                  }
-                                  className="px-3 py-1 rounded-full bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs flex items-center space-x-1.5"
-                                >
-                                  <FileText className="w-3.5 h-3.5 text-[#05389f]" />
-                                  <span>Statutory Policy Basis</span>
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    executeAiQuery(
-                                      `Draft a 2026 AIP 20% Local Development Fund project ordinance for ${selectedBarangay.realName} with budget and SDG targets.`
-                                    )
-                                  }
-                                  className="px-3 py-1 rounded-full bg-white border border-slate-200 hover:border-[#05389f] text-slate-700 hover:text-[#05389f] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs flex items-center space-x-1.5"
-                                >
-                                  <Scale className="w-3.5 h-3.5 text-[#05389f]" />
-                                  <span>Draft AIP Proposal</span>
-                                </button>
-                              </div>
-
-                              {/* LATEST POLICY & SDG SYNTHESIS Output Box */}
-                              {(() => {
-                                const latestAiMsg = [...chatMessages].reverse().find((m) => m.sender === "ai") || chatMessages[0];
-                                return (
-                                  <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 space-y-2.5 text-xs shadow-2xs">
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#05389f]">
-                                        LATEST POLICY &amp; SDG SYNTHESIS
-                                      </span>
-                                      <button
-                                        onClick={() => setIsAiOpen(true)}
-                                        className="text-[10px] font-bold text-slate-500 hover:text-[#05389f] flex items-center space-x-0.5 cursor-pointer"
-                                      >
-                                        <span>Open Full History</span>
-                                        <ArrowUpRight className="w-3 h-3" />
-                                      </button>
-                                    </div>
-
-                                    <p className="text-[11px] text-slate-700 leading-relaxed max-h-48 overflow-y-auto">
-                                      {latestAiMsg?.text}
-                                    </p>
-
-                                    {/* Statutory Citation + SDG Pills */}
-                                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                                      {latestAiMsg?.citation && (
-                                        <span className="px-2.5 py-0.5 rounded-md bg-[#edf3fc] text-[#05389f] font-mono font-bold text-[10px] border border-[#05389f]/20 flex items-center space-x-1">
-                                          <Scale className="w-3 h-3 text-[#05389f]" />
-                                          <span>{latestAiMsg.citation}</span>
-                                        </span>
-                                      )}
-                                      {latestAiMsg?.sdgs?.map((sdg: string, idx: number) => (
-                                        <span
-                                          key={idx}
-                                          className="px-2.5 py-0.5 rounded-md bg-[#fef9e7] text-[#92400e] font-bold text-[10px] border border-[#fccf17]/50"
-                                        >
-                                          {sdg}
-                                        </span>
-                                      ))}
-                                    </div>
-
-                                    {/* One-Click Queue Draft Proposal if present (Matching Image 1) */}
-                                    {latestAiMsg?.proposalDraft && (
-                                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-                                        <div className="truncate text-[10px] font-semibold text-slate-600">
-                                          Draft: <strong className="text-slate-900">{latestAiMsg.proposalDraft.project_title}</strong> (₱{latestAiMsg.proposalDraft.estimated_budget_php?.toLocaleString()})
-                                        </div>
-                                        <button
-                                          onClick={() => handleQueueDraftProposal(latestAiMsg.proposalDraft)}
-                                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold shrink-0 cursor-pointer transition-colors shadow-2xs"
-                                        >
-                                          + Queue to AIP
-                                        </button>
-                                      </div>
-                                    )}
+                              {/* Sector Score Meters */}
+                              <div className="space-y-2 text-xs">
+                                <div>
+                                  <div className="flex justify-between text-[11px] mb-1 font-semibold text-slate-700">
+                                    <span>DRRMO Disaster Exposure:</span>
+                                    <span className="font-mono text-rose-700 font-bold">{selectedBarangay.sector_scores?.drrmo_disaster_risk || 40}%</span>
                                   </div>
-                                );
-                              })()}
-
-                              {/* Inset Ask AI Input Bar */}
-                              <div className="pt-0.5">
-                                <div className="flex items-center bg-[#f8fafd] border border-slate-200 rounded-full pl-3.5 pr-1 py-1 focus-within:border-[#05389f] focus-within:bg-white transition-all shadow-2xs">
-                                  <input
-                                    type="text"
-                                    value={chatInput}
-                                    onChange={(e) => setChatInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter" && chatInput.trim()) {
-                                        executeAiQuery(chatInput);
-                                      }
-                                    }}
-                                    placeholder={`Ask SDG or policy question for ${selectedBarangay.realName}...`}
-                                    className="flex-1 bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400"
-                                  />
-                                  <button
-                                    onClick={() => {
-                                      if (chatInput.trim()) {
-                                        executeAiQuery(chatInput);
-                                      } else {
-                                        executeAiQuery(`Synthesize SDG priorities and statutory policies for ${selectedBarangay.realName}`);
-                                      }
-                                    }}
-                                    className="px-3.5 py-1.5 rounded-full bg-[#05389f] hover:bg-[#042d82] text-white text-xs font-bold transition-all cursor-pointer flex items-center space-x-1 shrink-0 shadow-xs"
-                                  >
-                                    <span>Ask AI</span>
-                                    <Send className="w-3 h-3 text-[#facc15]" />
-                                  </button>
+                                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-rose-500 rounded-full transition-all"
+                                      style={{ width: `${selectedBarangay.sector_scores?.drrmo_disaster_risk || 40}%` }}
+                                    />
+                                  </div>
                                 </div>
+
+                                <div>
+                                  <div className="flex justify-between text-[11px] mb-1 font-semibold text-slate-700">
+                                    <span>CEO Infrastructure Deficit:</span>
+                                    <span className="font-mono text-amber-700 font-bold">{selectedBarangay.sector_scores?.ceo_infrastructure_deficit || 40}%</span>
+                                  </div>
+                                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-amber-500 rounded-full transition-all"
+                                      style={{ width: `${selectedBarangay.sector_scores?.ceo_infrastructure_deficit || 40}%` }}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <div className="flex justify-between text-[11px] mb-1 font-semibold text-slate-700">
+                                    <span>CHO Health &amp; WASH Risk:</span>
+                                    <span className="font-mono text-blue-700 font-bold">{selectedBarangay.sector_scores?.cho_health_risk || 40}%</span>
+                                  </div>
+                                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-blue-600 rounded-full transition-all"
+                                      style={{ width: `${selectedBarangay.sector_scores?.cho_health_risk || 40}%` }}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <div className="flex justify-between text-[11px] mb-1 font-semibold text-slate-700">
+                                    <span>SWO Social Protection Deficit:</span>
+                                    <span className="font-mono text-purple-700 font-bold">{selectedBarangay.sector_scores?.swo_social_vulnerability || 40}%</span>
+                                  </div>
+                                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-purple-600 rounded-full transition-all"
+                                      style={{ width: `${selectedBarangay.sector_scores?.swo_social_vulnerability || 40}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Statutory Citation Card */}
+                              <div className="p-3 rounded-xl bg-[#f8fafd] border border-slate-200/90 text-xs space-y-1.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#05389f] flex items-center space-x-1">
+                                    <Scale className="w-3 h-3 text-[#05389f]" />
+                                    <span>Statutory Mandate Basis</span>
+                                  </span>
+                                  <span className="text-[9px] font-mono text-slate-400">RA 7160 / RA 10121</span>
+                                </div>
+                                <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                  Under <strong>RA 7160 Section 17 &amp; Section 287</strong>, capital project interventions for {selectedBarangay.realName} qualify for 20% Local Development Fund (LDF) financing, targeting UN Sustainable Development Goals (SDG 6, SDG 11).
+                                </p>
+                              </div>
+
+                              {/* Quick Navigation Footer */}
+                              <div className="pt-1 flex items-center justify-between gap-2">
+                                <button
+                                  onClick={() => {
+                                    const el = document.getElementById("diagnostic-matrix-section");
+                                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                                  }}
+                                  className="flex-1 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold text-center cursor-pointer transition-colors"
+                                >
+                                  Inspect in Matrix ↓
+                                </button>
+                                <button
+                                  onClick={() => setActiveNavTab("proposals")}
+                                  className="flex-1 py-1.5 rounded-xl bg-[#05389f] hover:bg-[#042d82] text-white text-[11px] font-bold text-center cursor-pointer transition-colors shadow-2xs"
+                                >
+                                  View AIP Queue →
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -1665,7 +1671,8 @@ export default function ModernCategorizedCommandCenter() {
                               </div>
                               <button
                                 onClick={() => {
-                                  setIsAiOpen(true);
+                                  setSidePanelTab("intel");
+                                  setIntelSubTab("overview");
                                   executeAiQuery(`Synthesize all immediate statutory next steps for ${selectedBarangay.realName}`);
                                 }}
                                 className="text-[10px] text-[#05389f] font-bold hover:underline flex items-center space-x-0.5 cursor-pointer"
@@ -1712,7 +1719,8 @@ export default function ModernCategorizedCommandCenter() {
 
                               <button
                                 onClick={() => {
-                                  setIsAiOpen(true);
+                                  setSidePanelTab("intel");
+                                  setIntelSubTab("overview");
                                   executeAiQuery(`Draft comprehensive capital investment proposal for ${selectedBarangay.realName} drainage dredging under RA 7160`);
                                 }}
                                 className="mt-3 w-full py-2 rounded-xl bg-[#0f172a] hover:bg-[#1e293b] text-white text-xs font-bold transition-all cursor-pointer flex items-center justify-center space-x-1.5 shadow-2xs"
@@ -1788,7 +1796,8 @@ export default function ModernCategorizedCommandCenter() {
                               </div>
                               <button
                                 onClick={() => {
-                                  setIsAiOpen(true);
+                                  setSidePanelTab("intel");
+                                  setIntelSubTab("overview");
                                   executeAiQuery("Audit all detected anomaly clusters across Naga City 27 barangays");
                                 }}
                                 className="text-[10px] text-[#05389f] font-bold hover:underline flex items-center space-x-0.5 cursor-pointer"
@@ -1866,13 +1875,14 @@ export default function ModernCategorizedCommandCenter() {
                               </div>
                               <button
                                 onClick={() => {
-                                  setIsAiOpen(true);
+                                  setSidePanelTab("intel");
+                                  setIntelSubTab("overview");
                                   executeAiQuery(`Analyze detected risk anomalies for ${selectedBarangay.realName}`);
                                 }}
                                 className="w-full mt-1.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-[#05389f] text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center space-x-1"
                               >
                                 <Bot className="w-3.5 h-3.5" />
-                                <span>Audit Detected Anomalies with Copilot</span>
+                                <span>Audit Detected Anomalies with AI Agent</span>
                               </button>
                             </div>
                           </div>
@@ -2035,7 +2045,6 @@ export default function ModernCategorizedCommandCenter() {
                   </div>
                 </div>
               </div>
-            )}
           </div>
 
           {/* ─────────────────────────────────────────────────────────────
@@ -2167,7 +2176,9 @@ export default function ModernCategorizedCommandCenter() {
                     </p>
                     <button
                       onClick={() => {
-                        setIsAiOpen(true);
+                        setActiveNavTab("dashboard");
+                        setSidePanelTab("intel");
+                        setIntelSubTab("overview");
                         executeAiQuery(`Formulate RA 10121 BDRRM evacuation and shelter reinforcement plan for ${selectedBarangay.displayName}`);
                       }}
                       className="pill-btn-blue w-full py-2 text-xs font-bold cursor-pointer"
@@ -2553,7 +2564,9 @@ export default function ModernCategorizedCommandCenter() {
                     </div>
                     <button
                       onClick={() => {
-                        setIsAiOpen(true);
+                        setActiveNavTab("dashboard");
+                        setSidePanelTab("intel");
+                        setIntelSubTab("overview");
                         executeAiQuery(`Synthesize ${selectedDeptTab.toUpperCase()} evidence-based intervention for ${selectedBarangay.realName}`);
                       }}
                       className="pill-btn-blue px-3 py-1 text-xs font-bold flex items-center space-x-1 cursor-pointer"
@@ -2959,7 +2972,9 @@ export default function ModernCategorizedCommandCenter() {
                     </span>
                     <button
                       onClick={() => {
-                        setIsAiOpen(true);
+                        setActiveNavTab("dashboard");
+                        setSidePanelTab("intel");
+                        setIntelSubTab("overview");
                         executeAiQuery("Synthesize new AIP capital project proposal for high-vulnerability barangay");
                       }}
                       className="pill-btn-blue px-4 py-2 text-xs font-bold flex items-center space-x-2 cursor-pointer shadow-xs"
@@ -3053,16 +3068,28 @@ export default function ModernCategorizedCommandCenter() {
                 {/* Emergency Hotlines Row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                   {[
-                    { name: "CDRRMO Naga Central 911", num: "(054) 472-3000", color: "#05389f" },
-                    { name: "BFP Fire Operations", num: "(054) 811-1000", color: "#d97706" },
-                    { name: "PNP Naga City Police", num: "166 / (054) 473-2222", color: "#0284c7" },
-                    { name: "Bicol Medical Center (BMC)", num: "(054) 472-0125", color: "#10b981" }
+                    { name: "CDRRMO Naga Central 911", num: "911 • (054) 205-2980", mobile: "0908-525-3000", tel: "911", color: "#05389f" },
+                    { name: "BFP Fire Operations", num: "160 • (054) 473-8445", mobile: "0915-603-4249", tel: "160", color: "#d97706" },
+                    { name: "PNP Naga City Police", num: "166 • (054) 473-2222", mobile: "0998-598-5969", tel: "166", color: "#0284c7" },
+                    { name: "Bicol Medical Center (BMC)", num: "(054) 472-0125", mobile: "0927-357-9967", tel: "0544720125", color: "#10b981" }
                   ].map((hotline, idx) => (
-                    <div key={idx} className="p-3 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] space-y-1">
-                      <span className="text-[10px] uppercase font-bold text-[#6b7280]">{hotline.name}</span>
-                      <div className="font-bold text-sm text-[#0a1128] font-mono">{hotline.num}</div>
-                      <span className="text-[10px] text-emerald-600 font-bold block">● 24/7 Dispatch Ready</span>
-                    </div>
+                    <a
+                      key={idx}
+                      href={`tel:${hotline.tel}`}
+                      className="p-3 rounded-xl bg-[#f7f8fa] hover:bg-white hover:border-[#05389f]/40 border border-[#e5e7eb] space-y-1 block transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs group cursor-pointer"
+                      title={`Click to call ${hotline.name}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] uppercase font-bold text-[#6b7280] group-hover:text-[#05389f] transition-colors">{hotline.name}</span>
+                        <PhoneCall className="w-3 h-3 text-slate-400 group-hover:text-[#05389f] transition-colors" />
+                      </div>
+                      <div className="font-black text-sm text-[#0a1128] font-mono leading-tight">{hotline.num}</div>
+                      <div className="text-[10px] text-slate-500 font-mono font-medium">Mobile: {hotline.mobile}</div>
+                      <span className="text-[10px] text-emerald-600 font-bold flex items-center space-x-1 pt-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>24/7 Dispatch Ready</span>
+                      </span>
+                    </a>
                   ))}
                 </div>
 
@@ -3160,7 +3187,9 @@ export default function ModernCategorizedCommandCenter() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && searchQuery.trim()) {
                     setIsSearchOpen(false);
-                    setIsAiOpen(true);
+                    setActiveNavTab("dashboard");
+                    setSidePanelTab("intel");
+                    setIntelSubTab("overview");
                     executeAiQuery(searchQuery);
                   }
                 }}
@@ -3330,7 +3359,9 @@ export default function ModernCategorizedCommandCenter() {
                           <button
                             onClick={() => {
                               setIsSearchOpen(false);
-                              setIsAiOpen(true);
+                              setActiveNavTab("dashboard");
+                              setSidePanelTab("intel");
+                              setIntelSubTab("overview");
                               executeAiQuery(ind.prompt);
                             }}
                             className="px-3 py-1.5 bg-[#05389f] hover:bg-[#042d82] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0 ml-3 flex items-center space-x-1"
@@ -3431,7 +3462,9 @@ export default function ModernCategorizedCommandCenter() {
                     desc: "Statutory baseline requiring minimum 20% of NTA/IRA earmarked for development fund.",
                     action: () => {
                       setIsSearchOpen(false);
-                      setIsAiOpen(true);
+                      setActiveNavTab("dashboard");
+                      setSidePanelTab("intel");
+                      setIntelSubTab("overview");
                       executeAiQuery("Explain RA 7160 Section 287 statutory requirement for 20% development fund baseline");
                     }
                   },
@@ -3488,7 +3521,7 @@ export default function ModernCategorizedCommandCenter() {
                 );
               })()}
 
-              {/* 5. DIRECT ASK COPILOT ACTION */}
+              {/* 5. DIRECT ASK AI AGENT ACTION */}
               {searchQuery.trim() && (
                 <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 flex items-center justify-between">
                   <div className="flex items-center space-x-2.5">
@@ -3497,22 +3530,24 @@ export default function ModernCategorizedCommandCenter() {
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-900">
-                        Ask Statutory Copilot: &quot;{searchQuery}&quot;
+                        Ask AI Agent: &quot;{searchQuery}&quot;
                       </div>
                       <div className="text-[10px] text-slate-500 font-medium">
-                        Run full legal corpus & CBMS synthesis on this prompt
+                        Empirical CBMS Data • SDG Alignment • Statutory Policy Basis &amp; Draft AIP Proposal
                       </div>
                     </div>
                   </div>
                   <button
                     onClick={() => {
                       setIsSearchOpen(false);
-                      setIsAiOpen(true);
+                      setActiveNavTab("dashboard");
+                      setSidePanelTab("intel");
+                      setIntelSubTab("overview");
                       executeAiQuery(searchQuery);
                     }}
                     className="px-3.5 py-1.5 bg-[#05389f] hover:bg-[#042d82] text-white rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-xs"
                   >
-                    Ask Copilot ↵
+                    Ask AI Agent ↵
                   </button>
                 </div>
               )}
@@ -3521,7 +3556,7 @@ export default function ModernCategorizedCommandCenter() {
             {/* Footer Keyboard Navigation Tips */}
             <div className="px-4 py-2.5 border-t border-slate-100 bg-[#f8f9fc] flex items-center justify-between text-[11px] text-slate-400 font-medium">
               <div className="flex items-center space-x-3">
-                <span>↵ to select / ask Copilot</span>
+                <span>↵ to select / ask AI Agent</span>
                 <span>•</span>
                 <span>Esc to close</span>
               </div>
@@ -3531,168 +3566,8 @@ export default function ModernCategorizedCommandCenter() {
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────
-          7. ULTRA-MODERN STATUTORY COPILOT DRAWER (APPLE / ORCHESTRATEIQ)
-         ───────────────────────────────────────────────────────────── */}
-      {isAiOpen && (
-        <>
-          {/* Glassmorphic Backdrop */}
-          <div
-            className="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
-            onClick={() => setIsAiOpen(false)}
-          />
 
-          {/* Slide-over Drawer Panel */}
-          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-white shadow-2xl border-l border-slate-200 flex flex-col animate-in slide-in-from-right duration-250 ease-out font-sans">
-            {/* Header */}
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-[#fbfcfe]">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#05389f] text-white flex items-center justify-center font-bold shadow-md shadow-blue-900/20 shrink-0">
-                  <Sparkles className="w-5 h-5 text-[#facc15]" />
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <h3 className="text-sm font-black text-slate-900">
-                      Statutory Decision Copilot
-                    </h3>
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
-                  </div>
-                  <p className="text-[10px] text-slate-500 font-medium">
-                    CBMS Local Inference + Legal Corpus (RA 7160, RA 10121, RA 11223)
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsAiOpen(false)}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-800 hover:bg-slate-100 cursor-pointer transition-colors"
-                title="Close Copilot"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
-            {/* Messages Feed */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-[#fbfcfe]">
-              {chatMessages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}
-                >
-                  <div
-                    className={`p-3.5 rounded-2xl max-w-[90%] leading-relaxed ${
-                      msg.sender === "user"
-                        ? "bg-[#05389f] text-white shadow-xs rounded-tr-xs"
-                        : "bg-white text-slate-900 border border-slate-200/80 shadow-2xs rounded-tl-xs"
-                    }`}
-                  >
-                    <p className="font-medium text-xs sm:text-[13px] leading-relaxed">{msg.text}</p>
-
-                    {/* Legal Citation Badge */}
-                    {msg.citation && (
-                      <div className="mt-2.5 pt-2 border-t border-slate-100 flex flex-wrap items-center gap-1.5 text-[10px]">
-                        <span className="font-bold text-slate-500">Statutory Citation:</span>
-                        <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#05389f] font-mono font-bold border border-blue-200/80">
-                          {msg.citation}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* SDG Badges */}
-                    {msg.sdgs && (
-                      <div className="mt-1.5 flex flex-wrap gap-1 text-[10px]">
-                        {msg.sdgs.map((sdg, sIdx) => (
-                          <span
-                            key={sIdx}
-                            className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200/60"
-                          >
-                            {sdg}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Drafted Proposal Card (Sunshine Yellow Card matching OrchestrateIQ) */}
-                  {msg.proposalDraft && (
-                    <div className="mt-2.5 p-3.5 w-full bg-[#fefce8] border border-amber-300/80 rounded-2xl space-y-2 text-xs shadow-2xs">
-                      <div className="flex items-center justify-between font-bold text-slate-900">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-                          <span className="text-[#05389f] font-black">Drafted Statutory Proposal</span>
-                        </div>
-                        <span className="font-mono text-emerald-800 font-extrabold text-xs sm:text-sm">
-                          ₱{msg.proposalDraft.estimated_budget_php?.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="font-extrabold text-slate-900 text-xs sm:text-[13px]">
-                        {msg.proposalDraft.project_title}
-                      </div>
-                      <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
-                        {msg.proposalDraft.problem_statement}
-                      </p>
-                      <button
-                        onClick={() => handleQueueDraftProposal(msg.proposalDraft)}
-                        className="w-full mt-1.5 py-2 rounded-xl bg-[#05389f] hover:bg-[#042d82] text-white text-xs font-bold cursor-pointer transition-colors shadow-xs flex items-center justify-center space-x-1.5"
-                      >
-                        <Check className="w-3.5 h-3.5 text-[#facc15]" />
-                        <span>Queue to Mayor&apos;s Review Deck</span>
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Suggested Actions */}
-                  {msg.suggestedActions && (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {msg.suggestedActions.map((action, aIdx) => (
-                        <button
-                          key={aIdx}
-                          onClick={() => executeAiQuery(action)}
-                          className="px-3 py-1 bg-white hover:bg-[#edf3fc] border border-slate-200 hover:border-[#05389f]/40 rounded-full text-[10px] text-[#05389f] font-bold cursor-pointer shadow-2xs transition-all"
-                        >
-                          {action}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {isAiLoading && (
-                <div className="flex items-center space-x-2 text-slate-600 text-xs p-3 bg-white rounded-2xl border border-slate-100 shadow-2xs">
-                  <Sparkles className="w-4 h-4 animate-spin text-[#05389f]" />
-                  <span className="font-medium">Analyzing CBMS datasets & statutory mandates...</span>
-                </div>
-              )}
-            </div>
-
-            {/* Chat Input Bar */}
-            <div className="p-3 border-t border-slate-100 bg-white">
-              <div className="flex items-center space-x-2 bg-[#f4f5f9] border border-slate-200 rounded-full px-3.5 py-2 focus-within:bg-white focus-within:border-[#05389f] transition-all shadow-2xs">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && chatInput.trim()) executeAiQuery(chatInput);
-                  }}
-                  placeholder="Ask statutory synthesis, RA 7160 basis, or budget..."
-                  className="flex-1 bg-transparent text-xs sm:text-[13px] text-slate-900 outline-none placeholder:text-slate-400 font-medium"
-                />
-                <button
-                  onClick={() => executeAiQuery(chatInput)}
-                  disabled={isAiLoading || !chatInput.trim()}
-                  className="w-7 h-7 rounded-full bg-[#05389f] disabled:opacity-40 text-white flex items-center justify-center cursor-pointer shadow-xs hover:bg-[#042d82] transition-colors shrink-0"
-                >
-                  <Send className="w-3.5 h-3.5 text-[#facc15]" />
-                </button>
-              </div>
-              <p className="text-[9px] text-center text-slate-400 font-medium mt-1.5">
-                Direct statutory AI reasoning grounded in 44,892 PSA CBMS households across 27 Barangays.
-              </p>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 }
